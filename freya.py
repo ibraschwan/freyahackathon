@@ -18,6 +18,7 @@ def api(method, path, body=None, **params):
             with urllib.request.urlopen(req, timeout=120) as r: out = json.load(r)
             break
         except urllib.error.HTTPError as e:
+            if method == "GET" and e.code in (502, 503, 504) and attempt < 3: time.sleep(5 * (attempt + 1)); continue
             raise RuntimeError(f"{method} {path} -> {e.code}: {e.read().decode()[:1500]}") from None
         except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
             if method != "GET" or attempt == 3: raise

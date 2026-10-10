@@ -1,13 +1,13 @@
 """Record the decision on the last measurement in auto/results.tsv (one row per experiment, as in autoresearch).
 
-    python3 auto/record.py keep|discard|crash|baseline|confirm "<what was tried and what happened>"
+    python3 auto/record.py keep|discard|crash|baseline|confirm|pending "<what was tried and what happened>"
 
 keep / baseline on a full single run also makes it the run later experiments are compared with.
 """
 import json, pathlib, sys, time
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 status, text = sys.argv[1], sys.argv[2]
-assert status in ("keep", "discard", "crash", "baseline", "confirm"), status
+assert status in ("keep", "discard", "crash", "baseline", "confirm", "pending"), status
 s = json.load(open(ROOT / "auto" / "last.json")) if status != "crash" or (ROOT / "auto" / "last.json").exists() else {}
 tsv = ROOT / "auto" / "results.tsv"
 if not tsv.exists(): tsv.write_text("time\tcommit\tharness\tpassed\ttotal\tledger\thung\tstalls\treps\tstyle\tstatus\texperiment\tdescription\n")
