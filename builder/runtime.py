@@ -528,6 +528,9 @@ def _run(vars):
         x = NL.get(r)
         if x and x not in pre and x not in st['said']:
             pre.append(x)
+    if st.get('_keys') and vars.get('stalled') != '1':
+        st['stall'] = 0
+    vars['stalled'] = '0'
     seen = []
     for e in st.get('_ref') or []:
         i = e[1]
@@ -571,7 +574,7 @@ def _run(vars):
             elif started:
                 line = str(SEN.get('next_product') or 'Now your <product>.').replace('<product>', p['words']) + ' ' + str(SEN.get('ask_product') or 'When can you pay it?')
             else:
-                line = str(SEN.get('say_again') or 'I am sorry, could you say that again?')
+                line = str((SEN.get('first_ask_multi') if len(st['products']) > 1 else SEN.get('first_ask_single')) or SEN.get('say_again') or 'I am sorry, could you say that again?')
         elif [i for i in st['plan'] if i not in st['promises']]:
             line = readback(st)
         elif st['promises']:
@@ -604,9 +607,17 @@ except Exception as e:
 STALL = r'''
 try:
     st = gst(vars)
+    n = int(st.get('stall') or 0) + 1
     op = open_ids(st)
-    if st['stage'] == 'verified' and op:
+    # The first time the engine only says the question on the table again: the last message may have been an answer
+    # the model failed to report, and then the customer simply repeats it. Only a second stall in a row, with nothing
+    # reported in between, counts as a non-answer for the product in discussion.
+    hit = n >= 2 and st['stage'] == 'verified' and bool(op)
+    st['stall'] = 0 if hit else n
+    pst(vars, st)
+    if hit:
         emit(vars, [['refuse', op[0], 'flat_refusal']])
+    vars['stalled'] = '1'
     vars['dirty'] = '1'
 except Exception as e:
     vars['dirty'] = '1'

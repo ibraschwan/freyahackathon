@@ -132,6 +132,9 @@ class Sim:
         """A code tool, by its internal name: set_promise, set_note, refusal, confirm, finish."""
         assert not self.ended, "the call is over"
         self._run(name.upper(), params=params); self._route()
+    def stall(self):
+        """Six customer messages in a row with no tool call: the engine's stall step runs."""
+        self._run("STALL"); self._route()
     def together(self, *calls):
         """Several code tools in ONE message of the model: they run side by side on the same snapshot of the variables,
         and for a variable two of them write, the later write wins. Then the engine routes once."""
@@ -304,6 +307,18 @@ if __name__ == "__main__":
     check("after a dispute the next product is opened", s.said[-1], "Now your personal loan. Could you pay the full amount of 900.00 for your personal loan by Friday 16 October 2026?")
     s.tool("refusal", product_id="p2", kind="flat_refusal"); s.tool("refusal", product_id="p2", kind="flat_refusal")
     check("dispute + refused", s.summary(), ("no_promise", "dispute", [], [("p1", "dispute"), ("p2", "refused")], [], []))
+    # a conversation that does not move: first the question is only said again, the second stall in a row counts as a non-answer
+    s = mk("PUB-07", notes=False).login(); s.stall()
+    check("first stall: the first question is said again, nothing is counted", (s.said[-1], s.state["prop"]), ("Can you make this payment today?", {}))
+    s.stall(); check("second stall in a row: persuasion attempt 1", s.said[-1], "Could you pay the full amount of 540.00 for your personal loan by Friday 16 October 2026?")
+    s.stall(); check("then the offer is said again", (s.said[-1].startswith("Could you pay the full amount of 540.00"), s.state["prop"]), (True, {"p1": 1}))
+    s.tool("set_promise", product_id="p1", amount="full", date="2026-10-16"); s.stall()
+    check("a report in between resets the count: the read-back is said again", s.said[-1], "To confirm: you will pay 540.00 for your personal loan on Friday 16 October 2026. Do you confirm?")
+    s.tool("confirm"); s.tool("finish", outcome="promise"); check("and the call still ends as a promise", s.summary()[:3], ("promise", None, [("p1", 540.0, "2026-10-16")]))
+    s = mk("PUB-08", notes=False).login()
+    for k in range(4): s.stall()
+    check("four stalls on an early-band product: one attempt, then refused", s.summary()[:2], ("no_promise", "refused"))
+
     # two tools in one message of the model run side by side; nothing may be lost
     s = mk("PUB-12").login(); s.together(("set_promise", dict(product_id="all", amount="full", date="2026-10-15")), ("set_note", dict(product_id="p3", reason="dispute")))
     check("promise for all + dispute on one, in one message", s.said[-1], "To confirm: you will pay 510.00 for your credit card ending 9015 on Thursday 15 October 2026, and 1320.00 for your personal loan on Thursday 15 October 2026. Do you confirm?")
