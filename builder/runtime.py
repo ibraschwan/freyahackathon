@@ -771,10 +771,20 @@ try:
     fa = A.get('answer') or 'answer'
     b = body_of(config)
     kind = ''
+    tf = []
     for q in (S.get('identity') or dict()).get('questions') or []:
         if q.get('field') == b.get(fq):
             kind = q.get('kind') or ''
+            tf = q.get('transform') or []
     a = str(b.get(fa) or '').strip()
+    if 'remove_spaces' in tf:
+        a = re.sub(r'\s+', '', a)
+    if 'uppercase' in tf:
+        a = a.upper()
+    if 'lowercase' in tf:
+        a = a.lower()
+    if tf:
+        b[fa] = a
     if kind == 'digits':
         dg = re.sub(r'\D', '', a)
         if dg:

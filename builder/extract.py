@@ -49,7 +49,7 @@ SCHEMA = """THE CONFIGURATION. Return one JSON object with exactly these keys.
 "calendar": {"weekend_days": numbers of the days that are NOT business days, Monday = 0 ... Sunday = 6, "holidays": ["YYYY-MM-DD", ...]}.
 "callback": {"include_today": true/false, "business_days_ahead": how many business days after today a callback may be booked (1 = the next business day only), "from": "HH:MM", "to": "HH:MM" (both ends count as inside), "after_now": true when a callback today must be later than now}.
 "identity": {
-  "questions": the security questions in the order to ask them: [{"field": the value of the verify_identity question field for it, taken from the tool API enum, "kind": "date" | "digits" | "text", "ask": the exact question sentence to say}],
+  "questions": the security questions in the order to ask them: [{"field": the value of the verify_identity question field for it, taken from the tool API enum, "kind": "date" | "digits" | "text", "ask": the exact question sentence to say, "transform": optional list for a text answer the brief wants normalised before it is sent, from "uppercase", "lowercase", "remove_spaces"}],
   "numeric_date_order": "DMY" or "MDY": how to read a date given only as numbers,
   "response": the names of the verify_identity response fields with these roles: {"verified": this answer was right, "all_verified": the whole check is passed, "left": how many wrong answers are left, "hint": the hint field},
   "hints": {<hint value from the tool API>: the instruction for the dialogue model when this hint comes back, including the exact sentence to say, and whether it counts as a wrong answer},
