@@ -600,6 +600,18 @@ except Exception as e:
     vars['enter_line'] = 'I am sorry, could you say that again?'
 '''
 
+# the payment step got several customer messages in a row and no tool was called: the engine treats the last one as a non-answer
+STALL = r'''
+try:
+    st = gst(vars)
+    op = open_ids(st)
+    if st['stage'] == 'verified' and op:
+        emit(vars, [['refuse', op[0], 'flat_refusal']])
+    vars['dirty'] = '1'
+except Exception as e:
+    vars['dirty'] = '1'
+'''
+
 # picks the next agreed promise to send to the bank, or ends the loop
 REC_NEXT = r'''
 try:
@@ -998,20 +1010,27 @@ def allowed_text():
     return '; '.join(say(d) + ' from ' + hm(a) + ' to ' + hm(c) for d, a, c in slots) or 'none'
 try:
     dt = iso(b.get(A.get('date') or 'date'))
-    tm = mins_of(b.get(A.get('time') or 'time'))
 except Exception:
     dt = None
+try:
+    tm = mins_of(b.get(A.get('time') or 'time'))
+except Exception:
     tm = None
-if slots is not None and (dt is None or tm is None):
-    raise Exception('RULE: give the callback day as YYYY-MM-DD and the time as HH:MM (24 hour). Nothing was booked.')
-if slots is not None and not any(d == dt and a <= tm <= c for d, a, c in slots):
-    n = int(st.get('cb_bad') or 0) + 1
-    st['cb_bad'] = n
-    pst(vars, st)
-    G = (S.get('guidance') or dict())
-    if n == 1:
-        raise Exception('RULE: ' + say(dt) + ' at ' + hm(tm) + ' is OUTSIDE the callback window. Nothing was booked. Allowed: ' + allowed_text() + '. ' + G.get('callback_outside_first', 'Ask once for another time.'))
-    raise Exception('RULE: ' + say(dt) + ' at ' + hm(tm) + ' is again OUTSIDE the callback window. Nothing was booked. ' + G.get('callback_outside_second', 'Do not schedule a callback. End the call.'))
+if slots is not None:
+    if dt is None:
+        raise Exception('RULE: nothing was booked. Ask on which day the customer can be reached, then CALL schedule_callback with that day as YYYY-MM-DD.')
+    day_ok = any(d == dt for d, a, c in slots)
+    if day_ok and tm is None:
+        raise Exception('RULE: nothing was booked. ' + say(dt) + ' is possible, but a clock time is missing. Ask at what time on that day, then CALL schedule_callback again with the time as HH:MM (24 hour).')
+    if not day_ok or not any(d == dt and a <= tm <= c for d, a, c in slots):
+        n = int(st.get('cb_bad') or 0) + 1
+        st['cb_bad'] = n
+        pst(vars, st)
+        G = (S.get('guidance') or dict())
+        what = say(dt) + (' at ' + hm(tm) if tm is not None else '')
+        if n == 1:
+            raise Exception('RULE: ' + what + ' is OUTSIDE the callback window. Nothing was booked. Allowed: ' + allowed_text() + '. ' + G.get('callback_outside_first', 'Ask once for another time.'))
+        raise Exception('RULE: ' + what + ' is again OUTSIDE the callback window. Nothing was booked. ' + G.get('callback_outside_second', 'Do not schedule a callback. End the call.'))
 if slots is not None:
     b[A.get('time') or 'time'] = hm(tm)
     b[A.get('date') or 'date'] = dt.isoformat()
@@ -1189,7 +1208,7 @@ CORE_KEYS = ["now_variable", "calendar", "sentences", "closing_lines", "outcomes
 # snippet: (source, helper sections besides core, spec keys besides CORE_KEYS)
 ALL = dict(
     SETUP=(SETUP, ["cal", "live"], ["callback"]), PREPARE=(PREPARE, ["cal", "terms", "live"], ["product", "bands", "attempt_offers", "dates"]),
-    SYNC=(SYNC, ["live", "decide"], ["guidance", "note_lines"]), REC_NEXT=(REC_NEXT, ["live", "decide"], []), NOTE_NEXT=(NOTE_NEXT, ["live", "decide"], ["note_lines"]),
+    SYNC=(SYNC, ["live", "decide"], ["guidance", "note_lines"]), STALL=(STALL, [], []), REC_NEXT=(REC_NEXT, ["live", "decide"], []), NOTE_NEXT=(NOTE_NEXT, ["live", "decide"], ["note_lines"]),
     SET_PROMISE=(SET_PROMISE, [], ["guidance"]), SET_NOTE=(SET_NOTE, [], []), REFUSAL=(REFUSAL, [], []), CONFIRM=(CONFIRM, [], []), FINISH=(FINISH, ["decide"], []),
     VERIFY_PRE=(VERIFY_PRE, [], ["identity"]), VERIFY_POST=(VERIFY_POST, ["live"], ["identity"]),
     CALLBACK_PRE=(CALLBACK_PRE, ["cal"], ["callback", "guidance"]), CALLBACK_POST=(CALLBACK_POST, [], []),
