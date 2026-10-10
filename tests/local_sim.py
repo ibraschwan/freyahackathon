@@ -325,6 +325,8 @@ if __name__ == "__main__":
     check("both paid in one message", (s.summary(), s.said[-1]), (("paid", None, [], [("p1", "paid"), ("p2", "paid")], [], []), "Payments can take one business day to appear. Thank you, goodbye."))
     s = mk("PUB-13").login(); s.tool("set_note", product_id="p2", reason="paid")
     check("paid on one product: the engine says the sentence and goes on", s.said[-1].startswith("Payments can take one business day to appear. Could you pay") or s.said[-1].startswith("Payments can take one business day to appear."), True)
+    s = mk("PUB-08").login(); s.tool("finish", outcome="paid")
+    check("paid, Brief B, ended with wrap_up: the sentence is still said once", s.said[-1], "Payments can take one business day to appear. Thank you, goodbye.")
     s = mk("PUB-08", notes=False).login(); s.tool("finish", outcome="paid")
     check("paid, Brief A: closing sentence", s.said[-1], "Payments can take one business day to appear. Thank you, goodbye.")
 

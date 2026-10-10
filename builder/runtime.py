@@ -673,7 +673,14 @@ try:
             if i not in st['promises']:
                 st['plan'].pop(i, None)
         o, r = decide(st, st.get('mo'), st.get('mr'), False)
-        set_final(vars, o, r, closing_line(o, r, st['said']))
+        pre = []
+        NL = S.get('note_lines') or dict()
+        for i, x in st.get('_new') or []:
+            y = NL.get(x)
+            if y and y not in pre and y not in st['said']:
+                pre.append(y)
+        st['said'] = st['said'] + pre
+        set_final(vars, o, r, ' '.join(pre + [closing_line(o, r, st['said'])]))
         st['fin'] = 'set'
     nxt = None
     if NOTES.get('enabled') and not st['transfer'] and st['stage'] == 'verified':
@@ -1182,7 +1189,7 @@ CORE_KEYS = ["now_variable", "calendar", "sentences", "closing_lines", "outcomes
 # snippet: (source, helper sections besides core, spec keys besides CORE_KEYS)
 ALL = dict(
     SETUP=(SETUP, ["cal", "live"], ["callback"]), PREPARE=(PREPARE, ["cal", "terms", "live"], ["product", "bands", "attempt_offers", "dates"]),
-    SYNC=(SYNC, ["live", "decide"], ["guidance", "note_lines"]), REC_NEXT=(REC_NEXT, ["live", "decide"], []), NOTE_NEXT=(NOTE_NEXT, ["live", "decide"], []),
+    SYNC=(SYNC, ["live", "decide"], ["guidance", "note_lines"]), REC_NEXT=(REC_NEXT, ["live", "decide"], []), NOTE_NEXT=(NOTE_NEXT, ["live", "decide"], ["note_lines"]),
     SET_PROMISE=(SET_PROMISE, [], ["guidance"]), SET_NOTE=(SET_NOTE, [], []), REFUSAL=(REFUSAL, [], []), CONFIRM=(CONFIRM, [], []), FINISH=(FINISH, ["decide"], []),
     VERIFY_PRE=(VERIFY_PRE, [], ["identity"]), VERIFY_POST=(VERIFY_POST, ["live"], ["identity"]),
     CALLBACK_PRE=(CALLBACK_PRE, ["cal"], ["callback", "guidance"]), CALLBACK_POST=(CALLBACK_POST, [], []),

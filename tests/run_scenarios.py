@@ -65,7 +65,10 @@ def simulate(agent_id, name, variables_by_persona, concurrency, max_seconds=420)
         open_runs = [r for r in runs if r.get("outcome") in (None, "queued", "running", "analyzing", "pending")]
         if st in ("completed", "failed", "paused"): return sim_id, it_id, runs
         settled = settled + 1 if runs and len(runs) >= len(variables_by_persona) and not open_runs else 0
-        if settled >= 3: return sim_id, it_id, runs                      # every call judged for 30 s: done, whatever the status says
+        if settled >= 3:                                                  # every call judged for 30 s: done, whatever the status says
+            try: freya.api("PUT", f"/api/v2/simulations/{sim_id}", {"status": "completed"})     # or the workspace stays blocked for the next run
+            except Exception: pass
+            return sim_id, it_id, runs
 
 def run_once(agent_id, scen, ids, rules, concurrency):
     sessions = {s["id"]: dict(http("/v1/practice/sessions", {"case": s["session"]})["variables"], now=s["variables"]["now"]) for s in scen}
