@@ -55,7 +55,10 @@ Per experiment:
    if it now passes 3 of 3, and as **regressed** if it fails at least 2 of 3. A scenario between the two (2 of 3) is
    **unstable**: not evidence against the change, but a target, because unstable scenarios lose in the final.
 3. **Bank records come first.** A change that lowers the number of scenarios with right bank records is discarded,
-   whatever it does to the conversation score. Records are deterministic code; a drop there is a bug, not noise.
+   whatever it does to the conversation score. The code that writes records is deterministic, but the records are
+   not: the model may report a different intent on the next run, a tool call may fail, the simulated customer may
+   drift. So a drop is disqualifying until it is explained from the transcript, and it is logged with its cause
+   (code, model report, service, simulated customer). It is not assumed to be a code bug.
 4. **Keep** when records did not drop, nothing regressed and at least one scenario is fixed, or results are equal
    and the code is simpler. **Discard** (git revert the commit) otherwise.
 5. After every third kept change, and for the final candidate: the confirmation run, all scenarios three times.
