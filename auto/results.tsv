@@ -1,0 +1,2 @@
+time	commit	harness	passed	total	ledger	hung	stalls	reps	style	status	experiment	description
+2026-10-11 02:12	b4af2ce	646ae62e	98	100	100	0	0	1	-	baseline	1011-020045-baseline--builder-made-agent--spec-v4--t	builder-made agent from Brief A+B (spec v4), two-stage stall step. Fails: A12 (explanation given twice, records right), A40 (judge verdict never arrived)
