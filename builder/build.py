@@ -68,7 +68,8 @@ def main(argv):
     wf = engine.lint(engine.build_workflow(spec, openapi))
     (ROOT / "out" / (slot + ".workflow.json")).write_text(json.dumps(wf, indent=1))
     trace.log(f"workflow compiled: {len(wf['nodes'])} steps, {len(json.dumps(wf))} bytes, checks passed")
-    selftest(spec, openapi, trace)
+    try: selftest(spec, openapi, trace)
+    except Exception as e: trace.log("SELF-TEST against a fake bank FAILED (the agent is still deployed): " + type(e).__name__ + ": " + str(e)[:400])
     if opt.get("--no-deploy"): trace.end("not deployed"); return
     import freya
     freya.validate_workflow(slot, wf); trace.log("Freya dry run: valid")

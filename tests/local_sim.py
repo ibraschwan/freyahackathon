@@ -19,11 +19,12 @@ from builder import runtime
 class Rule(Exception): pass
 
 class Sim:
-    def __init__(self, spec, products, now, identity=None, fail_first=None, call_vars=None):
+    def __init__(self, spec, products, now, identity=None, fail_first=None, call_vars=None, max_wrong=3):
         self.code = runtime.embed(spec); self.spec = spec
         self.vars = dict({"customer_id": "c_x", "first_name": "Ann", "last_name": "Lee", "title": "Ms", "now": now}, **(call_vars or {}))
+        self.vars[spec.get("now_variable") or "now"] = now
         self.products, self.identity = products, identity or {"date_of_birth": "1988-03-14", "phone_last4": "4471"}
-        self.fail = dict(fail_first or {}); self.wrong = 0; self.ok_fields = set()
+        self.fail = dict(fail_first or {}); self.wrong = 0; self.ok_fields = set(); self.max_wrong = max_wrong
         self.ledger = {"promises": [], "notes": [], "callbacks": [], "transfers": [], "outcome": None, "reason": None, "calls": []}
         self.said = []; self.ended = False
         self._run("SETUP")
@@ -38,33 +39,41 @@ class Sim:
         return g
 
     def _bank(self, tool, body):
-        """The mock bank: the same answers the hackathon's mock gives."""
+        """The mock bank: the same answers the hackathon's mock gives. Field names come from the spec, so any tool API works."""
         body = {k: v for k, v in body.items() if v is not None}
-        L = self.ledger
+        L, R, sp = self.ledger, self.spec.get("tools") or {}, self.spec
+        OK = (sp.get("response") or {}).get("ok") or "ok"
+        I = (sp.get("identity") or {}).get("response") or {}
+        def f(role, default): return (R.get(tool) or {}).get(role, default)
         def done(status, data):
+            data = {(OK if k == "ok" else k): v for k, v in data.items()}
             L["calls"].append({"tool": tool, "args": {k: v for k, v in body.items() if k != "customer_id"}, "status": status, "result": data}); return status, data
         if L["outcome"]: return done(200, {"ok": False, "error": "the call is already closed"})
         if self.fail.get(tool, 0) > 0:
             self.fail[tool] -= 1; return done(500, {"ok": False, "error": "service unavailable, nothing was recorded"})
         if tool == "verify_identity":
-            f, a = body.get("field"), body.get("answer")
-            if self.wrong >= 3: return done(200, {"ok": False, "verified": False, "wrong_answers_left": 0, "error": "identity check is over"})
-            if f in self.ok_fields: return done(200, {"ok": True, "verified": True, "wrong_answers_left": 3 - self.wrong})
-            if a == self.identity.get(f):
-                self.ok_fields.add(f); return done(200, {"ok": True, "verified": True, "wrong_answers_left": 3 - self.wrong, "all_verified": self.ok_fields == set(self.identity)})
-            self.wrong += 1; return done(200, {"ok": True, "verified": False, "wrong_answers_left": 3 - self.wrong, "all_verified": False})
+            q, a = body.get(f("question", "field")), body.get(f("answer", "answer"))
+            V, A, LEFT = I.get("verified") or "verified", I.get("all_verified") or "all_verified", I.get("left") or "wrong_answers_left"
+            if self.wrong >= self.max_wrong: return done(200, {"ok": False, V: False, LEFT: 0, "error": "identity check is over"})
+            if q in self.ok_fields: return done(200, {"ok": True, V: True, LEFT: self.max_wrong - self.wrong})
+            if a == self.identity.get(q):
+                self.ok_fields.add(q); return done(200, {"ok": True, V: True, LEFT: self.max_wrong - self.wrong, A: self.ok_fields == set(self.identity)})
+            self.wrong += 1; return done(200, {"ok": True, V: False, LEFT: self.max_wrong - self.wrong, A: False})
+        P = sp.get("product") or {}
+        idf = P.get("id_field") or "product_id"
         if tool == "get_account":
             if self.ok_fields != set(self.identity): return done(200, {"ok": False, "error": "identity not verified"})
-            return done(200, {"ok": True, "products": self.products})
+            return done(200, {"ok": True, (P.get("list_field") or "products"): self.products})
         if tool == "create_promise":
-            if any(p["product_id"] == body["product_id"] for p in L["promises"]): return done(200, {"ok": False, "error": "this product already has a promise"})
-            if body["product_id"] not in [p["product_id"] for p in self.products]: return done(200, {"ok": False, "error": "unknown product_id"})
-            L["promises"].append({"product_id": body["product_id"], "amount": float(body["amount"]), "date": body["date"]}); return done(200, {"ok": True, "promise_id": "pr"})
-        if tool == "add_note": L["notes"].append({"product_id": body["product_id"], "reason": body["reason"]}); return done(200, {"ok": True})
-        if tool == "schedule_callback": L["callbacks"].append({"date": body["date"], "time": body["time"]}); return done(200, {"ok": True})
-        if tool == "transfer_to_agent": L["transfers"].append({"queue": body["queue"]}); return done(200, {"ok": True})
+            pid, am, dt = body.get(f("product", "product_id")), body.get(f("amount", "amount")), body.get(f("date", "date"))
+            if any(p["product_id"] == pid for p in L["promises"]): return done(200, {"ok": False, "error": "this product already has a promise"})
+            if pid not in [p[idf] for p in self.products]: return done(200, {"ok": False, "error": "unknown product_id"})
+            L["promises"].append({"product_id": pid, "amount": float(am), "date": dt}); return done(200, {"ok": True, "promise_id": "pr"})
+        if tool == "add_note": L["notes"].append({"product_id": body.get(f("product", "product_id")), "reason": body.get(f("reason", "reason"))}); return done(200, {"ok": True})
+        if tool == "schedule_callback": L["callbacks"].append({"date": body.get(f("date", "date")), "time": body.get(f("time", "time"))}); return done(200, {"ok": True})
+        if tool == "transfer_to_agent": L["transfers"].append({"queue": body.get(f("queue", "queue"))}); return done(200, {"ok": True})
         if tool == "close_call":
-            table = self.spec["outcomes"]["table"]; o, r = body.get("outcome"), body.get("reason")
+            table = sp["outcomes"]["table"]; o, r = body.get(f("outcome", "outcome")), body.get(f("reason", "reason"))
             if o not in table or (table[o] and r not in table[o]) or (not table[o] and r): return done(200, {"ok": False, "error": "this outcome needs one of these reasons: " + ", ".join(table.get(o, []))})
             L["outcome"], L["reason"] = o, r; return done(200, {"ok": True})
         raise KeyError(tool)
@@ -94,7 +103,8 @@ class Sim:
             while True:
                 self._run("REC_NEXT")
                 if self._v("rec_state") != "call": break
-                self._api("create_promise", {"product_id": self.vars["cur_pid"], "amount": self.vars["cur_amount"], "date": self.vars["cur_date"]}, pre="PROMISE_PRE", post="PROMISE_POST")
+                r = (self.spec.get("tools") or {}).get("create_promise") or {}
+                self._api("create_promise", {r.get("product", "product_id"): self.vars["cur_pid"], r.get("amount", "amount"): self.vars["cur_amount"], r.get("date", "date"): self.vars["cur_date"]}, pre="PROMISE_PRE", post="PROMISE_POST")
             if self._v("rec_state") == "close": return self._notes()
             self.said.append(self.vars["enter_line"]); return
         if self._v("fin_state") == "go": return self._notes()
@@ -103,12 +113,14 @@ class Sim:
         while True:
             self._run("NOTE_NEXT")
             if self._v("note_state") != "call": break
-            self._api("add_note", {"product_id": self.vars["cur_pid"], "reason": self.vars["cur_reason"]}, post="NOTE_POST")
+            r = (self.spec.get("tools") or {}).get("add_note") or {}
+            self._api("add_note", {r.get("product", "product_id"): self.vars["cur_pid"], r.get("reason", "reason"): self.vars["cur_reason"]}, post="NOTE_POST")
         self._goodbye()
 
     def _goodbye(self):
         self.said.append(self.vars["final_line"])
-        self._api("close_call", {"outcome": self.vars.get("final_outcome"), "reason": self.vars.get("final_reason")}, pre="CLOSE_PRE", post="CLOSE_POST")
+        r = (self.spec.get("tools") or {}).get("close_call") or {}
+        self._api("close_call", {r.get("outcome", "outcome"): self.vars.get("final_outcome"), r.get("reason", "reason"): self.vars.get("final_reason")}, pre="CLOSE_PRE", post="CLOSE_POST")
         self.ended = True
 
     # ---- what the dialogue model can do
@@ -117,14 +129,18 @@ class Sim:
         assert not self.ended, "the call is over"
         self._run(name.upper(), params=params); self._route()
     def verify(self, field, answer):
-        d = self._api("verify_identity", {"field": field, "answer": answer}, pre="VERIFY_PRE", post="VERIFY_POST"); self._route(); return d
+        r = (self.spec.get("tools") or {}).get("verify_identity") or {}
+        d = self._api("verify_identity", {r.get("question", "field"): field, r.get("answer", "answer"): answer}, pre="VERIFY_PRE", post="VERIFY_POST"); self._route(); return d
     def callback(self, date, time):
-        d = self._api("schedule_callback", {"date": date, "time": time}, pre="CALLBACK_PRE", post="CALLBACK_POST"); self._route(); return d
+        r = (self.spec.get("tools") or {}).get("schedule_callback") or {}
+        d = self._api("schedule_callback", {r.get("date", "date"): date, r.get("time", "time"): time}, pre="CALLBACK_PRE", post="CALLBACK_POST"); self._route(); return d
     def transfer(self, queue):
-        d = self._api("transfer_to_agent", {"queue": queue}, pre="TRANSFER_PRE", post="TRANSFER_POST"); self._route(); return d
+        r = (self.spec.get("tools") or {}).get("transfer_to_agent") or {}
+        d = self._api("transfer_to_agent", {r.get("queue", "queue"): queue}, pre="TRANSFER_PRE", post="TRANSFER_POST"); self._route(); return d
     def hang_up(self):
         """The call ends without finish: the end-of-call safety net closes it."""
-        try: self._api("close_call", {"outcome": "{{outcome}}", "reason": "{{reason}}"}, pre="FALLBACK_PRE")
+        r = (self.spec.get("tools") or {}).get("close_call") or {}
+        try: self._api("close_call", {r.get("outcome", "outcome"): "{{outcome}}", r.get("reason", "reason"): "{{reason}}"}, pre="FALLBACK_PRE")
         except Exception as e:
             if "already closed" not in str(e): raise
     def login(self):
