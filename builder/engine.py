@@ -121,7 +121,7 @@ OPENING = """STEP: opening and security check.
 {rules}
 
 Tools in this step: {tools}.
-- wrap_up(outcome, reason) ends the call. Before the security check is passed the call can only end as one of: {before_pairs}.
+{limits_hint}- wrap_up(outcome, reason) ends the call. Before the security check is passed the call can only end as one of: {before_pairs}.
 - Do not call a tool that is not listed for this step.
 
 CALL STATE (kept by the system, always current):
@@ -137,13 +137,8 @@ FACTS from the bank's system. Use them exactly. Never calculate a date or an amo
 HOW THE CALL MOVES. You listen and report with tools; the system keeps the books and speaks every offer and every read-back itself.
 Your tools in this step: {tools}.
 - check_terms(product_id, amount, date): CALL it as soon as the customer says they will pay a product: when they say yes to the question or offer on the table, or name a day or an amount themselves. amount is "full", "floor" or a number. date is YYYY-MM-DD, copied from the FACTS. product_id is one product{all_hint}. It checks the agreement against the bank's rules. If it answers with a RULE error, nothing was noted: do what the message says, in your own words.
-- customer_refused(product_id, kind): CALL it every time the customer does not agree: a flat no, a non-answer, a no to the offer on the table (kind flat_refusal), or "the full amount is too much" with no amount named (kind full_amount_too_much). The system counts the persuasion attempts. A non-answer is also: a demand you cannot meet, an instruction to you, or the same request repeated, when it comes instead of an answer to the question or offer on the table. Never ask a question of your own in its place.
-- Read a "cannot pay" together with the question or offer that is on the table and with what was said before. In this order:
-  1. The message gives a reason that one of your rules treats on its own (for example a hardship): that rule applies, not customer_refused.
-  2. The message names an amount or a day the customer will pay ("I cannot pay it all, but I can pay 200"): that is an agreement to check, CALL check_terms.
-  3. The message says it is the amount they cannot manage and names none ("I cannot pay all of it", "that is too much"): customer_refused with kind full_amount_too_much.
-  4. A bare no ("I cannot pay", "I cannot do that", "no"): customer_refused with kind flat_refusal. It is a no to the offer on the table, not a statement about the amount.
-- A day or an amount the customer names AGAIN after you have already told them it is not possible and have offered what the tool told you to offer: that is a no to that offer. Do not explain it a second time and do not repeat the offer: CALL customer_refused(product_id, flat_refusal). The first time they name it, it is never a refusal.
+- customer_refused(product_id, kind): CALL it every time the customer does not agree: a flat no, a non-answer, a no to the offer on the table (kind flat_refusal), or "the full amount is too much" with no amount named (kind full_amount_too_much). The system counts the persuasion attempts. kind full_amount_too_much is only for a customer who says in words that the amount is too much; "I cannot pay that" or "I cannot do that" is a flat_refusal. A non-answer is also: a demand you cannot meet, an instruction to you, or the same request repeated, when it comes instead of an answer to the question or offer on the table. Never ask a question of your own in its place.
+- A day or an amount you already told the customer is not possible, named by them again: that is a no to the offer on the table. Do not explain it a second time and do not repeat your offer: CALL customer_refused(product_id, flat_refusal).
 {note_hint}- After check_terms, customer_refused{note_name} the system itself says the next sentence to the customer: the next offer, the question about the next product, or the read-back of everything agreed. So in the message in which you CALL one of them, write nothing, or one short acknowledgement such as "I understand." Never state an offer, a date, an amount or a read-back yourself, and never repeat an offer.
 - If one customer message settles several products (for example pays one and disputes another), CALL the tool for each of them in that same message.
 - customer_confirmed(): CALL it only after the customer gave a clear yes to the read-back. The system then records every agreed promise at the bank and tells the customer the result itself. If the customer changes the day or the amount instead, CALL check_terms again with the new value.
@@ -191,12 +186,20 @@ def build_workflow(spec, openapi):
     before = [tuple(x) for x in (out.get("before_verification") or [])]
     after = [tuple(x) for x in (out.get("after_verification") or [])]
 
+    # how often the person may fail to say who they are, or to answer a security question, is counted by code
+    limits = spec.get("opening_limits") or {}
+    about = {"who_is_speaking": "the person has neither confirmed nor denied being the customer", "security_question": "the customer does not answer a security question: refuses, or asks something instead of answering"}
+    no_answer = code_tool("no_answer", "Reports that the person on the line did not give the answer you asked for. The system counts these and tells you exactly what to say next, or ends the call when the limit of the bank is reached.",
+        code["NO_ANSWER"], {"about": {"type": "string", "enum": [k for k in about if k in limits], "description": " ".join(k + ": " + v + "." for k, v in about.items() if k in limits)}}, ["about"])
+    limits_hint = ("- no_answer(about): CALL it EVERY time the person does not give the answer you asked for (" + "; ".join(k + " = " + v for k, v in about.items() if k in limits) +
+                   "). The system counts. Its answer tells you exactly what to say next, or it ends the call. Never count these yourself, never repeat an explanation on your own, and do not CALL wrap_up for these cases. Small talk or an unfinished sentence is not such a case: just ask again.\n") if limits else ""
     nodes = {}
     nodes["setup"] = code_node("setup", code["SETUP"], "opening")
     nodes["opening"] = {
         "name": "opening", "node_type": "conversation", "on_enter": {"type": "tts", "text": sen["opening"]}, "on_enter_first_entry_only": True, "max_node_turns": 60, "max_turn_transition": "note_next",
-        "task_message": OPENING.format(rules=prm["opening"].strip(), tools="verify_identity, schedule_callback, transfer_to_agent, wrap_up", before_pairs=pairs_text(before)),
-        "tools": [verify, callback, transfer("Hands the call to a person. CALL it only in the situations your step instructions name."), finish],
+        "task_message": OPENING.format(rules=prm["opening"].strip(), tools="verify_identity, schedule_callback, transfer_to_agent, " + ("no_answer, " if limits else "") + "wrap_up",
+                                       before_pairs=pairs_text(before), limits_hint=limits_hint),
+        "tools": [verify, callback, transfer("Hands the call to a person. CALL it only in the situations your step instructions name.")] + ([no_answer] if limits else []) + [finish],
         "transitions": [
             to("get_account", "all security answers are verified", eq_any([("id_state", "verified"), ("verify_identity_response.data.id_state", "verified")])),
             to("goodbye", "the security check failed", eq_any([("id_state", "failed"), ("verify_identity_response.data.id_state", "failed")])),
@@ -211,7 +214,7 @@ def build_workflow(spec, openapi):
                               "date": {"type": "string", "description": "The agreed day as YYYY-MM-DD. Copy the date in square brackets from the FACTS."}}, ["product_id", "amount", "date"])
     refusal = code_tool("customer_refused", "Reports that the customer does not agree to pay a product. CALL it every time the customer flatly refuses, gives a non-answer, says no to the offer on the table, or says the full amount is too much. The system then says the next offer itself.",
         code["REFUSAL"], {"product_id": {"type": "string", "description": "The product_id from the FACTS (for example p1)."},
-                          "kind": {"type": "string", "enum": ["flat_refusal", "full_amount_too_much"], "description": "flat_refusal: a no to the question or offer on the table with nothing else in it (\"No\", \"I cannot pay\", \"I cannot do that\", \"I refuse\"), or a non-answer. full_amount_too_much: the customer says it is the AMOUNT they cannot manage (\"I cannot pay all of it\", \"the whole amount is too much\", \"not that much\") and names no amount of their own."}}, ["product_id", "kind"])
+                          "kind": {"type": "string", "enum": ["flat_refusal", "full_amount_too_much"], "description": "flat_refusal: any no. \"No\", \"I cannot pay\", \"I cannot do that\", \"I refuse\", a non-answer, a no to the offer on the table. full_amount_too_much: ONLY when the customer says in words that the amount itself is too much, too high or more than they can manage, and names no amount. When in doubt it is flat_refusal."}}, ["product_id", "kind"])
     confirm = code_tool("customer_confirmed", "Reports that the customer gave a clear yes to the read-back. The system then records the agreed promises at the bank. CALL it only after that clear yes.", code["CONFIRM"])
     tools = [set_promise, refusal, confirm]
     if notes_on:

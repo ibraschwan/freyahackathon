@@ -266,6 +266,16 @@ if __name__ == "__main__":
     s = mk("PUB-01"); s.tool("finish", outcome="not_verified"); check("not_verified alone becomes declined", s.summary()[:2], ("not_verified", "declined"))
     s = mk("PUB-01"); s.transfer("restructuring"); check("queue before verification is general", s.summary(), ("transferred", "human", [], [], [], ["general"]))
 
+    # the two limits of the opening are counted by code
+    s = mk("PUB-01"); r1 = refused(s.tool, "no_answer", about="who_is_speaking")
+    check("first unclear answer: ask once more", 'Ask exactly once more: "Am I speaking with Ms Lee?"' in r1, True)
+    s.tool("no_answer", about="who_is_speaking"); check("second unclear answer closes the call", (s.summary()[:2], s.said[-1]), (("not_reached", "unclear"), "Thank you, goodbye."))
+    s = mk("PUB-09"); r1 = refused(s.tool, "no_answer", about="security_question")
+    check("first refusal: the explanation, once", "These questions protect your account." in r1, True)
+    s.tool("no_answer", about="security_question"); check("second refusal closes as declined", s.summary()[:2], ("not_verified", "declined"))
+    s = mk("PUB-09"); refused(s.tool, "no_answer", about="who_is_speaking"); r2 = refused(s.tool, "no_answer", about="security_question")
+    check("the two counts are separate", ("protect your account" in r2, s.ended), (True, False))
+    s = mk("PUB-09").login(); check("after verification the tool refuses", "already passed" in refused(s.tool, "no_answer", about="security_question"), True)
     s = mk("PUB-08", notes=False).login(); s.tool("finish", outcome="paid"); check("paid, Brief A", s.summary(), ("paid", None, [], [], [], []))
     s = mk("PUB-08").login(); s.tool("finish", outcome="paid"); check("paid, Brief B", s.summary(), ("paid", None, [], [("p1", "paid")], [], []))
     s = mk("PUB-05").login(); s.hang_up(); check("customer hangs up after verification", s.summary()[:2], ("no_promise", "refused"))
