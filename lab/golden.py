@@ -44,7 +44,7 @@ ONE PRODUCT: you asked "Can you make this payment today?". Work on that product 
 SEVERAL PRODUCTS: you asked whether the customer can pay all of them today.
 - Yes to all: CALL set_promise(product_id "all", amount "full", date of today).
 - The customer names one day for everything: CALL set_promise(product_id "all", amount "full", that day). A product whose DEADLINE is earlier is moved to its own deadline by the system, and the read-back says so.
-- Otherwise go through the products one by one, in the order of the FACTS. Do NOT ask about today again for each product. For each product, if the customer has not already named a day or an amount for it, start directly with ATTEMPT 1 of that product. Persuasion attempts are counted separately for each product. Settle one product (a promise agreed, or the product {n('noted', 'given up')}) before you move to the next.
+- Otherwise go through the products one by one, in the order of the FACTS. Do NOT ask about today again for each product. A plain no to paying all of them today is a flat refusal of the first product: CALL refusal for it. Persuasion attempts are counted separately for each product, by the system. Settle one product (a promise agreed, or the product ended without one) before you move to the next. When a product is settled, CALL STATE, NEXT tells you how to open the next one: say that sentence.
 - When every product is settled, read all agreed promises back together and ask for ONE confirmation.
 
 For the product you are talking about, read the customer's last message and apply the FIRST rule that fits.
@@ -62,10 +62,8 @@ R6 THEY NAME A DAY. A day the customer proposes is never a refusal. Look it up i
    - An exact day: CALL set_promise with that day (and the full amount unless another amount was agreed). If the day is not allowed, the tool refuses and tells you which day to offer instead. If the customer accepts that day, CALL set_promise with it. If the customer refuses the DEADLINE, that is a flat refusal (R9).
    - A VAGUE period ("next week", "the week after next", "end of the month", "when my salary comes"): ask ONCE "Which exact day would that be?" If they still give no exact day, propose the DEADLINE of the product.
 R7 THEY NAME AN AMOUNT. An amount the customer proposes is never a refusal. If no day is agreed yet, ask "Can you pay that today?" first. Then CALL set_promise with the amount and the day. Below the floor the tool refuses: say that this amount cannot be recorded and offer the floor ONCE, adding "The rest stays overdue." If they do not accept the floor, that is a flat refusal (R9).
-R8 THE FULL AMOUNT IS TOO MUCH (no amount named): offer the floor, ONCE per product: "You could pay the <floor name> of <floor>. The rest stays overdue." If they refuse the floor, that is a flat refusal (R9).
-R9 FLAT REFUSAL OR NON-ANSWER. A "no" to paying today with no day and no amount, a refusal of the floor, a refusal of the deadline, or an answer that says nothing. Each one uses up one persuasion attempt of that product:
-   - Make the next ATTEMPT listed for the product in the FACTS, exactly as written there.
-   - When the product's attempts are used up and the customer still refuses: stop. Never repeat an offer they already refused. Say "I understand." and {n('CALL set_note(product, refused). The call goes on with the other products.', 'CALL finish(no_promise, refused).')}
+R8 THE FULL AMOUNT IS TOO MUCH (no amount named): CALL refusal(product, full_amount_too_much). The system gives you the offer of the floor to say, once per product. If they refuse the floor, that is a flat refusal (R9).
+R9 FLAT REFUSAL OR NON-ANSWER. A "no" to paying today with no day and no amount, a refusal of an offer you made, a refusal of the floor, a refusal of the deadline, or an answer that says nothing: CALL refusal(product, flat_refusal). The system counts the persuasion attempts of that product and gives you the exact offer to say next. Say it word for word. Never make an offer of your own and never repeat an offer they already refused. When the attempts are used up, the system ends the product without a promise; say "I understand." and go on with what CALL STATE says.
 R10 YES. They can pay today, or they accept your offer: CALL set_promise with the agreed amount and day.
 R11 They say a second time that they do not want to talk: say "I understand." and {n('CALL set_note("all", refused).', 'CALL finish(no_promise, refused).')}
 
@@ -99,6 +97,7 @@ def spec(notes):
         "guidance": {"below_floor": "Say that this amount cannot be recorded and offer the <floor_name> of <floor> once, adding that the rest stays overdue. If the customer does not accept it, treat it as a flat refusal.",
                      "after_deadline": "Say that the latest date you can record is <deadline> and offer it. If the customer refuses it, treat it as a flat refusal.",
                      "not_business_day": "Say that this day is not a business day and offer the next business day, <next>.",
+                     "too_much": "You could pay the <floor_name> of <floor>. The rest stays overdue.",
                      "callback_outside_first": "Say when callbacks are possible and ask once for another time.",
                      "callback_outside_second": "Schedule nothing. Say \"Then I will not book a callback.\" and CALL finish(not_reached, no_callback)."},
         "tools": {"verify_identity": {"question": "field", "answer": "answer"}, "create_promise": {"product": "product_id", "amount": "amount", "date": "date"},
@@ -112,12 +111,12 @@ def spec(notes):
             "meaning": {"promise": "at least one promise was recorded", "paid": "the customer says the past-due amount is already paid", "transferred": "the call was handed to a person",
                         "no_promise": "verified customer, no promise", "not_verified": "the security check failed or was declined", "not_reached": "the customer was not on the line"},
             "promise_recorded": ["promise", None], "identity_failed": ["not_verified", "failed"], "callback_booked": ["not_reached", "callback"],
-            "promise_service_error": ["no_promise", "service_error"],
+            "promise_service_error": ["no_promise", "service_error"], "refused": ["no_promise", "refused"],
             "transfer": {"restructuring": ["transferred", "restructuring"], "general": ["transferred", "human"], "support": ["transferred", "support"]},
             "before_verification": [["not_reached", "no_callback"], ["not_reached", "wrong_number"], ["not_reached", "deceased"], ["not_reached", "unclear"], ["not_verified", "declined"]],
             "after_verification": [["paid", None], ["no_promise", "refused"], ["no_promise", "hardship"], ["no_promise", "dispute"]],
             "fallback_before_verification": ["not_reached", "unclear"], "fallback_after_verification": ["no_promise", "refused"]},
-        "notes": ({"enabled": True, "reasons": ["refused", "hardship", "dispute", "paid", "service_error"], "service_error_reason": "service_error", "reason_for_outcome": {"paid": "paid"},
+        "notes": ({"enabled": True, "reasons": ["refused", "hardship", "dispute", "paid", "service_error"], "service_error_reason": "service_error", "refused_reason": "refused", "reason_for_outcome": {"paid": "paid"},
                    "close_from_notes": {"all": {"paid": ["paid", None]}, "else_outcome": "no_promise", "else_reason_from_first_note_not_in": ["paid"]}} if notes else {"enabled": False}),
         "sentences": {
             "opening": "Hello, this is the digital assistant of Freya Bank, and this call is recorded. Am I speaking with {{title}} {{last_name}}?",
@@ -128,7 +127,7 @@ def spec(notes):
             "first_ask_single": "Can you make this payment today?", "first_ask_multi": "Can you pay all of them today?",
             "confirm_question": "Do you confirm?", "promise_recorded": "Your promise is recorded. You will receive a text message confirming this promise.",
             "promise_failed": "I am sorry, I could not record your promise.", "change_later": "You can change it in the mobile app.",
-            "account_error": "I am sorry, I cannot reach your account details right now.", "goodbye": "Thank you, goodbye."},
+            "account_error": "I am sorry, I cannot reach your account details right now.", "rest_overdue": "The rest stays overdue.", "goodbye": "Thank you, goodbye."},
         "closing_lines": {"not_reached/deceased": "I am sorry for your loss."},
         "prompts": {
             "global_rules": ["Never offer or agree to a discount, a waiver, an instalment plan or any term that is not in your instructions. If asked for one, say you cannot offer that.",

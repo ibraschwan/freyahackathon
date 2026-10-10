@@ -28,7 +28,8 @@ OPENING step
 After the last security answer is verified the engine calls get_account and computes, for every late product: its name in words, the full amount, the floor, the days late, its band, its deadline and its persuasion offers. Then it speaks: `sentences.verified_ack` + `sentences.debt_intro` + one `sentences.product_statement` per product + `sentences.first_ask_single` (one product) or `sentences.first_ask_multi` (several).
 
 NEGOTIATION step
-- The dialogue model negotiates. It never writes to the bank itself. Its tools: set_promise(product_id, amount, date), confirm(), set_note(product_id, reason) when notes are enabled, transfer_to_agent(queue), finish(outcome, reason).
+- The dialogue model negotiates. It never writes to the bank itself. Its tools: set_promise(product_id, amount, date), refusal(product_id, kind), confirm(), set_note(product_id, reason) when notes are enabled, transfer_to_agent(queue), finish(outcome, reason).
+- refusal(product_id, kind) is how the persuasion attempts are counted, by code. The model calls it every time the customer does not agree: kind flat_refusal (a no with no day and no amount, a non-answer, a refusal of an offer) or kind full_amount_too_much. The engine answers with the exact sentence to say next. For full_amount_too_much it gives the floor offer `guidance.too_much`, once per product. For flat_refusal it gives the next entry of `attempt_offers` as "Could you pay <amount> for your <product> by <date>?" (plus `sentences.rest_overdue` when the amount is the floor), as many times as the product's band allows. When the attempts are used up the engine ends the product: with notes enabled it notes it with `notes.refused_reason` and moves on, otherwise it closes the call with `outcomes.refused`. With several products the engine itself opens each next product with that product's attempt 1.
 - set_promise notes an agreement. The engine refuses, with an instruction to the model: an amount below the product's floor (`guidance.below_floor`), a day that is not a business day (`guidance.not_business_day`, it names the next business day), a day after the product's deadline (`guidance.after_deadline`), a day in the past, a product whose promise is already recorded (it makes the model say `sentences.change_later`). With several products and one day for all, a product whose deadline is earlier is put on its own deadline and the read-back says so.
 - The model reads the agreement back with a read-back the engine words: "To confirm: you will pay <amount> for your <product> on <date>. " + `sentences.confirm_question`.
 - confirm(): the engine calls create_promise once per agreed product. A failed call is repeated once. Then it speaks `sentences.promise_recorded`. If a call failed twice it speaks `sentences.promise_failed`; when notes are enabled that product is noted with `notes.service_error_reason`, otherwise the call is closed with `outcomes.promise_service_error`.
@@ -71,6 +72,7 @@ SCHEMA = """THE CONFIGURATION. Return one JSON object with exactly these keys.
   {"below_floor": the customer proposed less than the floor (tokens <floor>, <floor_name>),
    "after_deadline": the customer named a day after the deadline (token <deadline>),
    "not_business_day": the customer named a weekend day or a holiday inside the deadline (token <next> = the next business day),
+   "too_much": the exact sentence that offers the floor when the customer says the full amount is too much, with everything the brief wants said with that offer (tokens <floor>, <floor_name>),
    "callback_outside_first": the first day or time offered for a callback is outside the window,
    "callback_outside_second": the second one is outside too. Name the finish(outcome, reason) to call.}
 "tools": for each bank tool, the names of its body fields with these roles (take the names from the tool API file):
@@ -84,6 +86,7 @@ SCHEMA = """THE CONFIGURATION. Return one JSON object with exactly these keys.
   "identity_failed": [outcome, reason] when the security check failed on wrong answers,
   "callback_booked": [outcome, reason],
   "promise_service_error": [outcome, reason] when the promise could not be recorded after the retry,
+  "refused": [outcome, reason] for a verified customer who still refuses when the persuasion attempts are used up,
   "account_error": [outcome, reason] when the account could not be read (use the service-error pair if the brief has no own rule),
   "transfer": {<queue>: [outcome, reason]} for every queue of the tool API,
   "before_verification": every [outcome, reason] pair a call can end with while the customer is NOT verified and nothing was booked or transferred,
@@ -92,7 +95,7 @@ SCHEMA = """THE CONFIGURATION. Return one JSON object with exactly these keys.
   "fallback_after_verification": [outcome, reason] for a call that breaks off after verification with no promise
 }
 "notes": {"enabled": true only when the brief tells the agent to record a note (add_note) for products that end without a promise; false when the brief does not use add_note,
-  "reasons": the allowed note reasons, "service_error_reason": the reason for a promise that could not be recorded,
+  "reasons": the allowed note reasons, "service_error_reason": the reason for a promise that could not be recorded, "refused_reason": the reason for a product the customer refuses to pay,
   "reason_for_outcome": {<outcome>: the note reason that goes with it} for outcomes whose name is not itself a note reason (for example an outcome "paid" -> note reason "paid"),
   "close_from_notes": how a call with no recorded promise is closed from its notes:
      {"all": {<note reason>: [outcome, reason or null]} for the case that every product has that same note reason and the brief gives it its own outcome,
@@ -107,7 +110,7 @@ SCHEMA = """THE CONFIGURATION. Return one JSON object with exactly these keys.
    "first_ask_single": the first question after the debt is stated, for one product, "first_ask_multi": the same for several products,
    "confirm_question": the question that ends the read-back, "promise_recorded": what to say once the promise is recorded, including any sentence the brief requires after a recorded promise,
    "promise_failed": what to say when it could not be recorded, "change_later": what to say when the customer wants to change or cancel a recorded promise,
-   "account_error": what to say when the account cannot be read, "goodbye": the thanks and goodbye that end every call}
+   "account_error": what to say when the account cannot be read, "rest_overdue": the sentence the brief wants added whenever less than the full amount is offered (empty if none), "goodbye": the thanks and goodbye that end every call}
 "closing_lines": {"<outcome>/<reason>" or "<outcome>": a sentence the brief requires at the very end of a call with that outcome, spoken by the engine before the goodbye}. Only where the brief prescribes a sentence that is the last thing said. Usually one or two entries, often none.
 
 Rules for the JSON: exact values of the tool API file for every outcome, reason, queue, field name and product type. Use null where a pair has no reason. No comments. No keys other than these."""
@@ -141,12 +144,13 @@ The instructions for the NEGOTIATION step. Use this structure:
 
 How to write the rules:
 - The engine shows the model these FACTS in the NEGOTIATION step; refer to them by these names and never restate their numbers: for each product FULL (the full past-due amount), FLOOR (with its name), DEADLINE, the number of PERSUASION ATTEMPTS and each ATTEMPT with its amount and date; a DATE TABLE that says for every day up to the deadline whether it is allowed; WHAT THE CUSTOMER'S WORDS MEAN (today, tomorrow, this/next weekday); and CALL STATE (what is agreed, recorded, noted, open, and the read-back to say).
-- Persuasion: write "make the next ATTEMPT listed for the product in the FACTS, exactly as written there". Do not restate what the attempts are.
+- Persuasion is counted by the engine. For a flat refusal or a non-answer (name every case the brief counts as one: a no with no day and no amount, a refusal of an offer, a refusal of the floor, a refusal of the deadline) write: CALL refusal(<product>, flat_refusal); the system gives the exact offer to say next under CALL STATE, NEXT; say it word for word, make no offer of your own, never repeat an offer. For "the full amount is too much" with no amount named write: CALL refusal(<product>, full_amount_too_much). Do not restate what the attempts are and do not tell the model to count. When the attempts are used up the system ends the product itself; with notes enabled do NOT add set_note(<product>, refused) for it.
+- Several products: a plain no to paying all of them is a flat refusal of the first open product (CALL refusal for it). When a product is settled, CALL STATE, NEXT tells the model how to open the next one; write that the model says that sentence.
 - Days and amounts are checked by set_promise. For a day the customer names, write: CALL set_promise with it; if the tool refuses, it says what to offer instead. Do not make the model judge dates itself. A vague period is the exception: give the brief's rule for it.
 - Ending a call: CALL finish(outcome, reason) with the exact values of the policy. With notes enabled, a product that ends without a promise is settled with CALL set_note(product, reason) instead and the call goes on with the other products; when the note settles the last open product and no promise was agreed, the engine ends the call by itself, so do not add finish after it. set_note("all", reason) notes every open product at once.
 - The engine speaks these itself, so never tell the model to say them: the opening sentence, the debt statement and first question, the read-back wording, the sentence after a recorded promise, the sentence after a failed recording, the sentences after a transfer or a booked callback, the sentence after a failed security check, the closing lines, the goodbye. Never tell the model to say goodbye or thank-you-goodbye.
 - Sentences that belong to a situation in the middle of a call (for example what to say to an "already paid" claim) the model says itself: put them in the rule, in quotes.
-- Tools are written as: CALL verify_identity, CALL schedule_callback, CALL transfer_to_agent(queue <name>), CALL set_promise(...), CALL set_note(<product>, <reason>), CALL confirm, CALL finish(<outcome>, <reason>).
+- Tools are written as: CALL verify_identity, CALL schedule_callback, CALL transfer_to_agent(queue <name>), CALL set_promise(...), CALL refusal(<product>, <kind>), CALL set_note(<product>, <reason>), CALL confirm, CALL finish(<outcome>, <reason>).
 - Call variables may be used in double braces (for example {{title}} {{last_name}}). Use no other double braces except {{callback_facts}}.
 - Cover every rule of the brief that concerns the conversation. Add nothing the brief does not say. Keep each rule short and literal."""
 
@@ -207,7 +211,7 @@ def check(spec, openapi):
         o, r = p; t = out.get("table", {})
         if o not in t: bad.append(f"outcomes.{name}: unknown outcome '{o}'")
         elif (t[o] and r not in t[o]) or (not t[o] and r): bad.append(f"outcomes.{name}: reason '{r}' does not fit outcome '{o}' (allowed: {t[o] or 'none'})")
-    for k in ("promise_recorded", "identity_failed", "callback_booked", "promise_service_error", "fallback_before_verification", "fallback_after_verification"):
+    for k in ("promise_recorded", "identity_failed", "callback_booked", "promise_service_error", "refused", "fallback_before_verification", "fallback_after_verification"):
         if k in out: pair_ok(k, out[k])
         else: bad.append("outcomes." + k + " is missing")
     for k in ("before_verification", "after_verification"):
@@ -260,7 +264,7 @@ def check_prompts(prm, spec):
         for v in re.findall(r"\{\{\s*([\w.]+)\s*\}\}", prm[k]):
             if v not in cv: bad.append(f"{k} uses {{{{{v}}}}}, which is not a call variable")
     if "{{callback_facts}}" not in (prm.get("opening") or ""): bad.append("opening lacks the {{callback_facts}} placeholder")
-    for tool, where in (("verify_identity", "opening"), ("schedule_callback", "opening"), ("finish", "opening"), ("set_promise", "negotiation"), ("confirm", "negotiation"), ("transfer_to_agent", "negotiation")):
+    for tool, where in (("verify_identity", "opening"), ("schedule_callback", "opening"), ("finish", "opening"), ("set_promise", "negotiation"), ("refusal", "negotiation"), ("confirm", "negotiation"), ("transfer_to_agent", "negotiation")):
         if tool not in (prm.get(where) or ""): bad.append(f"{where} never mentions {tool}")
     if spec["notes"].get("enabled") and "set_note" not in (prm.get("negotiation") or ""): bad.append("negotiation never mentions set_note although notes are enabled")
     if not spec["notes"].get("enabled") and "set_note" in (prm.get("negotiation") or ""): bad.append("negotiation mentions set_note although notes are not enabled")
@@ -279,8 +283,10 @@ async def extract(trace, briefs, openapi, api_text):
     mat = material(briefs, api_text)
     a, b = await asyncio.gather(policy_once(trace, 1, mat), policy_once(trace, 2, mat))
     diffs = differences(a, b)
-    trace.log(f"the two readings differ at {len(diffs)} places" + ("" if not diffs else ": " + ", ".join(p for p, _, _ in diffs[:40])))
-    spec = await settle(trace, mat, a, b, diffs) if diffs else a
+    wording = ("/sentences/", "/guidance/", "/outcomes/meaning/", "/closing_lines/", "/test_variables/", "/hints/", "/ask", "/text", "/wrong_sentence", "/floor_name", "/words", "/bank_name", "/address")
+    hard = [d for d in diffs if not any(w in d[0] for w in wording)]
+    trace.log(f"the two readings differ at {len(diffs)} places, {len(hard)} of them in rules or values" + ("" if not hard else ": " + ", ".join(p for p, _, _ in hard[:40])))
+    spec = await settle(trace, mat, a, b, hard) if hard else a
     for attempt in range(2):
         bad = check(spec, openapi)
         if not bad: break

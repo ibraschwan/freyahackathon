@@ -131,6 +131,7 @@ FACTS from the bank's system. Use them exactly. Never calculate a date or an amo
 
 HOW THINGS GET RECORDED (your tools in this step: {tools})
 - set_promise(product_id, amount, date): CALL it as soon as the customer has agreed to pay a product, before you read anything back. amount is "full", "floor" or a number. date is YYYY-MM-DD, copied from the DATE TABLE. product_id is one product{all_hint}. It checks the agreement against the bank's rules and notes it. If it answers with a RULE error, nothing was noted: do what the message says.
+- refusal(product_id, kind): CALL it every time the customer does not agree: a flat no, a non-answer, a refusal of an offer you made (kind flat_refusal), or "the full amount is too much" with no amount named (kind full_amount_too_much). The system counts the persuasion attempts and puts the exact offer to make next under CALL STATE, NEXT. Say that offer word for word. Make no offer the system did not give you, and never repeat an offer. When the attempts are used up the system ends the product itself.
 - After set_promise, say the read-back shown under CALL STATE, word for word, and wait. If the customer then changes the day or the amount, CALL set_promise again with the new value and read back again.
 - confirm(): CALL it only after the customer gave a clear yes to the read-back. The system then records every agreed promise at the bank and tells the customer the result itself. Without confirm nothing is recorded.
 {note_hint}- transfer_to_agent(queue): hands the call to a person. The system says goodbye and closes the call after it.
@@ -195,7 +196,10 @@ def build_workflow(spec, openapi):
                               "amount": {"type": "string", "description": "\"full\" for the full past-due amount, \"floor\" for the floor, or the agreed number, for example 126.50."},
                               "date": {"type": "string", "description": "The agreed day as YYYY-MM-DD. Copy the date in square brackets from the DATE TABLE."}}, ["product_id", "amount", "date"])
     confirm = code_tool("confirm", "Records every agreed promise at the bank. CALL it only after the customer gave a clear yes to your read-back.", code["CONFIRM"])
-    tools = [set_promise, confirm]
+    refusal = code_tool("refusal", "Reports that the customer does not agree to pay a product, and gets the next offer to make. CALL it every time the customer flatly refuses, gives a non-answer, refuses an offer you made, or says the full amount is too much. The answer appears under CALL STATE, NEXT.",
+        code["REFUSAL"], {"product_id": {"type": "string", "description": "The product_id from the FACTS (for example p1)."},
+                          "kind": {"type": "string", "enum": ["flat_refusal", "full_amount_too_much"], "description": "flat_refusal: a no with no day and no amount, a non-answer, or a refusal of your offer. full_amount_too_much: the customer says the full amount is too much and names no amount."}}, ["product_id", "kind"])
+    tools = [set_promise, refusal, confirm]
     if notes_on:
         reasons = notes.get("reasons") or (api["add_note"]["props"].get((R.get("add_note") or {}).get("reason", "reason"), {}).get("enum") or [])
         tools.append(code_tool("set_note", "Notes why a product ends without a promise. CALL it when a product is settled without a promise. The notes are written to the bank at the end of the call.",

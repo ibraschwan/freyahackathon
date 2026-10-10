@@ -82,7 +82,7 @@ def gst(v):
             return st
     except Exception:
         pass
-    return dict(stage='opening', id='open', idv=[], products=[], plan=dict(), pnotes=dict(), promises=dict(), tries=dict(), perr=[], notes=dict(), ntries=dict(), transfer='', callback='', closed='', pend='')
+    return dict(stage='opening', id='open', idv=[], products=[], plan=dict(), pnotes=dict(), promises=dict(), tries=dict(), perr=[], notes=dict(), ntries=dict(), transfer='', callback='', closed='', pend='', prop=dict(), toomuch=[], floored=[], next='', cur='')
 def pst(v, st):
     s = json.dumps(st)
     while RB in s:
@@ -206,7 +206,36 @@ def amount_text(a, p):
     return 'the full amount ' + money(p['full'])
 #@core
 def open_ids(st):
-    return [p['id'] for p in st['products'] if p['id'] not in st['promises'] and p['id'] not in st['plan'] and p['id'] not in st['pnotes'] and p['id'] not in st['perr']]
+    return [p['id'] for p in st['products'] if p['id'] not in st['promises'] and p['id'] not in st['plan'] and p['id'] not in st['pnotes'] and p['id'] not in st['perr'] and p['id'] not in (st.get('given') or [])]
+def prod(st, i):
+    for p in st['products']:
+        if p['id'] == i:
+            return p
+    return None
+def offer_line(st, p, k):
+    """The sentence for persuasion attempt k (0-based) of product p."""
+    o = p['offers'][k]
+    kind = o['amount']
+    if kind == 'floor' or (kind == 'full_or_floor' and p['id'] in st['toomuch']):
+        am = 'the ' + p['floor_name'] + ' of ' + money(p['floor'])
+        extra = ' ' + (SEN.get('rest_overdue') or 'The rest stays overdue.')
+    else:
+        am = 'the full amount of ' + money(p['full'])
+        extra = ''
+    return 'Could you pay ' + am + ' for your ' + p['words'] + (' by ' + say(iso(o['date'])) if o['date'] else '') + '?' + extra
+def lead(st):
+    """With several products: when one is settled, the engine opens the next one with its first persuasion attempt."""
+    op = open_ids(st)
+    if not op:
+        st['cur'] = ''
+        return
+    nxt = op[0]
+    if st.get('cur') and st.get('cur') != nxt and len(st['products']) > 1:
+        p = prod(st, nxt)
+        if p and p['offers'] and int(st['prop'].get(nxt) or 0) == 0:
+            st['prop'][nxt] = 1
+            st['next'] = 'Go on to the ' + p['words'] + ' [' + nxt + ']. If the customer already told you a day or an amount for it, use that (CALL set_promise). Otherwise say exactly: "' + offer_line(st, p, 0) + '" (this is its persuasion attempt 1 of ' + str(p['attempts']) + ').'
+    st['cur'] = nxt
 #@live
 def readback(st):
     parts = []
@@ -238,7 +267,9 @@ def live(st):
             t = 'OPEN: nothing agreed and nothing noted yet'
         L.append('- ' + p['words'] + ' [' + i + ']: ' + t)
     op = open_ids(st)
-    if planned and op:
+    if st.get('next') and op:
+        L.append('NEXT: ' + st['next'])
+    elif planned and op:
         L.append('NEXT: settle the OPEN product(s) first. Then read ALL agreed promises back together.')
     elif planned:
         L.append('NEXT: say this read-back: "' + readback(st) + '" After a clear yes, CALL confirm. If the customer changes a day or an amount instead, CALL set_promise again with the new value.')
@@ -588,6 +619,10 @@ for p in targets:
 for i in new:
     st['plan'][i] = new[i]
     st['pnotes'].pop(i, None)
+st['next'] = ''
+if not st.get('cur'):
+    st['cur'] = targets[0]['id']
+lead(st)
 pst(vars, st)
 '''
 
@@ -619,10 +654,70 @@ for p in targets:
         continue
     st['plan'].pop(p['id'], None)
     st['pnotes'][p['id']] = reason
+st['next'] = ''
+if not st.get('cur') and targets:
+    st['cur'] = targets[0]['id']
+lead(st)
 if not open_ids(st) and not st['plan'] and not st['promises']:
     o, r = decide(st, '', '', False)
     set_final(vars, o, r, closing_line(o, r))
     vars['fin_state'] = 'go'
+pst(vars, st)
+'''
+
+REFUSAL = r'''
+st = gst(vars)
+if st['stage'] != 'verified' or not st['products']:
+    raise Exception('RULE: no account is loaded yet.')
+ps = st['products']
+ids = [p['id'] for p in ps]
+pid = str(params.get('product_id') or '').strip()
+op = open_ids(st)
+if len(ps) == 1:
+    pid = ids[0]
+elif pid not in ids:
+    pid = st.get('cur') if st.get('cur') in op else (op[0] if op else '')
+p = prod(st, pid)
+if p is None or pid in st['promises']:
+    raise Exception('RULE: there is no open product to refuse. Look at CALL STATE.')
+if pid in st['pnotes'] or pid in st['perr']:
+    raise Exception('RULE: the ' + p['words'] + ' is already settled without a promise. Go on with what CALL STATE says under NEXT.')
+st['plan'].pop(pid, None)
+if not st.get('cur'):
+    st['cur'] = pid
+kind = str(params.get('kind') or 'flat_refusal').strip()
+if kind == 'full_amount_too_much' and pid not in st['floored'] and p['floor'] < p['full'] - 0.005:
+    st['floored'].append(pid)
+    if pid not in st['toomuch']:
+        st['toomuch'].append(pid)
+    G = (S.get('guidance') or dict()).get('too_much') or 'You could pay the <floor_name> of <floor>. The rest stays overdue.'
+    st['next'] = 'For the ' + p['words'] + ' offer the floor now, once. Say exactly: "' + G.replace('<floor_name>', p['floor_name']).replace('<floor>', money(p['floor'])) + '" If the customer accepts, agree the day and CALL set_promise with amount "floor". If the customer refuses it, CALL refusal again.'
+else:
+    if kind == 'full_amount_too_much' and pid not in st['toomuch']:
+        st['toomuch'].append(pid)
+    used = int(st['prop'].get(pid) or 0)
+    if used < len(p['offers']):
+        st['prop'][pid] = used + 1
+        st['next'] = 'Persuasion attempt ' + str(used + 1) + ' of ' + str(p['attempts']) + ' for the ' + p['words'] + '. Say exactly: "' + offer_line(st, p, used) + '" If the customer accepts, CALL set_promise with that amount and that day. If the customer refuses again, CALL refusal again. Make no other offer.'
+    else:
+        st['next'] = ''
+        if NOTES.get('enabled'):
+            st['pnotes'][pid] = str(NOTES.get('refused_reason') or 'refused')
+        else:
+            if 'given' not in st:
+                st['given'] = []
+            st['given'].append(pid)
+        lead(st)
+        left = [i for i in open_ids(st) if i not in (st.get('given') or [])]
+        if not left and not st['plan'] and not st['promises']:
+            if NOTES.get('enabled'):
+                o, r = decide(st, '', '', False)
+            else:
+                o, r = pair(OUT.get('refused') or OUT.get('fallback_after_verification'))
+            set_final(vars, o, r, closing_line(o, r))
+            vars['fin_state'] = 'go'
+        elif not left:
+            st['next'] = 'The ' + p['words'] + ' ends without a promise. Do not offer anything more for it.'
 pst(vars, st)
 '''
 
@@ -976,7 +1071,7 @@ CORE_KEYS = ["now_variable", "calendar", "sentences", "closing_lines", "outcomes
 ALL = dict(
     SETUP=(SETUP, ["cal", "live"], ["callback"]), PREPARE=(PREPARE, ["cal", "terms", "live"], ["product", "bands", "attempt_offers", "dates"]),
     REC_NEXT=(REC_NEXT, ["live", "decide"], []), NOTE_NEXT=(NOTE_NEXT, [], []),
-    SET_PROMISE=(SET_PROMISE, ["live"], ["guidance"]), SET_NOTE=(SET_NOTE, ["live", "decide"], []), CONFIRM=(CONFIRM, [], []), FINISH=(FINISH, ["live", "decide"], []),
+    SET_PROMISE=(SET_PROMISE, ["live"], ["guidance"]), SET_NOTE=(SET_NOTE, ["live", "decide"], []), REFUSAL=(REFUSAL, ["live", "decide"], ["guidance"]), CONFIRM=(CONFIRM, [], []), FINISH=(FINISH, ["live", "decide"], []),
     VERIFY_PRE=(VERIFY_PRE, [], ["identity"]), VERIFY_POST=(VERIFY_POST, ["live"], ["identity"]),
     CALLBACK_PRE=(CALLBACK_PRE, ["cal"], ["callback", "guidance"]), CALLBACK_POST=(CALLBACK_POST, [], []),
     TRANSFER_PRE=(TRANSFER_PRE, [], ["transfer"]), TRANSFER_POST=(TRANSFER_POST, ["live"], []), ACCOUNT_POST=(ACCOUNT_POST, [], ["product"]),
