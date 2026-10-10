@@ -206,18 +206,19 @@ def build_workflow(spec, openapi):
     finish_hint = ("Give the outcome and reason that fit; the system checks them against what was recorded and noted." if notes_on else
                    "Without a recorded promise the call can only end as one of: " + pairs_text(after) + ".")
     nodes["negotiate"] = {
-        "name": "negotiate", "node_type": "conversation", "on_enter": {"type": "tts", "text": "{{debt_line}}"}, "on_enter_first_entry_only": True, "max_node_turns": 80, "max_turn_transition": "goodbye",
+        "name": "negotiate", "node_type": "conversation", # every entry speaks a line: the debt statement the first time, the result of the recording after it. A silent re-entry
+        # would leave the step without an assistant message, and the platform then suppresses routing on tool results.
+        "on_enter": {"type": "tts", "text": "{{enter_line}}"}, "max_node_turns": 80, "max_turn_transition": "goodbye",
         "task_message": NEGOTIATE.format(rules=prm["negotiation"].strip(), tools=", ".join(t["function"]["name"] for t in tools), all_hint=', or "all" for every open product on the same day',
                                          note_hint=note_hint, finish_hint=finish_hint, change_later=sen.get("change_later", "You can change it later.")),
         "tools": tools,
         "transitions": [to("rec_next", "the customer confirmed the read-back", eq("commit_state", "go")), auto, fin],
     }
     rp = R.get("create_promise") or {}
-    nodes["rec_next"] = code_node("rec_next", code["REC_NEXT"], "rec_say", [
+    nodes["rec_next"] = code_node("rec_next", code["REC_NEXT"], "negotiate", [
         to("create_promise", "one more promise to record", eq("rec_state", "call")), to("note_next", "nothing could be recorded, the call ends", eq("rec_state", "close"))])
     nodes["create_promise"] = api_node("create_promise", bank_tool(api, "create_promise", call_vars, "Record one agreed promise.",
         baked={rp.get("product", "product_id"): "cur_pid", rp.get("amount", "amount"): "cur_amount", rp.get("date", "date"): "cur_date"}, pre=code["PROMISE_PRE"], post=code["PROMISE_POST"]), "rec_next")
-    nodes["rec_say"] = say_node("rec_say", "{{say_line}}", "negotiate")
     nodes["note_next"] = code_node("note_next", code["NOTE_NEXT"], "goodbye", [to("add_note", "one more note to write", eq("note_state", "call"))] if notes_on else [])
     if notes_on:
         rn = R.get("add_note") or {}
@@ -251,7 +252,7 @@ def lint(wf):
     walk(wf)
     nodes = wf["nodes"]
     if wf["initial_node"] not in nodes: raise ValueError("unknown initial node")
-    known = {"live_state", "debt_line", "account_facts", "callback_facts", "final_line", "say_line"} | set(wf.get("test_variables") or {})
+    known = {"live_state", "debt_line", "account_facts", "callback_facts", "final_line", "enter_line"} | set(wf.get("test_variables") or {})
     for k, n in nodes.items():
         for t in n.get("transitions", []):
             if t["target_node"] not in nodes: raise ValueError(f"{k}: unknown target {t['target_node']}")

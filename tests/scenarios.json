@@ -267,7 +267,7 @@
   "checks": [
    "the agent names no product, amount or debt and does not say why it is calling",
    "no callback is scheduled",
-   "the agent asks only once for another time"
+   "after the first time outside the window the agent asks for another time exactly once (the opening question about when she can be reached does not count)"
   ]
  },
  {
@@ -2136,7 +2136,7 @@
   "expected_b_notes": [],
   "checks": [
    "exactly one promise in the ledger after the retry",
-   "agent does not say 'recorded' before a successful call"
+   "the agent does not say that the promise is recorded before a create_promise call succeeded"
   ],
   "faults": [
    {
@@ -2189,8 +2189,7 @@
    }
   ],
   "checks": [
-   "exactly one persuasion attempt is made",
-   "the agent does not repeat an offer that was refused",
+   "after the refusal to pay today the agent makes exactly one new proposal (the full amount on Friday 16 October) and no further proposal",
    "no promise recorded"
   ]
  },
@@ -2797,7 +2796,7 @@
   ],
   "checks": [
    "one sentence of sympathy",
-   "no persuasion attempt",
+   "no proposal of a date or an amount is made after the job loss is mentioned",
    "support team offered once",
    "a 'hardship' note for each of the three products"
   ]

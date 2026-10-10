@@ -87,7 +87,7 @@ class Sim:
         if st["stage"] != "verified" and self._v("id_state") == "verified":
             self._api("get_account", {}, post="ACCOUNT_POST"); self._run("PREPARE")
             if self._v("account_state") == "error": return self._goodbye()
-            self.said.append(self.vars["debt_line"]); return
+            self.said.append(self.vars["enter_line"]); return
         if st["stage"] != "verified" and self._v("id_state") == "failed": return self._goodbye()
         if self._v("auto_state") == "go": return self._goodbye()
         if self._v("commit_state") == "go":
@@ -96,7 +96,7 @@ class Sim:
                 if self._v("rec_state") != "call": break
                 self._api("create_promise", {"product_id": self.vars["cur_pid"], "amount": self.vars["cur_amount"], "date": self.vars["cur_date"]}, pre="PROMISE_PRE", post="PROMISE_POST")
             if self._v("rec_state") == "close": return self._notes()
-            self.said.append(self.vars["say_line"]); return
+            self.said.append(self.vars["enter_line"]); return
         if self._v("fin_state") == "go": return self._notes()
 
     def _notes(self):

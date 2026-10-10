@@ -348,7 +348,7 @@ except Exception as e:
 vars['id_state'] = 'open'
 vars['account_facts'] = '(not loaded yet)'
 vars['debt_line'] = ''
-vars['say_line'] = ''
+vars['enter_line'] = ''
 vars['final_line'] = fill(vars, SEN.get('goodbye') or 'Thank you, goodbye.')
 '''
 
@@ -421,6 +421,7 @@ def _run(vars):
     line += [stmt(p) for p in ps]
     line.append((SEN.get('first_ask_multi') if many else SEN.get('first_ask_single')) or '')
     vars['debt_line'] = fill(vars, ' '.join(x for x in line if x))
+    vars['enter_line'] = vars['debt_line']
     vars['account_state'] = 'ok'
     pst(vars, st)
 try:
@@ -468,27 +469,27 @@ try:
                 st['pnotes'][i] = str(NOTES.get('service_error_reason') or 'service_error')
         names = dict((p['id'], p['words']) for p in st['products'])
         if done and not failed:
-            vars['say_line'] = SEN.get('promise_recorded') or 'Your promise is recorded.'
+            vars['enter_line'] = SEN.get('promise_recorded') or 'Your promise is recorded.'
             vars['rec_state'] = 'talk'
         elif done:
-            vars['say_line'] = (SEN.get('promise_recorded') or 'Your promise is recorded.') + ' ' + (SEN.get('promise_failed') or 'I am sorry, I could not record the promise') + ' for your ' + ' and your '.join(names.get(i, i) for i in failed) + '.'
+            vars['enter_line'] = (SEN.get('promise_recorded') or 'Your promise is recorded.') + ' ' + (SEN.get('promise_failed') or 'I am sorry, I could not record the promise') + ' for your ' + ' and your '.join(names.get(i, i) for i in failed) + '.'
             vars['rec_state'] = 'talk'
         elif failed and len(st['products']) > 1 and open_ids(st):
-            vars['say_line'] = (SEN.get('promise_failed') or 'I am sorry, I could not record your promise.')
+            vars['enter_line'] = (SEN.get('promise_failed') or 'I am sorry, I could not record your promise.')
             vars['rec_state'] = 'talk'
         elif failed:
             o, r = decide(st, '', '', False)
             set_final(vars, o, r, (SEN.get('promise_failed') or 'I am sorry, I could not record your promise.') + ' ' + (SEN.get('goodbye') or 'Thank you, goodbye.'))
             vars['rec_state'] = 'close'
         else:
-            vars['say_line'] = ''
+            vars['enter_line'] = SEN.get('anything_else') or 'Thank you.'
             vars['rec_state'] = 'talk'
     vars['commit_state'] = 'idle'
     pst(vars, st)
 except Exception as e:
     vars['rec_state'] = 'talk'
     vars['commit_state'] = 'idle'
-    vars['say_line'] = ''
+    vars['enter_line'] = 'Thank you.'
 '''
 
 NOTE_NEXT = r'''
