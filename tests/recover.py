@@ -7,7 +7,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT)); sys.path.insert(0, str(ROOT / "tools")); sys.path.insert(0, str(ROOT / "tests"))
 import freya
 from score import http, score_ledger
-from run_scenarios import expected, transcript
+from run_scenarios import expected, transcript, verdict
 
 ap = argparse.ArgumentParser(); ap.add_argument("sim"); ap.add_argument("--rules", required=True); ap.add_argument("--out")
 a = ap.parse_args()
@@ -24,7 +24,8 @@ for run in sorted(runs, key=lambda r: r.get("personaName", "")):
     led = http("/v1/practice/ledger/" + m.group(0)) if m else {}
     failed = score_ledger(dict(s, expected=expected(s, a.rules)), led)["failed"] if led.get("ok") else ["no ledger found"]
     ledger_ok = not failed
-    if run.get("outcome") != "pass": failed.append(f"conversation ({run.get('outcome')}): " + " ".join(str(run.get("reason") or "no verdict").split())[:700])
+    ok, why, source = verdict(run)
+    if not ok: failed.append(f"conversation ({source}): " + " ".join(str(why or "no verdict").split())[:700])
     rows.append({"id": sid, "family": s["family"], "pass": not failed, "ledger_ok": ledger_ok, "failed": failed, "call_id": run["callId"], "ended": call.get("endedReason"), "duration": call.get("duration")})
     print(("PASS" if not failed else "FAIL"), sid, f"{s['family']:<14}", "|", " > ".join(c["tool"].replace("verify_identity", "verify").replace("create_promise", "promise") for c in led.get("calls", [])), "|", call.get("endedReason"))
     for f in failed: print("       -", f[:330])

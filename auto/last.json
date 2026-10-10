@@ -1,21 +1,24 @@
 {
- "experiment": "1011-020045-baseline--builder-made-agent--spec-v4--t",
- "tag": "baseline: builder-made agent, spec v4, two-stage stall step",
- "commit": "b4af2ce",
+ "experiment": "1011-021228-baseline-repeats-of-the-scenarios-that-f",
+ "tag": "baseline repeats of the scenarios that failed in any earlier run",
+ "commit": "78bf4d5",
  "harness": "646ae62e",
  "slot": "ab",
- "only": null,
- "reps": 1,
+ "only": "A12,A40,A20,B10,A01,A05,A37",
+ "reps": 3,
  "style": null,
- "passed": 98,
- "total": 100,
- "ledger": 100,
+ "passed": 2,
+ "total": 7,
+ "ledger": 7,
  "hung": 0,
  "stalls": 0,
- "seconds": 685,
- "result": "results/auto/1011-020045-baseline--builder-made-agent--spec-v4--t.json",
+ "seconds": 518,
+ "result": "results/auto/1011-021228-baseline-repeats-of-the-scenarios-that-f.json",
  "failed": {
-  "A12": "0/1",
-  "A40": "0/1"
+  "A01": "2/3",
+  "A12": "0/3",
+  "A20": "2/3",
+  "A37": "2/3",
+  "B10": "2/3"
  }
 }

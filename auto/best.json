@@ -2,7 +2,7 @@
  "experiment": "1011-020045-baseline--builder-made-agent--spec-v4--t",
  "tag": "baseline: builder-made agent, spec v4, two-stage stall step",
  "commit": "b4af2ce",
- "harness": "646ae62e",
+ "harness": "0e52309d",
  "slot": "ab",
  "only": null,
  "reps": 1,

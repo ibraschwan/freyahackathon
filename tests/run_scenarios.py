@@ -70,6 +70,24 @@ def simulate(agent_id, name, variables_by_persona, concurrency, max_seconds=420)
             except Exception: pass
             return sim_id, it_id, runs
 
+def verdict(run):
+    """(passed, reason, where the verdict came from) for one simulated call.
+
+    The judge's verdict is stored twice: on the run of the simulation (`outcome`) and on the call (`successCriteriaResult`).
+    The run's outcome is not reliable: it can read "inconclusive" or "error" while the judge's stored verdict is a clear
+    yes or no, and the platform relabels the runs of an earlier simulation "inconclusive" when the same customers are
+    run again. So a run outcome other than pass or fail is settled by the verdict on the call."""
+    o = run.get("outcome")
+    if o in ("pass", "fail"): return o == "pass", run.get("reason"), "run"
+    if run.get("callId"):
+        for attempt in range(3):
+            try:
+                scr = freya.get_call(run["callId"]).get("successCriteriaResult") or {}
+                if scr.get("success") is not None: return bool(scr["success"]), scr.get("reason"), f"call, the run said {o}"
+            except Exception: pass
+            time.sleep(20)                                           # the judge may still be writing
+    return False, f"no verdict (the run said {o}): " + str(run.get("reason") or ""), "none"
+
 def run_once(agent_id, scen, ids, rules, concurrency):
     sessions = {s["id"]: dict(http("/v1/practice/sessions", {"case": s["session"]})["variables"], now=s["variables"]["now"]) for s in scen}
     t0 = time.time()
@@ -81,8 +99,11 @@ def run_once(agent_id, scen, ids, rules, concurrency):
         led = http("/v1/practice/ledger/" + sessions[s["id"]]["customer_id"])
         r = score_ledger(dict(s, expected=expected(s, rules)), led)
         j = judge.get(ids[s["id"]], {})
-        if j.get("outcome") != "pass": r["failed"].append("conversation: " + " ".join(str(j.get("reason") or "no verdict").split())[:600])
-        rows.append({"id": s["id"], "family": s["family"], "pass": not r["failed"], "failed": r["failed"], "call_id": j.get("callId"),
+        ok, why, source = verdict(j)
+        ledger_failed = list(r["failed"])
+        if not ok: r["failed"].append(f"conversation ({source}): " + " ".join(str(why or "no verdict").split())[:600])
+        rows.append({"id": s["id"], "family": s["family"], "pass": not r["failed"], "failed": r["failed"], "call_id": j.get("callId"), "run_outcome": j.get("outcome"), "judge_source": source,
+                     "pass_by_run_outcome": not ledger_failed and j.get("outcome") == "pass",
                      "tools": [x["tool"] for x in led["calls"]], "customer_id": sessions[s["id"]]["customer_id"], "ledger_ok": not [f for f in r["failed"] if not f.startswith("conversation")]})
         print(("PASS" if not r["failed"] else "FAIL"), s["id"], f"{s['family']:<14}", "|", " > ".join(x["tool"].replace("verify_identity", "verify").replace("create_promise", "promise") for x in led["calls"]) or "(no tool calls)", flush=True)
         for f in r["failed"]: print("       -", f[:300])
