@@ -99,6 +99,7 @@ class Sim:
             self.said.append(self.vars["enter_line"]); return
         if st["stage"] != "verified" and self._v("id_state") == "failed": return self._goodbye()
         if self._v("auto_state") == "go": return self._goodbye()
+        if self._v("fin_state") == "go": return self._notes()
         if self._v("commit_state") == "go":
             while True:
                 self._run("REC_NEXT")
@@ -107,7 +108,10 @@ class Sim:
                 self._api("create_promise", {r.get("product", "product_id"): self.vars["cur_pid"], r.get("amount", "amount"): self.vars["cur_amount"], r.get("date", "date"): self.vars["cur_date"]}, pre="PROMISE_PRE", post="PROMISE_POST")
             if self._v("rec_state") == "close": return self._notes()
             self.said.append(self.vars["enter_line"]); return
-        if self._v("fin_state") == "go": return self._notes()
+        if self._v("dirty") == "1":
+            self._run("SYNC")
+            if self._v("sync_state") == "fin": return self._notes()
+            self.said.append(self.vars["enter_line"])
 
     def _notes(self):
         while True:
@@ -125,9 +129,22 @@ class Sim:
 
     # ---- what the dialogue model can do
     def tool(self, name, **params):
-        """A code tool: set_promise, set_note, confirm, finish."""
+        """A code tool, by its internal name: set_promise, set_note, refusal, confirm, finish."""
         assert not self.ended, "the call is over"
         self._run(name.upper(), params=params); self._route()
+    def together(self, *calls):
+        """Several code tools in ONE message of the model: they run side by side on the same snapshot of the variables,
+        and for a variable two of them write, the later write wins. Then the engine routes once."""
+        assert not self.ended, "the call is over"
+        snap, writes = dict(self.vars), []
+        for name, params in calls:
+            self.vars = dict(snap)
+            try: self._run(name.upper(), params=params)
+            except Rule as e: writes.append({}); continue
+            writes.append({k: v for k, v in self.vars.items() if snap.get(k) != v})
+        self.vars = dict(snap)
+        for w in writes: self.vars.update(w)
+        self._route()
     def verify(self, field, answer):
         r = (self.spec.get("tools") or {}).get("verify_identity") or {}
         d = self._api("verify_identity", {r.get("question", "field"): field, r.get("answer", "answer"): answer}, pre="VERIFY_PRE", post="VERIFY_POST"); self._route(); return d
@@ -199,7 +216,7 @@ if __name__ == "__main__":
     check("two failures with notes", s.summary()[:4], ("no_promise", "service_error", [], [("p1", "service_error")]))
 
     s = mk("PUB-13").login(); s.tool("set_promise", product_id="all", amount="full", date="2026-10-30")
-    check("one date for both: read-back names both dates", "30 October" in s.vars["live_state"] and "23 October" in s.vars["live_state"] and "latest possible date" in s.vars["live_state"], True)
+    check("one date for both: read-back names both dates", s.said[-1], "To confirm: you will pay 300.00 for your credit card ending 6604 on Friday 30 October 2026, and 900.00 for your personal loan on Friday 23 October 2026 (the latest possible date for this product). Do you confirm?")
     s.tool("confirm"); s.tool("finish", outcome="promise")
     check("PUB-13", s.summary(), ("promise", None, [("p1", 300.0, "2026-10-30"), ("p2", 900.0, "2026-10-23")], [], [], []))
 
@@ -251,37 +268,65 @@ if __name__ == "__main__":
     s = mk("PUB-01", notes=False).login(); s.tool("set_promise", product_id="p1", amount="full", date="2026-10-14"); s.tool("confirm"); s.tool("finish", outcome="promise"); s.hang_up()
     check("safety net does not close twice", [c["tool"] for c in s.ledger["calls"]].count("close_call"), 1)
 
-    # the persuasion ladder is counted by code
+    # the persuasion ladder is counted by code, and the engine words every offer
     s = mk("PUB-08", notes=False).login(); s.tool("refusal", product_id="p1", kind="flat_refusal")
-    check("early band, attempt 1 offer", "Could you pay the full amount of 180.00 for your credit card ending 5512 by Friday 16 October 2026?" in s.vars["live_state"], True)
+    check("early band, attempt 1 offer", s.said[-1], "Could you pay the full amount of 180.00 for your credit card ending 5512 by Friday 16 October 2026?")
     s.tool("refusal", product_id="p1", kind="flat_refusal"); check("early band: second refusal ends the call", s.summary()[:2], ("no_promise", "refused"))
     s = mk("PUB-02", notes=False).login(); s.tool("refusal", product_id="p1", kind="flat_refusal"); s.tool("refusal", product_id="p1", kind="flat_refusal")
-    check("late band, attempt 2 offer", "Could you pay the instalment amount of 103.50 for your personal loan by Friday 23 October 2026? The rest stays overdue." in s.vars["live_state"], True)
+    check("late band, attempt 2 offer", s.said[-1], "Could you pay the instalment amount of 103.50 for your personal loan by Friday 23 October 2026? The rest stays overdue.")
     check("late band still open after two refusals", s.ended, False)
-    s.tool("set_promise", product_id="p1", amount="floor", date="2026-10-23"); s.tool("confirm"); s.tool("finish", outcome="promise")
+    s.tool("set_promise", product_id="p1", amount="floor", date="2026-10-23")
+    check("read-back is spoken by the engine", s.said[-1], "To confirm: you will pay 103.50 for your personal loan on Friday 23 October 2026. Do you confirm?")
+    s.tool("confirm"); s.tool("finish", outcome="promise")
     check("accepts attempt 2", s.summary()[:3], ("promise", None, [("p1", 103.5, "2026-10-23")]))
     s = mk("PUB-06", notes=False).login(); s.tool("refusal", product_id="p1", kind="full_amount_too_much")
-    check("too much: the floor is offered", 'You could pay the minimum payment of 637.50. The rest stays overdue.' in s.vars["live_state"], True)
+    check("too much: the floor is offered", s.said[-1], "You could pay the minimum payment of 637.50. The rest stays overdue.")
     s.tool("refusal", product_id="p1", kind="flat_refusal")
-    check("too much then refusal: attempt 1 is for the floor", "Could you pay the minimum payment of 637.50 for your credit card ending 1903 by Friday 16 October 2026? The rest stays overdue." in s.vars["live_state"], True)
-    s.tool("refusal", product_id="p1", kind="flat_refusal"); check("attempt 2 comes next", "attempt 2 of 2" in s.vars["live_state"], True)
+    check("too much then refusal: attempt 1 is for the floor", s.said[-1], "Could you pay the minimum payment of 637.50 for your credit card ending 1903 by Friday 16 October 2026? The rest stays overdue.")
+    s.tool("refusal", product_id="p1", kind="flat_refusal"); check("attempt 2 comes next", "by Friday 23 October 2026" in s.said[-1], True)
     s.tool("refusal", product_id="p1", kind="flat_refusal"); check("then the call ends refused", s.summary()[:2], ("no_promise", "refused"))
     s = mk("PUB-12").login(); s.tool("set_promise", product_id="p1", amount="full", date="2026-10-15")
-    check("next product is opened with its attempt 1", "Go on to the personal loan [p2]" in s.vars["live_state"] and "Could you pay the full amount of 1320.00 for your personal loan by Friday 16 October 2026?" in s.vars["live_state"], True)
-    s.tool("refusal", product_id="p2", kind="flat_refusal"); check("personal loan attempt 2", "attempt 2 of 2 for the personal loan" in s.vars["live_state"] and "440.00" in s.vars["live_state"], True)
-    s.tool("refusal", product_id="p2", kind="flat_refusal"); check("then the car loan is opened", "Go on to the car loan [p3]" in s.vars["live_state"] and "140.00" in s.vars["live_state"], True)
-    s.tool("refusal", product_id="p3", kind="flat_refusal"); check("car loan ends after one attempt, read-back follows", "To confirm: you will pay 510.00 for your credit card ending 9015 on Thursday 15 October 2026" in s.vars["live_state"], True)
+    check("next product is opened with its attempt 1", s.said[-1], "Now your personal loan. Could you pay the full amount of 1320.00 for your personal loan by Friday 16 October 2026?")
+    s.tool("refusal", product_id="p2", kind="flat_refusal"); check("personal loan attempt 2", s.said[-1], "Could you pay the instalment amount of 440.00 for your personal loan by Friday 23 October 2026? The rest stays overdue.")
+    s.tool("refusal", product_id="p2", kind="flat_refusal"); check("then the car loan is opened", s.said[-1], "Now your car loan. Could you pay the full amount of 140.00 for your car loan by Friday 16 October 2026?")
+    s.tool("refusal", product_id="p3", kind="flat_refusal"); check("car loan ends after one attempt, read-back follows", s.said[-1], "To confirm: you will pay 510.00 for your credit card ending 9015 on Thursday 15 October 2026. Do you confirm?")
     s.tool("confirm"); s.tool("finish", outcome="promise")
     check("PUB-12 with the ladder", s.summary(), ("promise", None, [("p1", 510.0, "2026-10-15")], [("p2", "refused"), ("p3", "refused")], [], []))
     s = mk("PUB-12").login()
     for k in range(5): s.tool("refusal", product_id="", kind="flat_refusal")
-    check("five refusals: the car loan offer is on the table", (s.ended, "Go on to the car loan [p3]" in s.vars["live_state"]), (False, True))
+    check("five refusals: the car loan offer is on the table", (s.ended, s.said[-1].startswith("Now your car loan.")), (False, True))
     s.tool("refusal", product_id="", kind="flat_refusal")
     check("refuses all three: 2 + 2 + 1 attempts, then closed", s.summary(), ("no_promise", "refused", [], [("p1", "refused"), ("p2", "refused"), ("p3", "refused")], [], []))
     s = mk("PUB-13").login(); s.tool("set_note", product_id="p1", reason="dispute")
-    check("after a dispute the next product is opened", "Go on to the personal loan [p2]" in s.vars["live_state"], True)
+    check("after a dispute the next product is opened", s.said[-1], "Now your personal loan. Could you pay the full amount of 900.00 for your personal loan by Friday 16 October 2026?")
     s.tool("refusal", product_id="p2", kind="flat_refusal"); s.tool("refusal", product_id="p2", kind="flat_refusal")
     check("dispute + refused", s.summary(), ("no_promise", "dispute", [], [("p1", "dispute"), ("p2", "refused")], [], []))
+    # two tools in one message of the model run side by side; nothing may be lost
+    s = mk("PUB-12").login(); s.together(("set_promise", dict(product_id="all", amount="full", date="2026-10-15")), ("set_note", dict(product_id="p3", reason="dispute")))
+    check("promise for all + dispute on one, in one message", s.said[-1], "To confirm: you will pay 510.00 for your credit card ending 9015 on Thursday 15 October 2026, and 1320.00 for your personal loan on Thursday 15 October 2026. Do you confirm?")
+    s.tool("confirm"); s.tool("finish", outcome="promise")
+    check("B12 pattern", s.summary(), ("promise", None, [("p1", 510.0, "2026-10-15"), ("p2", 1320.0, "2026-10-15")], [("p3", "dispute")], [], []))
+    s = mk("PUB-12").login(); s.together(("set_note", dict(product_id="p3", reason="dispute")), ("set_promise", dict(product_id="all", amount="full", date="2026-10-15")))
+    s.tool("confirm"); s.tool("finish", outcome="promise")
+    check("B12 pattern, other order", s.summary(), ("promise", None, [("p1", 510.0, "2026-10-15"), ("p2", 1320.0, "2026-10-15")], [("p3", "dispute")], [], []))
+    s = mk("PUB-13").login(); s.together(("set_note", dict(product_id="p1", reason="dispute")), ("refusal", dict(product_id="p2", kind="flat_refusal")))
+    check("dispute + refusal in one message: attempt 1 for the loan", s.said[-1], "Could you pay the full amount of 900.00 for your personal loan by Friday 16 October 2026?")
+    s.tool("refusal", product_id="p2", kind="flat_refusal"); check("then attempt 2", "300.00" in s.said[-1] and "23 October" in s.said[-1], True)
+    s.tool("refusal", product_id="p2", kind="flat_refusal")
+    check("B04 pattern", s.summary(), ("no_promise", "dispute", [], [("p1", "dispute"), ("p2", "refused")], [], []))
+    # a refusal reported early for a later product does not use up an attempt: each product gets its own turn
+    s = mk("PUB-12").login(); s.together(("set_promise", dict(product_id="p1", amount="full", date="2026-10-15")), ("refusal", dict(product_id="p2", kind="flat_refusal")), ("refusal", dict(product_id="p3", kind="flat_refusal")))
+    check("pays one, refuses two, in one message: the loan's attempt 1 comes first", s.said[-1], "Could you pay the full amount of 1320.00 for your personal loan by Friday 16 October 2026?")
+    s.tool("refusal", product_id="p2", kind="flat_refusal"); check("loan attempt 2", "440.00" in s.said[-1], True)
+    s.tool("refusal", product_id="p2", kind="flat_refusal"); check("car loan attempt 1", s.said[-1], "Now your car loan. Could you pay the full amount of 140.00 for your car loan by Friday 16 October 2026?")
+    s.tool("refusal", product_id="p3", kind="flat_refusal"); check("then the read-back", s.said[-1].startswith("To confirm: you will pay 510.00"), True)
+    check("offers spoken: 2 for the loan, 1 for the car loan", (sum("personal loan by" in x for x in s.said), sum("car loan by" in x for x in s.said)), (2, 1))
+    s = mk("PUB-13").login(); s.together(("set_note", dict(product_id="p1", reason="paid")), ("set_note", dict(product_id="p2", reason="paid")))
+    check("both paid in one message", (s.summary(), s.said[-1]), (("paid", None, [], [("p1", "paid"), ("p2", "paid")], [], []), "Payments can take one business day to appear. Thank you, goodbye."))
+    s = mk("PUB-13").login(); s.tool("set_note", product_id="p2", reason="paid")
+    check("paid on one product: the engine says the sentence and goes on", s.said[-1].startswith("Payments can take one business day to appear. Could you pay") or s.said[-1].startswith("Payments can take one business day to appear."), True)
+    s = mk("PUB-08", notes=False).login(); s.tool("finish", outcome="paid")
+    check("paid, Brief A: closing sentence", s.said[-1], "Payments can take one business day to appear. Thank you, goodbye.")
 
     for now, late, want in ((("2026-10-16T15:00", 28, "2026-10-23"), ("2026-12-22T14:00", 14, "2026-12-24"), ("2026-10-14T11:00", 5, "2026-10-16"))[i] for i in range(3)):
         s = Sim(golden.spec(False), [{"product_id": "p1", "type": "personal_loan", "past_due": 900.0, "days_late": late, "instalment_amount": 300.0}], now).login()

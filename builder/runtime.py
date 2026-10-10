@@ -75,25 +75,86 @@ def mins_of(s):
 def today_of(v):
     m = re.match(r'(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{1,2}):(\d{2}))?', str(v.get(S.get('now_variable') or 'now') or ''))
     return datetime.date(int(m.group(1)), int(m.group(2)), int(m.group(3))), int(m.group(4) or 0) * 60 + int(m.group(5) or 0)
-def gst(v):
+def base(v):
     try:
         st = json.loads(str(v.get('st_json') or ''))
         if isinstance(st, dict) and st.get('stage'):
             return st
     except Exception:
         pass
-    return dict(stage='opening', id='open', idv=[], products=[], plan=dict(), pnotes=dict(), promises=dict(), tries=dict(), perr=[], notes=dict(), ntries=dict(), transfer='', callback='', closed='', pend='', prop=dict(), toomuch=[], floored=[], next='', cur='')
+    return dict(stage='opening', id='open', idv=[], products=[], plan=dict(), pnotes=dict(), promises=dict(), tries=dict(), perr=[], notes=dict(), ntries=dict(), transfer='', callback='', closed='', pend='', npend='',
+                prop=dict(), toomuch=[], floored=[], given=[], said=[], mo='', mr='', fin='')
+def pending(v):
+    out = []
+    try:
+        for k in sorted(str(x) for x in v.keys()):
+            if k.startswith('ev_') and v.get(k):
+                try:
+                    out.append((k, json.loads(str(v.get(k)))))
+                except Exception:
+                    pass
+    except Exception:
+        pass
+    return out
+def fold(st, evs):
+    """Apply what the dialogue model reported since the last checkpoint. Two tools called in one message run side by
+    side and cannot see each other, so the order is settled here: a note or an exact agreement for a product wins over
+    an agreement made for "all" in the same batch. Returns the reported refusals and the new notes, in order."""
+    flat = [e for k, es in evs for e in es]
+    noted = set(e[1] for e in flat if e[0] == 'note')
+    exact = set(e[1] for e in flat if e[0] == 'plan' and not e[5])
+    ref = []
+    new = []
+    for e in flat:
+        if e[0] == 'plan':
+            i = e[1]
+            if i in st['promises'] or (e[5] and (i in noted or i in exact)):
+                continue
+            st['plan'][i] = dict(amount=e[2], date=e[3], capped=e[4])
+            st['pnotes'].pop(i, None)
+            if i in st['given']:
+                st['given'].remove(i)
+        elif e[0] == 'note':
+            i = e[1]
+            if i in st['promises']:
+                continue
+            st['pnotes'][i] = e[2]
+            st['plan'].pop(i, None)
+            new.append((i, e[2]))
+        elif e[0] == 'refuse':
+            ref.append(e)
+        elif e[0] == 'finish':
+            st['mo'] = e[1]
+            st['mr'] = e[2]
+    return ref, new
+def gst(v):
+    st = base(v)
+    evs = pending(v)
+    st['_keys'] = [k for k, es in evs]
+    st['_ref'], st['_new'] = fold(st, evs)
+    return st
 def pst(v, st):
+    """Write the checkpoint. Only code the engine runs one at a time calls this; the model's own tools use emit()."""
+    keys = st.pop('_keys', [])
+    st.pop('_ref', None)
+    st.pop('_new', None)
     s = json.dumps(st)
     while RB in s:
         s = s.replace(RB, chr(125) + ' ' + chr(125))
     while LB in s:
         s = s.replace(LB, chr(123) + ' ' + chr(123))
     v['st_json'] = s
+    for k in keys:
+        v[k] = ''
     try:
         v['live_state'] = live(st)
     except Exception:
         pass
+def emit(v, evs):
+    """Report something from a tool of the dialogue model. Each call writes its own variable, so two tools in one
+    message cannot overwrite each other. The engine merges the reports right after (the sync step)."""
+    v['ev_' + datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S%f') + '_' + str(id(evs) % 997)] = json.dumps(evs)
+    v['dirty'] = '1'
 def fill(v, s):
     def rep(m):
         return str(v.get(m.group(1)) or '')
@@ -106,9 +167,11 @@ def set_final(v, o, r, line):
     v['final_outcome'] = o
     v['final_reason'] = r or ''
     v['final_line'] = fill(v, line or SEN.get('goodbye') or 'Thank you, goodbye.')
-def closing_line(o, r):
+def closing_line(o, r, said=None):
     cl = S.get('closing_lines') or dict()
     x = cl.get(o + '/' + r) or cl.get(o) or ''
+    if x and said and x in said:
+        x = ''
     return (x + ' ' if x else '') + (SEN.get('goodbye') or 'Thank you, goodbye.')
 #@cal
 def cb_slots(today, mins):
@@ -206,7 +269,7 @@ def amount_text(a, p):
     return 'the full amount ' + money(p['full'])
 #@core
 def open_ids(st):
-    return [p['id'] for p in st['products'] if p['id'] not in st['promises'] and p['id'] not in st['plan'] and p['id'] not in st['pnotes'] and p['id'] not in st['perr'] and p['id'] not in (st.get('given') or [])]
+    return [p['id'] for p in st['products'] if p['id'] not in st['promises'] and p['id'] not in st['plan'] and p['id'] not in st['pnotes'] and p['id'] not in st['perr'] and p['id'] not in st['given']]
 def prod(st, i):
     for p in st['products']:
         if p['id'] == i:
@@ -218,24 +281,11 @@ def offer_line(st, p, k):
     kind = o['amount']
     if kind == 'floor' or (kind == 'full_or_floor' and p['id'] in st['toomuch']):
         am = 'the ' + p['floor_name'] + ' of ' + money(p['floor'])
-        extra = ' ' + (SEN.get('rest_overdue') or 'The rest stays overdue.')
+        extra = (' ' + SEN.get('rest_overdue')) if SEN.get('rest_overdue') else ''
     else:
         am = 'the full amount of ' + money(p['full'])
         extra = ''
     return 'Could you pay ' + am + ' for your ' + p['words'] + (' by ' + say(iso(o['date'])) if o['date'] else '') + '?' + extra
-def lead(st):
-    """With several products: when one is settled, the engine opens the next one with its first persuasion attempt."""
-    op = open_ids(st)
-    if not op:
-        st['cur'] = ''
-        return
-    nxt = op[0]
-    if st.get('cur') and st.get('cur') != nxt and len(st['products']) > 1:
-        p = prod(st, nxt)
-        if p and p['offers'] and int(st['prop'].get(nxt) or 0) == 0:
-            st['prop'][nxt] = 1
-            st['next'] = 'Go on to the ' + p['words'] + ' [' + nxt + ']. If the customer already told you a day or an amount for it, use that (CALL set_promise). Otherwise say exactly: "' + offer_line(st, p, 0) + '" (this is its persuasion attempt 1 of ' + str(p['attempts']) + ').'
-    st['cur'] = nxt
 #@live
 def readback(st):
     parts = []
@@ -261,22 +311,19 @@ def live(st):
             x = st['plan'][i]
             planned = True
             t = 'AGREED, not recorded yet: ' + money(x['amount']) + ' on ' + say(iso(x['date'])) + (' (moved to this product\'s latest possible date)' if x.get('capped') else '')
-        elif i in st['pnotes']:
-            t = 'no promise, noted as: ' + str(st['pnotes'][i])
+        elif i in st['pnotes'] or i in st['given']:
+            t = 'settled without a promise' + (': ' + str(st['pnotes'][i]) if i in st['pnotes'] else '')
         else:
-            t = 'OPEN: nothing agreed and nothing noted yet'
+            n = int(st['prop'].get(i) or 0)
+            t = 'OPEN' + ('; persuasion offers made so far: ' + str(n) + ' of ' + str(p['attempts']) if n else '')
         L.append('- ' + p['words'] + ' [' + i + ']: ' + t)
     op = open_ids(st)
-    if st.get('next') and op:
-        L.append('NEXT: ' + st['next'])
-    elif planned and op:
-        L.append('NEXT: settle the OPEN product(s) first. Then read ALL agreed promises back together.')
+    if op:
+        L.append('The product in discussion now: ' + (prod(st, op[0]) or dict(words=''))['words'] + ' [' + op[0] + '].')
     elif planned:
-        L.append('NEXT: say this read-back: "' + readback(st) + '" After a clear yes, CALL confirm. If the customer changes a day or an amount instead, CALL set_promise again with the new value.')
-    elif op:
-        L.append('NEXT: continue with the first OPEN product.')
+        L.append('The system has read the agreement back. A clear yes -> CALL customer_confirmed. A changed day or amount -> CALL agreed_terms again.')
     else:
-        L.append('NEXT: nothing is open. Answer what the customer still asks. When they have nothing more, CALL finish.')
+        L.append('Nothing is open. Answer what the customer still asks. When they have nothing more, CALL wrap_up.')
     return '\n'.join(L)
 #@decide
 def decide(st, mo, mr, strict):
@@ -380,6 +427,8 @@ vars['id_state'] = 'open'
 vars['account_facts'] = '(not loaded yet)'
 vars['debt_line'] = ''
 vars['enter_line'] = ''
+vars['dirty'] = '0'
+vars['sync_state'] = ''
 vars['final_line'] = fill(vars, SEN.get('goodbye') or 'Thank you, goodbye.')
 '''
 
@@ -467,6 +516,90 @@ except Exception as e:
     pst(vars, st)
 '''
 
+# merges what the dialogue model's tools reported, works the persuasion ladder and words the next sentence
+SYNC = r'''
+def _run(vars):
+    st = gst(vars)
+    G = S.get('guidance') or dict()
+    NL = S.get('note_lines') or dict()
+    pre = []
+    line = ''
+    for i, r in st.get('_new') or []:
+        x = NL.get(r)
+        if x and x not in pre and x not in st['said']:
+            pre.append(x)
+    seen = []
+    for e in st.get('_ref') or []:
+        i = e[1]
+        p = prod(st, i)
+        if p is None or i in seen or i in st['promises'] or i in st['pnotes'] or i in st['perr'] or i in st['given']:
+            continue
+        st['plan'].pop(i, None)
+        op = open_ids(st)
+        if not op or op[0] != i:
+            continue
+        seen.append(i)
+        if e[2] == 'full_amount_too_much':
+            if i not in st['toomuch']:
+                st['toomuch'].append(i)
+            if i not in st['floored'] and p['floor'] < p['full'] - 0.005:
+                st['floored'].append(i)
+                line = str(G.get('too_much') or 'You could pay the <floor_name> of <floor>.').replace('<floor_name>', p['floor_name']).replace('<floor>', money(p['floor'])).replace('<product>', p['words'])
+                continue
+        used = int(st['prop'].get(i) or 0)
+        if used < len(p['offers']):
+            st['prop'][i] = used + 1
+            line = offer_line(st, p, used)
+        else:
+            line = ''
+            if NOTES.get('enabled'):
+                st['pnotes'][i] = str(NOTES.get('refused_reason') or 'refused')
+            else:
+                st['given'].append(i)
+    fin = False
+    if not line:
+        op = open_ids(st)
+        if op:
+            p = prod(st, op[0])
+            n = int(st['prop'].get(p['id']) or 0)
+            started = len(op) < len(st['products'])
+            if started and n == 0 and p['offers']:
+                st['prop'][p['id']] = 1
+                line = str(SEN.get('next_product') or 'Now your <product>.').replace('<product>', p['words']) + ' ' + offer_line(st, p, 0)
+            elif n > 0 and p['offers']:
+                line = offer_line(st, p, n - 1)
+            elif started:
+                line = str(SEN.get('next_product') or 'Now your <product>.').replace('<product>', p['words']) + ' ' + str(SEN.get('ask_product') or 'When can you pay it?')
+            else:
+                line = str(SEN.get('say_again') or 'I am sorry, could you say that again?')
+        elif [i for i in st['plan'] if i not in st['promises']]:
+            line = readback(st)
+        elif st['promises']:
+            line = str(SEN.get('anything_else') or 'Is there anything else?')
+        else:
+            fin = True
+    st['said'] = st['said'] + pre
+    if fin:
+        if NOTES.get('enabled') or not st['given']:
+            o, r = decide(st, '', '', False)
+        else:
+            o, r = pair(OUT.get('refused') or OUT.get('fallback_after_verification'))
+        set_final(vars, o, r, ' '.join(pre + [closing_line(o, r, st['said'])]))
+        st['fin'] = 'set'
+        vars['sync_state'] = 'fin'
+    else:
+        vars['enter_line'] = fill(vars, ' '.join(pre + [line]))
+        vars['sync_state'] = 'talk'
+    vars['dirty'] = '0'
+    pst(vars, st)
+try:
+    _run(vars)
+except Exception as e:
+    vars['dirty'] = '0'
+    vars['sync_state'] = 'talk'
+    vars['enter_line'] = 'I am sorry, could you say that again?'
+'''
+
 # picks the next agreed promise to send to the bank, or ends the loop
 REC_NEXT = r'''
 try:
@@ -499,23 +632,27 @@ try:
             for i in failed:
                 st['pnotes'][i] = str(NOTES.get('service_error_reason') or 'service_error')
         names = dict((p['id'], p['words']) for p in st['products'])
+        ok_line = SEN.get('promise_recorded') or 'Your promise is recorded.'
+        bad_line = SEN.get('promise_failed') or 'I am sorry, I could not record your promise.'
         if done and not failed:
-            vars['enter_line'] = SEN.get('promise_recorded') or 'Your promise is recorded.'
+            vars['enter_line'] = fill(vars, ok_line)
             vars['rec_state'] = 'talk'
         elif done:
-            vars['enter_line'] = (SEN.get('promise_recorded') or 'Your promise is recorded.') + ' ' + (SEN.get('promise_failed') or 'I am sorry, I could not record the promise') + ' for your ' + ' and your '.join(names.get(i, i) for i in failed) + '.'
+            vars['enter_line'] = fill(vars, ok_line + ' ' + bad_line + ' This concerns your ' + ' and your '.join(names.get(i, i) for i in failed) + '.')
             vars['rec_state'] = 'talk'
-        elif failed and len(st['products']) > 1 and open_ids(st):
-            vars['enter_line'] = (SEN.get('promise_failed') or 'I am sorry, I could not record your promise.')
+        elif failed and open_ids(st):
+            vars['enter_line'] = fill(vars, bad_line)
             vars['rec_state'] = 'talk'
         elif failed:
             o, r = decide(st, '', '', False)
-            set_final(vars, o, r, (SEN.get('promise_failed') or 'I am sorry, I could not record your promise.') + ' ' + (SEN.get('goodbye') or 'Thank you, goodbye.'))
+            set_final(vars, o, r, bad_line + ' ' + (SEN.get('goodbye') or 'Thank you, goodbye.'))
+            st['fin'] = 'set'
             vars['rec_state'] = 'close'
         else:
-            vars['enter_line'] = SEN.get('anything_else') or 'Thank you.'
+            vars['enter_line'] = fill(vars, SEN.get('anything_else') or 'Is there anything else?')
             vars['rec_state'] = 'talk'
     vars['commit_state'] = 'idle'
+    vars['dirty'] = '0'
     pst(vars, st)
 except Exception as e:
     vars['rec_state'] = 'talk'
@@ -523,6 +660,7 @@ except Exception as e:
     vars['enter_line'] = 'Thank you.'
 '''
 
+# decides how the call ends (once), then writes the notes one by one
 NOTE_NEXT = r'''
 try:
     st = gst(vars)
@@ -530,6 +668,13 @@ try:
         i = st['npend']
         st['ntries'][i] = int(st['ntries'].get(i) or 0) + 1
         st['npend'] = ''
+    if not st.get('fin'):
+        for i in list(st['plan'].keys()):
+            if i not in st['promises']:
+                st['plan'].pop(i, None)
+        o, r = decide(st, st.get('mo'), st.get('mr'), False)
+        set_final(vars, o, r, closing_line(o, r, st['said']))
+        st['fin'] = 'set'
     nxt = None
     if NOTES.get('enabled') and not st['transfer'] and st['stage'] == 'verified':
         for p in st['products']:
@@ -545,18 +690,20 @@ try:
     else:
         vars['note_state'] = 'done'
     vars['fin_state'] = 'idle'
+    vars['dirty'] = '0'
     pst(vars, st)
 except Exception as e:
     vars['note_state'] = 'done'
     vars['fin_state'] = 'idle'
 '''
 
-# ------------------------------------------------------------------ code tools the dialogue model calls
+# ------------------------------------------------------------------ code tools the dialogue model calls. They check and report; they never write the state.
 SET_PROMISE = r'''
 st = gst(vars)
 today, mins = today_of(vars)
 if st['stage'] != 'verified' or not st['products']:
-    raise Exception('RULE: no account is loaded. A promise can only be noted after the security check.')
+    raise Exception('RULE: no account is loaded. An agreement can only be noted after the security check.')
+G = S.get('guidance') or dict()
 pid = str(params.get('product_id') or '').strip()
 ps = st['products']
 ids = [p['id'] for p in ps]
@@ -564,29 +711,29 @@ allmode = False
 if len(ps) == 1:
     targets = ps
 elif pid.lower() in ('all', 'every', 'everything', 'both', ''):
-    targets = [p for p in ps if p['id'] not in st['promises'] and p['id'] not in st['pnotes'] and p['id'] not in st['perr']]
+    targets = [p for p in ps if p['id'] not in st['promises'] and p['id'] not in st['pnotes'] and p['id'] not in st['perr'] and p['id'] not in st['given']]
     allmode = True
 elif pid in ids:
     targets = [p for p in ps if p['id'] == pid]
 else:
     raise Exception('RULE: unknown product_id "' + pid + '". Use one of: ' + ', '.join(ids) + ', or "all".')
 if not targets:
-    raise Exception('RULE: there is no open product left to promise.')
+    raise Exception('RULE: there is no open product left.')
 raw = str(params.get('amount') if params.get('amount') is not None else 'full').strip().lower().replace(',', '')
 try:
     dt = iso(params.get('date'))
 except Exception:
-    raise Exception('RULE: the date must be YYYY-MM-DD. Copy the date in square brackets from the DATE TABLE.')
-new = dict()
+    raise Exception('RULE: the date must be YYYY-MM-DD. Copy the date in square brackets from the FACTS.')
+evs = []
 for p in targets:
     i = p['id']
     if i in st['promises']:
         if allmode:
             continue
-        raise Exception('RULE: the promise for the ' + p['words'] + ' is already recorded at the bank and cannot be changed or cancelled in this call. Say: "' + (SEN.get('change_later') or 'You can change it in the mobile app.') + '"')
-    if raw in ('full', 'all', 'full amount', 'total'):
+        raise Exception('RULE: the promise for the ' + p['words'] + ' is already recorded at the bank and cannot be changed or cancelled in this call. Say: "' + (SEN.get('change_later') or 'It can be changed later.') + '"')
+    if raw in ('full', 'all', 'full amount', 'total', 'whole'):
         am = p['full']
-    elif raw in ('floor', 'minimum', 'min'):
+    elif raw in ('floor', 'minimum', 'min', 'smallest'):
         am = p['floor']
     else:
         am = num(re.sub(r'[^0-9.]', '', raw))
@@ -594,44 +741,40 @@ for p in targets:
             raise Exception('RULE: amount must be "full", "floor" or a number.')
         am = round(am, 2)
     if am < p['floor'] - 0.005:
-        raise Exception('RULE: ' + money(am) + ' is below the floor for the ' + p['words'] + ' and cannot be recorded. ' + (S.get('guidance') or dict()).get('below_floor', 'Say that this amount cannot be recorded and offer the floor of ' + money(p['floor']) + ' once.').replace('<floor>', money(p['floor'])).replace('<floor_name>', p['floor_name']))
+        raise Exception('RULE: ' + money(am) + ' is below the floor for the ' + p['words'] + ' and cannot be recorded. Nothing was noted. ' + str(G.get('below_floor') or 'Say that this amount cannot be recorded and offer the floor of <floor> once.').replace('<floor>', money(p['floor'])).replace('<floor_name>', p['floor_name']) + ' If the customer accepts, CALL agreed_terms with amount "floor". If not, CALL customer_refused.')
     if am > p['full'] + 0.005:
         am = p['full']
-    capped = False
     if dt < today:
-        raise Exception('RULE: ' + say(dt) + ' is in the past. Look the day up in the DATE TABLE.')
+        raise Exception('RULE: ' + say(dt) + ' is in the past. Look the day up in the FACTS.')
     dl = iso(p['deadline']) if p['deadline'] else None
+    late = str(G.get('after_deadline') or 'Say that the latest date you can record is <deadline> and offer it.')
     if not isbd(dt):
-        nb = nextbd(dt)
         if dl is not None and dt > dl:
-            raise Exception('RULE: ' + say(dt) + ' is after the deadline for the ' + p['words'] + '. ' + (S.get('guidance') or dict()).get('after_deadline', 'Say that the latest date you can record is <deadline> and offer it.').replace('<deadline>', say(dl)))
+            raise Exception('RULE: ' + say(dt) + ' is after the deadline for the ' + p['words'] + '. Nothing was noted. ' + late.replace('<deadline>', say(dl)) + ' If the customer accepts, CALL agreed_terms with ' + dl.isoformat() + '. If not, CALL customer_refused.')
+        nb = nextbd(dt)
         if dl is not None and nb > dl:
             nb = dl
-        raise Exception('RULE: ' + say(dt) + ' is ' + why(dt) + ', not a business day. Nothing was noted. ' + (S.get('guidance') or dict()).get('not_business_day', 'Offer the next business day, <next>.').replace('<next>', say(nb)) + ' If the customer accepts, CALL set_promise with ' + nb.isoformat() + '.')
+        raise Exception('RULE: ' + say(dt) + ' is ' + why(dt) + ', not a business day. Nothing was noted. ' + str(G.get('not_business_day') or 'Offer the next business day, <next>.').replace('<next>', say(nb)) + ' If the customer accepts, CALL agreed_terms with ' + nb.isoformat() + '.')
     use = dt
+    capped = 0
     if dl is not None and dt > dl:
         if allmode and len(targets) > 1 and any((not q['deadline']) or dt <= iso(q['deadline']) for q in targets):
             use = dl
-            capped = True
+            capped = 1
         else:
-            raise Exception('RULE: ' + say(dt) + ' is after the deadline for the ' + p['words'] + '. Nothing was noted. ' + (S.get('guidance') or dict()).get('after_deadline', 'Say that the latest date you can record is <deadline> and offer it.').replace('<deadline>', say(dl)) + ' If the customer accepts, CALL set_promise with ' + dl.isoformat() + '.')
-    new[i] = dict(amount=am, date=use.isoformat(), capped=capped)
-for i in new:
-    st['plan'][i] = new[i]
-    st['pnotes'].pop(i, None)
-st['next'] = ''
-if not st.get('cur'):
-    st['cur'] = targets[0]['id']
-lead(st)
-pst(vars, st)
+            raise Exception('RULE: ' + say(dt) + ' is after the deadline for the ' + p['words'] + '. Nothing was noted. ' + late.replace('<deadline>', say(dl)) + ' If the customer accepts, CALL agreed_terms with ' + dl.isoformat() + '. If not, CALL customer_refused.')
+    evs.append(['plan', i, am, use.isoformat(), capped, 1 if allmode else 0])
+if not evs:
+    raise Exception('RULE: there is no open product left.')
+emit(vars, evs)
 '''
 
 SET_NOTE = r'''
 st = gst(vars)
 if st['stage'] != 'verified' or not st['products']:
-    raise Exception('RULE: no account is loaded. Notes exist only after the security check.')
+    raise Exception('RULE: no account is loaded. This tool is for after the security check.')
 if not NOTES.get('enabled'):
-    raise Exception('RULE: notes are not used on this call.')
+    raise Exception('RULE: this tool is not used on this call. To end the call, CALL wrap_up.')
 pid = str(params.get('product_id') or '').strip()
 reason = str(params.get('reason') or '').strip()
 allowed = NOTES.get('reasons') or []
@@ -647,22 +790,16 @@ elif pid in ids:
     targets = [p for p in ps if p['id'] == pid]
 else:
     raise Exception('RULE: unknown product_id "' + pid + '". Use one of: ' + ', '.join(ids) + ', or "all".')
+evs = []
 for p in targets:
     if p['id'] in st['promises']:
         if len(targets) == 1:
-            raise Exception('RULE: the ' + p['words'] + ' already has a recorded promise, so it gets no note.')
+            raise Exception('RULE: the ' + p['words'] + ' already has a recorded promise, so it cannot be settled without one.')
         continue
-    st['plan'].pop(p['id'], None)
-    st['pnotes'][p['id']] = reason
-st['next'] = ''
-if not st.get('cur') and targets:
-    st['cur'] = targets[0]['id']
-lead(st)
-if not open_ids(st) and not st['plan'] and not st['promises']:
-    o, r = decide(st, '', '', False)
-    set_final(vars, o, r, closing_line(o, r))
-    vars['fin_state'] = 'go'
-pst(vars, st)
+    evs.append(['note', p['id'], reason])
+if not evs:
+    raise Exception('RULE: there is no open product left.')
+emit(vars, evs)
 '''
 
 REFUSAL = r'''
@@ -675,70 +812,35 @@ pid = str(params.get('product_id') or '').strip()
 op = open_ids(st)
 if len(ps) == 1:
     pid = ids[0]
-elif pid not in ids:
-    pid = st.get('cur') if st.get('cur') in op else (op[0] if op else '')
+elif pid not in ids or (pid not in op and pid not in st['plan']):
+    pid = op[0] if op else ''
 p = prod(st, pid)
 if p is None or pid in st['promises']:
     raise Exception('RULE: there is no open product to refuse. Look at CALL STATE.')
-if pid in st['pnotes'] or pid in st['perr']:
-    raise Exception('RULE: the ' + p['words'] + ' is already settled without a promise. Go on with what CALL STATE says under NEXT.')
-st['plan'].pop(pid, None)
-if not st.get('cur'):
-    st['cur'] = pid
+if pid in st['pnotes'] or pid in st['perr'] or pid in st['given']:
+    raise Exception('RULE: the ' + p['words'] + ' is already settled without a promise. Make no further offer for it.')
 kind = str(params.get('kind') or 'flat_refusal').strip()
-if kind == 'full_amount_too_much' and pid not in st['floored'] and p['floor'] < p['full'] - 0.005:
-    st['floored'].append(pid)
-    if pid not in st['toomuch']:
-        st['toomuch'].append(pid)
-    G = (S.get('guidance') or dict()).get('too_much') or 'You could pay the <floor_name> of <floor>. The rest stays overdue.'
-    st['next'] = 'For the ' + p['words'] + ' offer the floor now, once. Say exactly: "' + G.replace('<floor_name>', p['floor_name']).replace('<floor>', money(p['floor'])) + '" If the customer accepts, agree the day and CALL set_promise with amount "floor". If the customer refuses it, CALL refusal again.'
-else:
-    if kind == 'full_amount_too_much' and pid not in st['toomuch']:
-        st['toomuch'].append(pid)
-    used = int(st['prop'].get(pid) or 0)
-    if used < len(p['offers']):
-        st['prop'][pid] = used + 1
-        st['next'] = 'Persuasion attempt ' + str(used + 1) + ' of ' + str(p['attempts']) + ' for the ' + p['words'] + '. Say exactly: "' + offer_line(st, p, used) + '" If the customer accepts, CALL set_promise with that amount and that day. If the customer refuses again, CALL refusal again. Make no other offer.'
-    else:
-        st['next'] = ''
-        if NOTES.get('enabled'):
-            st['pnotes'][pid] = str(NOTES.get('refused_reason') or 'refused')
-        else:
-            if 'given' not in st:
-                st['given'] = []
-            st['given'].append(pid)
-        lead(st)
-        left = [i for i in open_ids(st) if i not in (st.get('given') or [])]
-        if not left and not st['plan'] and not st['promises']:
-            if NOTES.get('enabled'):
-                o, r = decide(st, '', '', False)
-            else:
-                o, r = pair(OUT.get('refused') or OUT.get('fallback_after_verification'))
-            set_final(vars, o, r, closing_line(o, r))
-            vars['fin_state'] = 'go'
-        elif not left:
-            st['next'] = 'The ' + p['words'] + ' ends without a promise. Do not offer anything more for it.'
-pst(vars, st)
+emit(vars, [['refuse', pid, kind if kind == 'full_amount_too_much' else 'flat_refusal']])
 '''
 
 CONFIRM = r'''
 st = gst(vars)
 todo = [i for i in st['plan'] if i not in st['promises']]
 if st['stage'] != 'verified' or not todo:
-    raise Exception('RULE: nothing is agreed yet, so there is nothing to record. First CALL set_promise for each product the customer agreed to pay, read it back, and only after a clear yes CALL confirm.')
+    raise Exception('RULE: nothing is agreed yet, so there is nothing to record. First CALL agreed_terms for each product the customer agreed to pay. The system then reads it back. Only after a clear yes CALL customer_confirmed.')
 vars['commit_state'] = 'go'
-pst(vars, st)
 '''
 
 FINISH = r'''
 st = gst(vars)
 mo = str(params.get('outcome') or '').strip()
 mr = str(params.get('reason') or '').strip()
+evs = []
 if st['stage'] == 'verified' and st['products']:
     planned = [i for i in st['plan'] if i not in st['promises']]
     PR = pair(OUT.get('promise_recorded'))[0]
     if planned and mo == PR:
-        raise Exception('RULE: the agreed promise is not recorded yet. If the customer gave a clear yes to your read-back, CALL confirm now. If not, read it back first.')
+        raise Exception('RULE: the agreed promise is not recorded yet. If the customer gave a clear yes to the read-back, CALL customer_confirmed now. If not, wait for their answer.')
     for i in planned:
         st['plan'].pop(i, None)
     if NOTES.get('enabled'):
@@ -749,13 +851,13 @@ if st['stage'] == 'verified' and st['products']:
             if guess:
                 for i in op:
                     st['pnotes'][i] = guess
+                    evs.append(['note', i, guess])
             else:
                 names = dict((p['id'], p['words']) for p in st['products'])
-                raise Exception('RULE: before the call can end, every product without a promise needs a note. CALL set_note for: ' + ', '.join(names[i] + ' [' + i + ']' for i in op) + ' with one of the reasons: ' + ', '.join(allowed) + '. Then CALL finish again.')
-o, r = decide(st, mo, mr, True)
-set_final(vars, o, r, closing_line(o, r))
+                raise Exception('RULE: before the call can end, every product needs a recorded promise or a reason for having none. CALL settle_without_promise for: ' + ', '.join(names[i] + ' [' + i + ']' for i in op) + ' with one of the reasons: ' + ', '.join(allowed) + '.')
+decide(st, mo, mr, True)
+emit(vars, evs + [['finish', mo, mr]])
 vars['fin_state'] = 'go'
-pst(vars, st)
 '''
 
 # ------------------------------------------------------------------ hooks on the bank's tools
@@ -926,7 +1028,7 @@ try:
     else:
         n = int(st.get('cb_fail') or 0) + 1
         st['cb_fail'] = n
-        d['what_to_do_next'] = 'The callback was NOT booked. Do not say it is booked. ' + ('CALL schedule_callback once more with the same date and time.' if n < 2 else 'Do not try again. Say that you could not book the callback and CALL finish.')
+        d['what_to_do_next'] = 'The callback was NOT booked. Do not say it is booked. ' + ('CALL schedule_callback once more with the same date and time.' if n < 2 else 'Do not try again. Say that you could not book the callback and CALL wrap_up.')
     pst(vars, st)
 except Exception:
     pass
@@ -1080,8 +1182,8 @@ CORE_KEYS = ["now_variable", "calendar", "sentences", "closing_lines", "outcomes
 # snippet: (source, helper sections besides core, spec keys besides CORE_KEYS)
 ALL = dict(
     SETUP=(SETUP, ["cal", "live"], ["callback"]), PREPARE=(PREPARE, ["cal", "terms", "live"], ["product", "bands", "attempt_offers", "dates"]),
-    REC_NEXT=(REC_NEXT, ["live", "decide"], []), NOTE_NEXT=(NOTE_NEXT, [], []),
-    SET_PROMISE=(SET_PROMISE, ["live"], ["guidance"]), SET_NOTE=(SET_NOTE, ["live", "decide"], []), REFUSAL=(REFUSAL, ["live", "decide"], ["guidance"]), CONFIRM=(CONFIRM, [], []), FINISH=(FINISH, ["live", "decide"], []),
+    SYNC=(SYNC, ["live", "decide"], ["guidance", "note_lines"]), REC_NEXT=(REC_NEXT, ["live", "decide"], []), NOTE_NEXT=(NOTE_NEXT, ["live", "decide"], []),
+    SET_PROMISE=(SET_PROMISE, [], ["guidance"]), SET_NOTE=(SET_NOTE, [], []), REFUSAL=(REFUSAL, [], []), CONFIRM=(CONFIRM, [], []), FINISH=(FINISH, ["decide"], []),
     VERIFY_PRE=(VERIFY_PRE, [], ["identity"]), VERIFY_POST=(VERIFY_POST, ["live"], ["identity"]),
     CALLBACK_PRE=(CALLBACK_PRE, ["cal"], ["callback", "guidance"]), CALLBACK_POST=(CALLBACK_POST, [], []),
     TRANSFER_PRE=(TRANSFER_PRE, [], ["transfer"]), TRANSFER_POST=(TRANSFER_POST, ["live"], []), ACCOUNT_POST=(ACCOUNT_POST, [], ["product"]),

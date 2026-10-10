@@ -40,12 +40,39 @@ def transcript(call_id):
     out.append(f"ended: {call.get('endedReason')}")
     return "\n".join(out)
 
+def simulate(agent_id, name, variables_by_persona, concurrency, max_seconds=420):
+    """Start a text simulation and wait until every call has a verdict. The platform sometimes leaves a simulation
+    at "running" after all calls are judged (seen with an "inconclusive" verdict), so the calls are watched, not the status."""
+    while True:
+        try:
+            sim = freya.api("POST", "/api/v2/simulations", {
+                "agentId": agent_id, "name": name, "mode": "chat", "selectedPersonaIds": list(variables_by_persona), "customerVariablesMap": variables_by_persona,
+                "maxConcurrentCalls": concurrency, "runsPerPersona": 1, "maxCallDurationSeconds": max_seconds,
+                "assistantLlmOverride": freya.AGENT_LLM, "routingLlmOverride": freya.AGENT_LLM, "extractionLlmOverride": freya.AGENT_LLM,
+                "personaLlmOverride": freya.SIM_LLM, "analysisLlmOverride": freya.SIM_LLM})
+            break
+        except RuntimeError as e:
+            if "concurrent simulations" not in str(e): raise
+            print("another simulation is running in this workspace, waiting 30 s", flush=True); time.sleep(30)
+    sim_id = (sim.get("simulation") or sim)["id"]; it_id, settled = None, 0
+    while True:
+        time.sleep(10)
+        st = freya.api("GET", f"/api/v2/simulations/{sim_id}"); st = (st.get("simulation") or st).get("status")
+        if not it_id:
+            its = freya.api("GET", f"/api/v2/simulations/{sim_id}/iterations"); its = its.get("iterations") or its.get("items") or its
+            if its: it_id = its[0]["id"]
+        runs = freya.get_iteration(sim_id, it_id)["runs"] if it_id else []
+        open_runs = [r for r in runs if r.get("outcome") in (None, "queued", "running", "analyzing", "pending")]
+        if st in ("completed", "failed", "paused"): return sim_id, it_id, runs
+        settled = settled + 1 if runs and len(runs) >= len(variables_by_persona) and not open_runs else 0
+        if settled >= 3: return sim_id, it_id, runs                      # every call judged for 30 s: done, whatever the status says
+
 def run_once(agent_id, scen, ids, rules, concurrency):
     sessions = {s["id"]: dict(http("/v1/practice/sessions", {"case": s["session"]})["variables"], now=s["variables"]["now"]) for s in scen}
     t0 = time.time()
-    sim_id, it_id, status = freya.run_simulation(agent_id, f"scen {time.strftime('%H:%M:%S')}", {ids[s["id"]]: sessions[s["id"]] for s in scen}, concurrency=concurrency)
+    sim_id, it_id, runs = simulate(agent_id, f"scen {time.strftime('%H:%M:%S')}", {ids[s["id"]]: sessions[s["id"]] for s in scen}, concurrency)
     took = time.time() - t0
-    judge = {r["personaId"]: r for r in freya.get_iteration(sim_id, it_id)["runs"]}
+    judge = {r["personaId"]: r for r in runs}
     rows = []
     for s in scen:
         led = http("/v1/practice/ledger/" + sessions[s["id"]]["customer_id"])
