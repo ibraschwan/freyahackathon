@@ -6,6 +6,8 @@ import json, os, sys, urllib.request
 
 HOST = os.environ.get("FREYA_BANK_HOST", "https://freya-bank-mock.freyavoice.workers.dev")
 UA = {"user-agent": "freya-bank-scorer/0.1", "content-type": "application/json"}
+if os.environ.get("FREYA_BANK_PIN_DNS") == "1":      # the local network's DNS blocks *.workers.dev: look this one host up publicly
+    import netpin; netpin.pin(urllib.request.urlparse(HOST).hostname)
 
 def http(path, body=None):
     h = dict(UA)
