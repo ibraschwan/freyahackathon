@@ -108,7 +108,7 @@ Rules that hold in every step:
 - A tool result with a what_to_do_next line: obey that line.
 - A tool result that is an error containing "RULE:": the tool refused, nothing happened. Do what the text after "RULE:" says, in your own next sentence. Never read the error aloud.
 - Never say that something is recorded, booked, noted or transferred. The system says so itself when it is true.
-- To end the call you CALL finish. The system then speaks the closing sentence and the goodbye and closes the call. So never say goodbye yourself, and never CALL finish while the customer still waits for an answer.
+- To end the call you CALL finish. The system then speaks the closing sentence and the goodbye and closes the call. So never say goodbye yourself, never ask a question in the message in which you CALL finish, and never CALL finish while the customer still waits for an answer.
 - If the customer gives a number or a date in parts, wait until it is complete before you use it. If they correct themselves, use the corrected value only. Ignore small talk: a day or a number that belongs to small talk is not an answer to your question. If they ask you something before answering, answer it in one sentence as your rules allow, then ask your question again."""
 
 OPENING = """STEP: opening and security check.
@@ -141,24 +141,13 @@ CALL STATE (kept by the system, always current; it tells you what is open and wh
 {{{{live_state}}}}"""
 
 # ------------------------------------------------------------------ the workflow
-RUNTIME_KEYS = ["now_variable", "calendar", "sentences", "closing_lines", "outcomes", "notes", "callback", "product", "bands", "attempt_offers", "dates",
-                "identity", "tools", "transfer", "guidance", "response"]
-
-def runtime_spec(spec):
-    """The part of the spec the in-call code needs, as JSON text without double braces. {{name}} becomes <<name>>."""
-    sub = {k: spec[k] for k in RUNTIME_KEYS if k in spec}
-    text = json.dumps(sub, indent=1, ensure_ascii=True)
-    text = re.sub(r"\{\{\s*(\w+)\s*\}\}", r"<<\1>>", text)
-    if "{{" in text or "}}" in text: raise ValueError("the spec holds double braces that are not a call variable")
-    return text
-
 def pairs_text(pairs): return "; ".join(str(o) + (" / " + str(r) if r else "") for o, r in pairs)
 
 def build_workflow(spec, openapi):
     api = read_api(openapi)
     missing = [t for t in SEVEN if t not in api and not (t == "add_note" and not (spec.get("notes") or {}).get("enabled"))]
     if missing: raise ValueError("the tool API file lacks: " + ", ".join(missing))
-    code = runtime.embed(runtime_spec(spec))
+    code = runtime.embed(spec)
     call_vars = set(spec.get("call_variables") or ["customer_id"])
     R = spec.get("tools") or {}
     sen, out, notes = spec.get("sentences") or {}, spec.get("outcomes") or {}, spec.get("notes") or {}

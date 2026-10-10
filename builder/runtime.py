@@ -31,10 +31,12 @@ def nextbd(d):
         d = d + ONE
         n += 1
     return d
+#@cal
 def addbd(d, n):
     for _ in range(int(n)):
         d = nextbd(d)
     return d
+#@core
 def say(d):
     return WD[d.weekday()] + ' ' + str(d.day) + ' ' + MO[d.month - 1] + ' ' + str(d.year)
 def tag(d):
@@ -108,6 +110,7 @@ def closing_line(o, r):
     cl = S.get('closing_lines') or dict()
     x = cl.get(o + '/' + r) or cl.get(o) or ''
     return (x + ' ' if x else '') + (SEN.get('goodbye') or 'Thank you, goodbye.')
+#@cal
 def cb_slots(today, mins):
     C = S.get('callback') or dict()
     lo = mins_of(C.get('from') or '00:00') or 0
@@ -150,6 +153,7 @@ def pick_date(kind, today, dl):
     if x is not None and dl is not None and x > dl:
         x = dl
     return x
+#@terms
 def terms(p, today):
     P = S.get('product') or dict()
     typ = str(p.get(P.get('type_field') or 'type') or '')
@@ -200,8 +204,10 @@ def amount_text(a, p):
     if a == 'full_or_floor':
         return 'the full amount ' + money(p['full']) + ' (but the ' + p['floor_name'] + ' of ' + money(p['floor']) + ' if the customer already said the full amount is too much)'
     return 'the full amount ' + money(p['full'])
+#@core
 def open_ids(st):
     return [p['id'] for p in st['products'] if p['id'] not in st['promises'] and p['id'] not in st['plan'] and p['id'] not in st['pnotes'] and p['id'] not in st['perr']]
+#@live
 def readback(st):
     parts = []
     for p in st['products']:
@@ -241,6 +247,7 @@ def live(st):
     else:
         L.append('NEXT: nothing is open. Answer what the customer still asks. When they have nothing more, CALL finish.')
     return '\n'.join(L)
+#@decide
 def decide(st, mo, mr, strict):
     """The outcome and reason this call must be closed with. `strict` refuses a close the records do not support."""
     mo = str(mo or '').strip()
@@ -298,6 +305,7 @@ def decide(st, mo, mr, strict):
     if strict:
         raise Exception('RULE: no promise is recorded, so the call can only end as one of: ' + '; '.join(o + (' / ' + r if r else '') for o, r in allowed) + '. CALL finish again with the pair that fits what happened.')
     return same[0] if same else pair(OUT.get('fallback_after_verification') or (allowed[0] if allowed else [mo, mr]))
+#@core
 def body_of(config):
     b = config.get('body') if isinstance(config, dict) else None
     return b if isinstance(b, dict) else dict()
@@ -610,6 +618,10 @@ for p in targets:
         continue
     st['plan'].pop(p['id'], None)
     st['pnotes'][p['id']] = reason
+if not open_ids(st) and not st['plan'] and not st['promises']:
+    o, r = decide(st, '', '', False)
+    set_final(vars, o, r, closing_line(o, r))
+    vars['fin_state'] = 'go'
 pst(vars, st)
 '''
 
@@ -734,7 +746,7 @@ try:
         d['what_to_do_next'] = str((I.get('hints') or dict()).get(hint)) + ' Then CALL verify_identity with the new answer.'
     elif flag('verified', 'verified'):
         d['id_state'] = 'open'
-        d['what_to_do_next'] = 'That answer is correct. Now ask the next security question: "' + ask_of(todo[0] if todo else '') + '"'
+        d['what_to_do_next'] = 'Correct (do not say so). Say "Thank you." and ask the next security question: "' + ask_of(todo[0] if todo else '') + '"'
     elif d.get(R.get('verified') or 'verified') is not None and str(left) == '0':
         st['id'] = 'failed'
         d['id_state'] = 'failed'
@@ -958,16 +970,36 @@ else:
     b.pop(fr, None)
 '''
 
-ALL = dict(SETUP=SETUP, PREPARE=PREPARE, REC_NEXT=REC_NEXT, NOTE_NEXT=NOTE_NEXT, SET_PROMISE=SET_PROMISE, SET_NOTE=SET_NOTE, CONFIRM=CONFIRM, FINISH=FINISH,
-           VERIFY_PRE=VERIFY_PRE, VERIFY_POST=VERIFY_POST, CALLBACK_PRE=CALLBACK_PRE, CALLBACK_POST=CALLBACK_POST, TRANSFER_PRE=TRANSFER_PRE, TRANSFER_POST=TRANSFER_POST,
-           ACCOUNT_POST=ACCOUNT_POST, PROMISE_PRE=PROMISE_PRE, PROMISE_POST=PROMISE_POST, NOTE_POST=NOTE_POST, CLOSE_PRE=CLOSE_PRE, CLOSE_POST=CLOSE_POST, FALLBACK_PRE=FALLBACK_PRE)
+CORE_KEYS = ["now_variable", "calendar", "sentences", "closing_lines", "outcomes", "notes", "response", "tools"]
+# snippet: (source, helper sections besides core, spec keys besides CORE_KEYS)
+ALL = dict(
+    SETUP=(SETUP, ["cal", "live"], ["callback"]), PREPARE=(PREPARE, ["cal", "terms", "live"], ["product", "bands", "attempt_offers", "dates"]),
+    REC_NEXT=(REC_NEXT, ["live", "decide"], []), NOTE_NEXT=(NOTE_NEXT, [], []),
+    SET_PROMISE=(SET_PROMISE, ["live"], ["guidance"]), SET_NOTE=(SET_NOTE, ["live", "decide"], []), CONFIRM=(CONFIRM, [], []), FINISH=(FINISH, ["live", "decide"], []),
+    VERIFY_PRE=(VERIFY_PRE, [], ["identity"]), VERIFY_POST=(VERIFY_POST, ["live"], ["identity"]),
+    CALLBACK_PRE=(CALLBACK_PRE, ["cal"], ["callback", "guidance"]), CALLBACK_POST=(CALLBACK_POST, [], []),
+    TRANSFER_PRE=(TRANSFER_PRE, [], ["transfer"]), TRANSFER_POST=(TRANSFER_POST, ["live"], []), ACCOUNT_POST=(ACCOUNT_POST, [], ["product"]),
+    PROMISE_PRE=(PROMISE_PRE, [], []), PROMISE_POST=(PROMISE_POST, ["live"], []), NOTE_POST=(NOTE_POST, [], []),
+    CLOSE_PRE=(CLOSE_PRE, [], []), CLOSE_POST=(CLOSE_POST, [], []), FALLBACK_PRE=(FALLBACK_PRE, ["decide"], []))
 
-def embed(spec_json_text):
-    """The source of every snippet, with the spec embedded. Fails if the result holds double braces."""
-    lit = repr(spec_json_text)
-    out = {}
-    for name, body in ALL.items():
-        code = "SPEC_TEXT = " + lit + "\n" + LIB + "\n" + body
+def sections():
+    out, cur = [], "core"
+    for line in LIB.split("\n"):
+        if line.startswith("#@"): cur = line[2:].strip(); continue
+        out.append((cur, line))
+    return out
+
+def embed(spec):
+    """The source of every snippet: the helpers it needs and its part of the spec, as JSON text. Fails on double braces."""
+    import json, re
+    lines, out = sections(), {}
+    for name, (body, libs, keys) in ALL.items():
+        sub = {k: spec[k] for k in CORE_KEYS + keys if k in spec}
+        text = re.sub(r"\{\{\s*(\w+)\s*\}\}", r"<<\1>>", json.dumps(sub, separators=(",", ":"), ensure_ascii=True))
+        while "}}" in text: text = text.replace("}}", "} }")
+        while "{{" in text: text = text.replace("{{", "{ {")
+        lib = "\n".join(l for sec, l in lines if sec == "core" or sec in libs)
+        code = "SPEC_TEXT = " + repr(text) + "\n" + lib + "\n" + body
         if "{{" in code or "}}" in code: raise ValueError("double braces in " + name)
         compile(code, name, "exec")
         out[name] = code
