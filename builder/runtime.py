@@ -555,8 +555,8 @@ def _run(vars):
             line = offer_line(st, p, used)
         else:
             line = ''
-            if NOTES.get('enabled'):
-                st['pnotes'][i] = str(NOTES.get('refused_reason') or 'refused')
+            if NOTES.get('enabled') and NOTES.get('refused_reason'):
+                st['pnotes'][i] = str(NOTES.get('refused_reason'))
             else:
                 st['given'].append(i)
     fin = False
@@ -651,9 +651,9 @@ try:
         failed = [i for i in st['plan'] if i in st['perr']]
         for i in list(st['plan'].keys()):
             st['plan'].pop(i, None)
-        if failed and NOTES.get('enabled'):
+        if failed and NOTES.get('enabled') and NOTES.get('service_error_reason'):
             for i in failed:
-                st['pnotes'][i] = str(NOTES.get('service_error_reason') or 'service_error')
+                st['pnotes'][i] = str(NOTES.get('service_error_reason'))
         names = dict((p['id'], p['words']) for p in st['products'])
         ok_line = SEN.get('promise_recorded') or 'Your promise is recorded.'
         bad_line = SEN.get('promise_failed') or 'I am sorry, I could not record your promise.'

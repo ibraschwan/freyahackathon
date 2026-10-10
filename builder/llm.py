@@ -10,7 +10,7 @@ MODEL = os.environ.get("BUILDER_MODEL", "claude-opus-5-5")
 class Trace:
     """Plain-text log of one build run: start and end, every model call, what was created, what was tested."""
     def __init__(self, path):
-        self.path, self.t0, self.calls = path, time.time(), 0
+        self.path, self.t0, self.calls, self.usd = path, time.time(), 0, 0.0
         os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
         open(path, "w").write("")
         self.log("START " + time.strftime("%Y-%m-%dT%H:%M:%S%z"))
@@ -19,7 +19,13 @@ class Trace:
         with open(self.path, "a") as f: f.write(f"[{time.time() - self.t0:7.1f}s] {line}\n")
         print(line, flush=True)
     def end(self, note=""):
-        self.log(f"END {time.strftime('%Y-%m-%dT%H:%M:%S%z')} | {time.time() - self.t0:.0f} s | {self.calls} model calls{' | ' + note if note else ''}")
+        self.log(f"END {time.strftime('%Y-%m-%dT%H:%M:%S%z')} | {time.time() - self.t0:.0f} s | {self.calls} model calls, {self.usd:.2f} USD{' | ' + note if note else ''}")
+        root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        try:                                                                         # the spend ledger of the improvement loop, and a copy of every trace
+            os.makedirs(os.path.join(root, "auto"), exist_ok=True); os.makedirs(os.path.join(root, "traces", "history"), exist_ok=True)
+            with open(os.path.join(root, "auto", "spend.tsv"), "a") as f: f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')}\t{os.path.basename(self.path)}\t{self.calls}\t{self.usd:.2f}\t{time.time() - self.t0:.0f}\n")
+            import shutil; shutil.copy(self.path, os.path.join(root, "traces", "history", time.strftime("%m%d-%H%M%S-") + os.path.basename(self.path)))
+        except Exception: pass
 
 async def ask(trace, purpose, system, prompt, model=None):
     """One model call. Returns the text of the answer."""
@@ -31,6 +37,7 @@ async def ask(trace, purpose, system, prompt, model=None):
         if isinstance(m, AssistantMessage): text += "".join(b.text for b in m.content if isinstance(b, TextBlock))
         elif isinstance(m, ResultMessage): cost = m.total_cost_usd
     trace.calls += 1
+    trace.usd += float(cost or 0)
     trace.log(f"MODEL CALL {trace.calls}: model={model} | purpose: {purpose} | {time.time() - t0:.0f} s | prompt {len(prompt)} chars, answer {len(text)} chars" + (f" | ${cost:.2f}" if cost else ""))
     return text
 

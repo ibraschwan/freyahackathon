@@ -97,7 +97,7 @@ SCHEMA = """THE CONFIGURATION. Return one JSON object with exactly these keys.
 }
 "notes": {"enabled": true only when the brief tells the agent to record a note (add_note) for products that end without a promise; false when the brief does not use add_note,
   "reasons": the allowed note reasons, "service_error_reason": the reason for a promise that could not be recorded, "refused_reason": the reason for a product the customer refuses to pay,
-  "reason_for_outcome": {<outcome>: the note reason that goes with it} for outcomes whose name is not itself a note reason (for example an outcome "paid" -> note reason "paid"),
+  "reason_for_outcome": {<outcome>: the note reason that goes with it} for outcomes whose name is not itself a note reason,
   "close_from_notes": how a call with no recorded promise is closed from its notes:
      {"all": {<note reason>: [outcome, reason or null]} for the case that every product has that same note reason and the brief gives it its own outcome,
       "else_outcome": the outcome otherwise, "else_reason_from_first_note_not_in": [note reasons to skip]: the reason is the note reason of the first product, in account order, whose note is not in this list}}
@@ -112,7 +112,7 @@ SCHEMA = """THE CONFIGURATION. Return one JSON object with exactly these keys.
    "confirm_question": the question that ends the read-back, "promise_recorded": what to say once the promise is recorded, including any sentence the brief requires after a recorded promise,
    "promise_failed": what to say when it could not be recorded, "change_later": what to say when the customer wants to change or cancel a recorded promise,
    "account_error": what to say when the account cannot be read, "rest_overdue": the sentence the brief wants added whenever less than the full amount is offered (empty if none), "next_product": a short lead-in when the engine moves on to the next product, with the token <product>, for example "Now your <product>.", "anything_else": a short neutral question for after a recorded promise when nothing else is open, "goodbye": the thanks and goodbye that end every call}
-"note_lines": {<note reason>: the sentence the brief requires the agent to say when a product is settled without a promise for that reason} (only when notes are enabled; only reasons for which the brief prescribes a sentence, for example what to say to an "already paid" claim; the engine says it, once per call).
+"note_lines": {<note reason>: the sentence the brief requires the agent to say when a product is settled without a promise for that reason} (only when notes are enabled; only reasons for which the brief prescribes a sentence; the engine says it, once per call).
 "closing_lines": {"<outcome>/<reason>" or "<outcome>": a sentence the brief requires at the very end of a call with that outcome, spoken by the engine before the goodbye}. Only where the brief prescribes a sentence that is the last thing said. Usually one or two entries, often none.
 
 Rules for the JSON: exact values of the tool API file for every outcome, reason, queue, field name and product type. Use null where a pair has no reason. No comments. No keys other than these."""
@@ -240,6 +240,8 @@ def check(spec, openapi):
         e = enum("add_note", "reason", "reason") or []
         for x in n.get("reasons") or []:
             if e and x not in e: bad.append(f"notes.reasons: '{x}' is not in the tool API {e}")
+        for k in ("service_error_reason", "refused_reason"):
+            if n.get(k) not in (n.get("reasons") or []): bad.append(f"notes.{k} must be one of notes.reasons")
         cf = n.get("close_from_notes") or {}
         for k, p in (cf.get("all") or {}).items(): pair_ok("close_from_notes.all." + k, p)
         if cf.get("else_outcome") not in out.get("table", {}): bad.append("notes.close_from_notes.else_outcome is not an outcome")
