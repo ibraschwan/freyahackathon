@@ -1,0 +1,621 @@
+[
+ {
+  "id": "H01",
+  "brief": "A",
+  "session": "PUB-01",
+  "family": "Other days",
+  "level": "medium",
+  "title": "Flat no on a Monday, accepts the first proposal",
+  "variables": {
+   "first_name": "Daniel",
+   "last_name": "Reyes",
+   "title": "Mr",
+   "now": "2026-10-19T09:30"
+  },
+  "identity": {
+   "date_of_birth": "1988-03-14",
+   "phone_last4": "4471"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "4821",
+    "past_due": 420.0,
+    "days_late": 6,
+    "minimum_payment": 126.0
+   }
+  ],
+  "third_party": false,
+  "style": null,
+  "script": "Verified. When asked whether you can pay today say only 'No.' Give no date and no amount. Accept the first new proposal the assistant makes. Confirm at the read-back.",
+  "expected": {
+   "outcome": "promise",
+   "reason": null,
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 420.0,
+     "date": "2026-10-23"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "expected_b_notes": [],
+  "checks": [
+   "the agent proposes Friday 23 October"
+  ]
+ },
+ {
+  "id": "H02",
+  "brief": "A",
+  "session": "PUB-04",
+  "family": "Other days",
+  "level": "medium",
+  "title": "A date after a deadline that crosses a holiday",
+  "variables": {
+   "first_name": "Lena",
+   "last_name": "Hoffmann",
+   "title": "Ms",
+   "now": "2026-11-05T16:45"
+  },
+  "identity": {
+   "date_of_birth": "1984-01-30",
+   "phone_last4": "2219"
+  },
+  "products": [
+   {
+    "type": "car_loan",
+    "past_due": 1250.0,
+    "days_late": 14,
+    "instalment_amount": 400.0
+   }
+  ],
+  "third_party": false,
+  "style": null,
+  "script": "Verified. You cannot pay today. Say you can pay the full amount on the 20th of November. Accept the latest possible date when it is offered. Confirm at the read-back.",
+  "expected": {
+   "outcome": "promise",
+   "reason": null,
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 1250.0,
+     "date": "2026-11-17"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "expected_b_notes": [],
+  "checks": [
+   "20 November is not accepted",
+   "the agent says the latest date it can record is 17 November"
+  ]
+ },
+ {
+  "id": "H03",
+  "brief": "A",
+  "session": "PUB-07",
+  "family": "Other days",
+  "level": "medium",
+  "title": "The day after tomorrow is a holiday",
+  "variables": {
+   "first_name": "Samuel",
+   "last_name": "Ortiz",
+   "title": "Mr",
+   "now": "2026-11-24T12:00"
+  },
+  "identity": {
+   "date_of_birth": "1975-12-05",
+   "phone_last4": "7093"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 540.0,
+    "days_late": 5,
+    "instalment_amount": 180.0
+   }
+  ],
+  "third_party": false,
+  "style": null,
+  "script": "Verified. You cannot pay today. Say you will pay the full amount 'the day after tomorrow'. Accept the next business day when it is offered. Confirm at the read-back.",
+  "expected": {
+   "outcome": "promise",
+   "reason": null,
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 540.0,
+     "date": "2026-11-27"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "expected_b_notes": [],
+  "checks": [
+   "Thursday 26 November is not accepted",
+   "promise recorded for Friday 27 November"
+  ]
+ },
+ {
+  "id": "H04",
+  "brief": "A",
+  "session": "PUB-02",
+  "family": "Other days",
+  "level": "medium",
+  "title": "Callback asked for after the window has closed for today",
+  "variables": {
+   "first_name": "Maria",
+   "last_name": "Costa",
+   "title": "Ms",
+   "now": "2026-11-13T19:00"
+  },
+  "identity": {
+   "date_of_birth": "1979-11-02",
+   "phone_last4": "0358"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 310.5,
+    "days_late": 11,
+    "instalment_amount": 103.5
+   }
+  ],
+  "third_party": true,
+  "style": null,
+  "script": "You are her husband. Say Maria is home today at half past seven in the evening. If asked for another time, say Monday at ten in the morning.",
+  "expected": {
+   "outcome": "not_reached",
+   "reason": "callback",
+   "promises": [],
+   "notes": [],
+   "callbacks": [
+    {
+     "date": "2026-11-16",
+     "time": "10:00"
+    }
+   ],
+   "transfers": []
+  },
+  "expected_b_notes": [],
+  "checks": [
+   "the agent names no product, amount or debt and does not say why it is calling",
+   "no callback is scheduled for today",
+   "callback scheduled for Monday 16 November at 10:00"
+  ]
+ },
+ {
+  "id": "H05",
+  "brief": "A",
+  "session": "PUB-09",
+  "family": "Other days",
+  "level": "medium",
+  "title": "Flat no on New Year's Eve",
+  "variables": {
+   "first_name": "Victor",
+   "last_name": "Ionescu",
+   "title": "Mr",
+   "now": "2026-12-31T10:15"
+  },
+  "identity": {
+   "date_of_birth": "1981-08-11",
+   "phone_last4": "5560"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 2100.0,
+    "days_late": 28,
+    "instalment_amount": 700.0
+   }
+  ],
+  "third_party": false,
+  "style": null,
+  "script": "Verified. When asked whether you can pay today say only 'No, I can't.' Give no date and no amount. Accept the first new proposal the assistant makes. Confirm at the read-back.",
+  "expected": {
+   "outcome": "promise",
+   "reason": null,
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 2100.0,
+     "date": "2027-01-08"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "expected_b_notes": [],
+  "checks": [
+   "the agent proposes Friday 8 January, the last business day of next week"
+  ]
+ },
+ {
+  "id": "H06",
+  "brief": "A",
+  "session": "PUB-06",
+  "family": "Other days",
+  "level": "medium",
+  "title": "Too much, then the lower amount next Monday",
+  "variables": {
+   "first_name": "Priya",
+   "last_name": "Nair",
+   "title": "Ms",
+   "now": "2026-12-23T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1986-05-17",
+   "phone_last4": "1502"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "1903",
+    "past_due": 2125.1,
+    "days_late": 12,
+    "minimum_payment": 637.5
+   }
+  ],
+  "third_party": false,
+  "style": null,
+  "script": "Verified. Say the full amount is too much for you right now. Accept the lower amount when it is offered, and say you will pay it 'next Monday'. If asked which date that is, say 'Monday of next week'. Confirm at the read-back.",
+  "expected": {
+   "outcome": "promise",
+   "reason": null,
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 637.5,
+     "date": "2026-12-28"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "expected_b_notes": [],
+  "checks": [
+   "the agent never asks how much she can pay",
+   "promise recorded for 637.50 on Monday 28 December"
+  ]
+ },
+ {
+  "id": "H07",
+  "brief": "B",
+  "session": "PUB-13",
+  "family": "Other days",
+  "level": "medium",
+  "title": "One date for both, deadlines differ, on another day",
+  "variables": {
+   "first_name": "Elena",
+   "last_name": "Rossi",
+   "title": "Ms",
+   "now": "2026-10-19T09:30"
+  },
+  "identity": {
+   "date_of_birth": "1991-01-08",
+   "phone_last4": "6604"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "6604",
+    "past_due": 300.0,
+    "days_late": 4,
+    "minimum_payment": 90.0
+   },
+   {
+    "type": "personal_loan",
+    "past_due": 900.0,
+    "days_late": 20,
+    "instalment_amount": 300.0
+   }
+  ],
+  "third_party": false,
+  "style": null,
+  "script": "Verified. You cannot pay today. Say you want to pay both in full on the 30th of October. Accept when told the loan has an earlier latest date. Confirm once at the read-back.",
+  "expected": {
+   "outcome": "promise",
+   "reason": null,
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 300.0,
+     "date": "2026-10-30"
+    },
+    {
+     "product_id": "p2",
+     "amount": 900.0,
+     "date": "2026-10-29"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "expected_b_notes": [],
+  "checks": [
+   "credit card recorded on 30 October",
+   "loan recorded on its own deadline, 29 October",
+   "the read-back names both dates"
+  ]
+ },
+ {
+  "id": "H08",
+  "brief": "B",
+  "session": "PUB-12",
+  "family": "Other days",
+  "level": "medium",
+  "title": "All three tomorrow, on another day",
+  "variables": {
+   "first_name": "Marcus",
+   "last_name": "Bell",
+   "title": "Mr",
+   "now": "2026-11-05T16:45"
+  },
+  "identity": {
+   "date_of_birth": "1983-10-19",
+   "phone_last4": "4410"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "9015",
+    "past_due": 510.0,
+    "days_late": 16,
+    "minimum_payment": 153.0
+   },
+   {
+    "type": "personal_loan",
+    "past_due": 1320.0,
+    "days_late": 16,
+    "instalment_amount": 440.0
+   },
+   {
+    "type": "car_loan",
+    "past_due": 140.0,
+    "days_late": 7,
+    "instalment_amount": 46.0
+   }
+  ],
+  "third_party": false,
+  "style": null,
+  "script": "Verified. You cannot pay today. Say you will pay all three in full tomorrow. Confirm once at the read-back.",
+  "expected": {
+   "outcome": "promise",
+   "reason": null,
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 510.0,
+     "date": "2026-11-06"
+    },
+    {
+     "product_id": "p2",
+     "amount": 1320.0,
+     "date": "2026-11-06"
+    },
+    {
+     "product_id": "p3",
+     "amount": 140.0,
+     "date": "2026-11-06"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "expected_b_notes": [],
+  "checks": [
+   "all three recorded for Friday 6 November",
+   "one read-back and one confirmation for all three"
+  ]
+ },
+ {
+  "id": "H09",
+  "brief": "A",
+  "session": "PUB-08",
+  "family": "Other days",
+  "level": "medium",
+  "title": "Callback an hour too early, then on the hour",
+  "variables": {
+   "first_name": "Hannah",
+   "last_name": "Schmidt",
+   "title": "Ms",
+   "now": "2026-11-24T12:00"
+  },
+  "identity": {
+   "date_of_birth": "1993-04-28",
+   "phone_last4": "3317"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "5512",
+    "past_due": 180.0,
+    "days_late": 5,
+    "minimum_payment": 54.0
+   }
+  ],
+  "third_party": true,
+  "style": null,
+  "script": "You are her mother. Say Hannah can be reached tomorrow at nine in the morning. If asked for another time, say tomorrow at ten in the morning.",
+  "expected": {
+   "outcome": "not_reached",
+   "reason": "callback",
+   "promises": [],
+   "notes": [],
+   "callbacks": [
+    {
+     "date": "2026-11-25",
+     "time": "10:00"
+    }
+   ],
+   "transfers": []
+  },
+  "expected_b_notes": [],
+  "checks": [
+   "the agent names no product, amount or debt and does not say why it is calling",
+   "no callback is scheduled for 09:00",
+   "callback scheduled for 25 November at 10:00"
+  ]
+ },
+ {
+  "id": "H10",
+  "brief": "A",
+  "session": "PUB-05",
+  "family": "Other days",
+  "level": "medium",
+  "title": "This Friday, said on a Monday",
+  "variables": {
+   "first_name": "Tomas",
+   "last_name": "Novak",
+   "title": "Mr",
+   "now": "2026-10-19T09:30"
+  },
+  "identity": {
+   "date_of_birth": "1990-09-09",
+   "phone_last4": "8846"
+  },
+  "products": [
+   {
+    "type": "personal_loan",
+    "past_due": 780.0,
+    "days_late": 21,
+    "instalment_amount": 260.0
+   }
+  ],
+  "third_party": false,
+  "style": null,
+  "script": "Verified. You cannot pay today. Say you will pay the full amount this Friday. Confirm at the read-back.",
+  "expected": {
+   "outcome": "promise",
+   "reason": null,
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 780.0,
+     "date": "2026-10-23"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "expected_b_notes": [],
+  "checks": [
+   "promise recorded for Friday 23 October"
+  ]
+ },
+ {
+  "id": "H11",
+  "brief": "A",
+  "session": "PUB-03",
+  "family": "Other days",
+  "level": "medium",
+  "title": "A day in January, said on New Year's Eve",
+  "variables": {
+   "first_name": "Owen",
+   "last_name": "Park",
+   "title": "Mr",
+   "now": "2026-12-31T10:15"
+  },
+  "identity": {
+   "date_of_birth": "1992-07-21",
+   "phone_last4": "6630"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "0377",
+    "past_due": 95.0,
+    "days_late": 4,
+    "minimum_payment": 28.5
+   }
+  ],
+  "third_party": false,
+  "style": null,
+  "script": "Verified. You cannot pay today. Say you will pay the full amount on the 5th of January. Confirm at the read-back.",
+  "expected": {
+   "outcome": "promise",
+   "reason": null,
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 95.0,
+     "date": "2027-01-05"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "expected_b_notes": [],
+  "checks": [
+   "promise recorded for Tuesday 5 January 2027"
+  ]
+ },
+ {
+  "id": "H12",
+  "brief": "A",
+  "session": "PUB-10",
+  "family": "Other days",
+  "level": "medium",
+  "title": "Tomorrow is Christmas Eve, and the service fails once",
+  "variables": {
+   "first_name": "Grace",
+   "last_name": "Lin",
+   "title": "Ms",
+   "now": "2026-12-23T11:00"
+  },
+  "identity": {
+   "date_of_birth": "1989-02-23",
+   "phone_last4": "9904"
+  },
+  "products": [
+   {
+    "type": "credit_card",
+    "card_last4": "7740",
+    "past_due": 365.0,
+    "days_late": 8,
+    "minimum_payment": 109.5
+   }
+  ],
+  "third_party": false,
+  "style": null,
+  "script": "Verified. You cannot pay today. Say you will pay the full amount tomorrow. Confirm at the read-back.",
+  "expected": {
+   "outcome": "promise",
+   "reason": null,
+   "promises": [
+    {
+     "product_id": "p1",
+     "amount": 365.0,
+     "date": "2026-12-24"
+    }
+   ],
+   "notes": [],
+   "callbacks": [],
+   "transfers": []
+  },
+  "expected_b_notes": [],
+  "checks": [
+   "exactly one promise in the ledger after the retry",
+   "promise recorded for Thursday 24 December"
+  ],
+  "faults": [
+   {
+    "tool": "create_promise",
+    "fail_first_n": 1
+   }
+  ]
+ }
+]
