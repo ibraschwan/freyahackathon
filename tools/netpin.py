@@ -23,6 +23,12 @@ def _public_ips(host):
 
 def pin(host):
     def getaddrinfo(h, *a, **k):
-        ips = _public_ips(host) if h == host else []
-        return _real(ips[0] if ips else h, *a, **k)
+        if h != host: return _real(h, *a, **k)
+        ips = _public_ips(host)
+        try: local = _real(h, *a, **k)
+        except Exception: local = []
+        # the local answer is used whenever it is the real one (it may also offer IPv6, which some networks need)
+        if local and (not ips or any(r[4][0] in ips or ":" in r[4][0] for r in local)):
+            return sorted(local, key=lambda r: ":" not in r[4][0])      # IPv6 first: without an IPv6 route it fails at once, and one network here resets IPv4 to this host
+        return _real(ips[0], *a, **k) if ips else local
     socket.getaddrinfo = getaddrinfo

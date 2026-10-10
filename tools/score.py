@@ -13,8 +13,12 @@ def http(path, body=None):
     h = dict(UA)
     h["x-team-key"] = os.environ["FREYA_BANK_TEAM_KEY"]
     req = urllib.request.Request(HOST + path, data=json.dumps(body).encode() if body is not None else None, headers=h, method="POST" if body is not None else "GET")
-    try: return json.load(urllib.request.urlopen(req, timeout=20))
-    except urllib.error.HTTPError as e: return json.load(e)
+    for attempt in range(5):                     # the network drops connections now and then: try again (a repeated session request only makes a spare session)
+        try: return json.load(urllib.request.urlopen(req, timeout=20))
+        except urllib.error.HTTPError as e: return json.load(e)
+        except (urllib.error.URLError, TimeoutError, ConnectionError):
+            if attempt == 4: raise
+            import time; time.sleep(3 * (attempt + 1))
 
 def score_ledger(case, led):
     exp, bad = case["expected"], []

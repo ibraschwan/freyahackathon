@@ -13,10 +13,15 @@ def api(method, path, body=None, **params):
     """Call the API and return the `result` part of its {success, data: {message, result}} envelope."""
     q = "?" + urllib.parse.urlencode(params) if params else ""
     req = urllib.request.Request(URL + path + q, data=json.dumps(body).encode() if body is not None else None, headers=HEADERS, method=method)
-    try:
-        with urllib.request.urlopen(req, timeout=120) as r: out = json.load(r)
-    except urllib.error.HTTPError as e:
-        raise RuntimeError(f"{method} {path} -> {e.code}: {e.read().decode()[:1500]}") from None
+    for attempt in range(4):                       # a read is repeated when the connection drops or times out; a write is not
+        try:
+            with urllib.request.urlopen(req, timeout=120) as r: out = json.load(r)
+            break
+        except urllib.error.HTTPError as e:
+            raise RuntimeError(f"{method} {path} -> {e.code}: {e.read().decode()[:1500]}") from None
+        except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
+            if method != "GET" or attempt == 3: raise
+            time.sleep(5 * (attempt + 1))
     return out.get("data", {}).get("result", out) if isinstance(out, dict) else out
 
 _ws = None

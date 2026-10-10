@@ -321,7 +321,7 @@ def live(st):
     if op:
         L.append('The product in discussion now: ' + (prod(st, op[0]) or dict(words=''))['words'] + ' [' + op[0] + '].')
     elif planned:
-        L.append('The system has read the agreement back. A clear yes -> CALL customer_confirmed. A changed day or amount -> CALL agreed_terms again.')
+        L.append('The system has read the agreement back. A clear yes -> CALL customer_confirmed. A changed day or amount -> CALL check_terms again.')
     else:
         L.append('Nothing is open. Answer what the customer still asks. When they have nothing more, CALL wrap_up.')
     return '\n'.join(L)
@@ -748,7 +748,7 @@ for p in targets:
             raise Exception('RULE: amount must be "full", "floor" or a number.')
         am = round(am, 2)
     if am < p['floor'] - 0.005:
-        raise Exception('RULE: ' + money(am) + ' is below the floor for the ' + p['words'] + ' and cannot be recorded. Nothing was noted. ' + str(G.get('below_floor') or 'Say that this amount cannot be recorded and offer the floor of <floor> once.').replace('<floor>', money(p['floor'])).replace('<floor_name>', p['floor_name']) + ' If the customer accepts, CALL agreed_terms with amount "floor". If not, CALL customer_refused.')
+        raise Exception('RULE: ' + money(am) + ' is below the floor for the ' + p['words'] + ' and cannot be recorded. Nothing was noted. ' + str(G.get('below_floor') or 'Say that this amount cannot be recorded and offer the floor of <floor> once.').replace('<floor>', money(p['floor'])).replace('<floor_name>', p['floor_name']) + ' If the customer accepts, CALL check_terms with amount "floor". If not, CALL customer_refused.')
     if am > p['full'] + 0.005:
         am = p['full']
     if dt < today:
@@ -757,11 +757,11 @@ for p in targets:
     late = str(G.get('after_deadline') or 'Say that the latest date you can record is <deadline> and offer it.')
     if not isbd(dt):
         if dl is not None and dt > dl:
-            raise Exception('RULE: ' + say(dt) + ' is after the deadline for the ' + p['words'] + '. Nothing was noted. ' + late.replace('<deadline>', say(dl)) + ' If the customer accepts, CALL agreed_terms with ' + dl.isoformat() + '. If not, CALL customer_refused.')
+            raise Exception('RULE: ' + say(dt) + ' is after the deadline for the ' + p['words'] + '. Nothing was noted. ' + late.replace('<deadline>', say(dl)) + ' If the customer accepts, CALL check_terms with ' + dl.isoformat() + '. If not, CALL customer_refused.')
         nb = nextbd(dt)
         if dl is not None and nb > dl:
             nb = dl
-        raise Exception('RULE: ' + say(dt) + ' is ' + why(dt) + ', not a business day. Nothing was noted. ' + str(G.get('not_business_day') or 'Offer the next business day, <next>.').replace('<next>', say(nb)) + ' If the customer accepts, CALL agreed_terms with ' + nb.isoformat() + '.')
+        raise Exception('RULE: ' + say(dt) + ' is ' + why(dt) + ', not a business day. Nothing was noted. ' + str(G.get('not_business_day') or 'Offer the next business day, <next>.').replace('<next>', say(nb)) + ' If the customer accepts, CALL check_terms with ' + nb.isoformat() + '.')
     use = dt
     capped = 0
     if dl is not None and dt > dl:
@@ -769,7 +769,7 @@ for p in targets:
             use = dl
             capped = 1
         else:
-            raise Exception('RULE: ' + say(dt) + ' is after the deadline for the ' + p['words'] + '. Nothing was noted. ' + late.replace('<deadline>', say(dl)) + ' If the customer accepts, CALL agreed_terms with ' + dl.isoformat() + '. If not, CALL customer_refused.')
+            raise Exception('RULE: ' + say(dt) + ' is after the deadline for the ' + p['words'] + '. Nothing was noted. ' + late.replace('<deadline>', say(dl)) + ' If the customer accepts, CALL check_terms with ' + dl.isoformat() + '. If not, CALL customer_refused.')
     evs.append(['plan', i, am, use.isoformat(), capped, 1 if allmode else 0])
 if not evs:
     raise Exception('RULE: there is no open product left.')
@@ -834,7 +834,7 @@ CONFIRM = r'''
 st = gst(vars)
 todo = [i for i in st['plan'] if i not in st['promises']]
 if st['stage'] != 'verified' or not todo:
-    raise Exception('RULE: nothing is agreed yet, so there is nothing to record. First CALL agreed_terms for each product the customer agreed to pay. The system then reads it back. Only after a clear yes CALL customer_confirmed.')
+    raise Exception('RULE: nothing is agreed yet, so there is nothing to record. First CALL check_terms for each product the customer agreed to pay. The system then reads it back. Only after a clear yes CALL customer_confirmed.')
 vars['commit_state'] = 'go'
 '''
 
@@ -861,7 +861,7 @@ if st['stage'] == 'verified' and st['products']:
                     evs.append(['note', i, guess])
             else:
                 names = dict((p['id'], p['words']) for p in st['products'])
-                raise Exception('RULE: before the call can end, every product needs a recorded promise or a reason for having none. CALL settle_without_promise for: ' + ', '.join(names[i] + ' [' + i + ']' for i in op) + ' with one of the reasons: ' + ', '.join(allowed) + '.')
+                raise Exception('RULE: before the call can end, every product needs a recorded promise or a reason for having none. CALL skip_product for: ' + ', '.join(names[i] + ' [' + i + ']' for i in op) + ' with one of the reasons: ' + ', '.join(allowed) + '.')
 decide(st, mo, mr, True)
 emit(vars, evs + [['finish', mo, mr]])
 vars['fin_state'] = 'go'
