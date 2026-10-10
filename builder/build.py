@@ -28,7 +28,7 @@ def selftest(spec, openapi, trace):
         for k in api["get_account"]["response"].get(P["list_field"], {}).get("items", {}).get("properties", {}):
             if k not in p: p[k] = "1234" if "last" in k else 90.0 * (i + 1)
         return p
-    identity = {q["field"]: {"date": "1980-02-03", "digits": "1234"}.get(q["kind"], "x") for q in spec["identity"]["questions"]}
+    identity = {q["field"]: {"date": "1980-02-03", "digits": "1234"}.get(q["kind"], "AB12CD") for q in spec["identity"]["questions"]}     # a text answer that upper-casing and removing spaces leave as it is
     now = str(spec.get("test_variables", {}).get(spec["now_variable"]) or "2026-01-05T11:00")
     ran = []
     for n in ((1, 3) if spec["notes"].get("enabled") else (1,)):
