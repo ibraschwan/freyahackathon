@@ -192,6 +192,8 @@ try:
     vars['date_facts'] = '\n'.join(L)
 except Exception as e:
     vars['date_facts'] = 'TODAY: ' + str(vars.get(NOW_VAR) or '')[:10] + '.'
+for fn in json.loads(FNS_TEXT):
+    vars['ff_ans_' + fn] = ''
 vars['fin_state'] = ''
 vars['ff_closed'] = 'no'
 '''
@@ -236,6 +238,43 @@ try:
             if v not in old:
                 old.append(v)
         vars['ff_seen_' + k] = json.dumps(old[-80:])
+    # every longer text value of this answer, under this service's own variable (two services answering side by side cannot overwrite each other)
+    texts = []
+    def strings(x, depth):
+        if depth > 6:
+            return
+        if isinstance(x, dict):
+            for k in x:
+                strings(x[k], depth + 1)
+        elif isinstance(x, list):
+            for v in x[:60]:
+                strings(v, depth + 1)
+        elif isinstance(x, str) and len(x.strip()) >= 8 and x not in texts:
+            texts.append(x)
+    body = result.get('data') if isinstance(result, dict) else None
+    strings(body, 0)
+    try:
+        old = json.loads(str(vars.get('ff_any_' + FN) or '[]'))
+    except Exception:
+        old = []
+    for v in texts:
+        if v not in old:
+            old.append(v)
+    vars['ff_any_' + FN] = json.dumps(old[-120:])
+    # the answer itself, kept for the rest of the call: the step prompt shows it in every turn, so nothing has to be remembered or guessed
+    ok = isinstance(result, dict) and str(result.get('status')) == 'success' and not (isinstance(result.get('status_code'), int) and result.get('status_code') >= 400)
+    req = str(vars.get('ff_req_' + FN) or '')
+    shown = json.dumps(body, ensure_ascii=False, separators=(',', ':')) if ok else 'FAILED (status ' + str(result.get('status_code') if isinstance(result, dict) else '') + '): ' + json.dumps(body, ensure_ascii=False, separators=(',', ':'))[:300]
+    while chr(123) + chr(123) in shown or chr(125) + chr(125) in shown:
+        shown = shown.replace(chr(123) + chr(123), chr(123) + ' ' + chr(123)).replace(chr(125) + chr(125), chr(125) + ' ' + chr(125))
+    line = '- ' + NAME + '(' + req + ') answered: ' + shown[:2600]
+    try:
+        kept = json.loads(str(vars.get('ff_mem_' + FN) or '[]'))
+    except Exception:
+        kept = []
+    kept = [x for x in kept if x[0] != req] + [[req, line]]
+    vars['ff_mem_' + FN] = json.dumps(kept[-5:])
+    vars['ff_ans_' + FN] = '\n'.join(x[1] for x in kept[-5:])
 except Exception:
     pass
 try:
@@ -245,6 +284,7 @@ try:
         if not isinstance(d, dict):
             d = dict()
             result['data'] = d
+        d['note_from_the_system'] = 'These values are exact. Whenever you say or send a name, an address, a number, an amount or a date from an answer of a service, copy it character by character from WHAT THE SERVICES HAVE ANSWERED; never shorten it, respell it or write it from memory.'
         if str(result.get('status')) != 'success' or d.get('error') or (isinstance(result.get('status_code'), int) and result.get('status_code') >= 400):
             d['what_to_do_next'] = 'This call did NOT succeed (status ' + str(result.get('status_code')) + '): nothing was done or recorded by it. Do what your step instructions say for this answer of this service; if they say nothing, tell the customer honestly that it could not be done right now. Never say it was done.'
 except Exception:
@@ -309,7 +349,10 @@ Tools in this step: {tools}.
 - wrap_up({args}) ends the call. {end_hint}
 
 DATES (computed by the system; always current):
-{{{{date_facts}}}}"""
+{{{{date_facts}}}}
+
+WHAT THE SERVICES HAVE ANSWERED IN THIS CALL (kept by the system; always current). Work from these values in every turn: never from memory, never invented. A service that is not listed has not answered yet.
+{answers}"""
 
 def speaks(spec):
     lang = str(spec.get("language") or "English").strip()
@@ -325,6 +368,9 @@ try:
     PATHS = json.loads(PATHS_TEXT)
     b = config.get('body') if isinstance(config, dict) and isinstance(config.get('body'), dict) else dict()
     out = dict()
+    sent = dict()
+    ALL_FNS = json.loads(FNS_TEXT)
+    MODEL_FIELDS = json.loads(MODEL_TEXT)
     def tail(x):
         return ''.join(c for c in str(x) if c.isalnum())[-4:]
     def head(x):
@@ -346,13 +392,34 @@ try:
             known = json.loads(str(vars.get('ff_seen_' + path[-1]) or '[]'))
         except Exception:
             known = []
-        if known and str(v) not in known and len(tail(v)) == 4:
-            same = [x for x in known if tail(x) == tail(v)]
+        if known and str(v) not in known:
+            same = [x for x in known if len(tail(v)) == 4 and tail(x) == tail(v)]
             if len(same) > 1:
                 near = [x for x in same if head(x) and head(v) and (head(x).startswith(head(v)) or head(v).startswith(head(x)))]
                 same = near if len(near) == 1 else same
             if len(same) == 1:
                 v = same[0]
+            elif len(known) == 1:
+                v = known[0]                 # the bank gave exactly one value for this field in this call
+        elif not known and isinstance(v, str) and len(v.strip()) >= 8:
+            # no answer has a field of this name: a text the model wrote that ends like exactly one text the bank gave (and is not itself one) is that text, retyped
+            every = []
+            for fn in ALL_FNS:
+                try:
+                    for x in json.loads(str(vars.get('ff_any_' + fn) or '[]')):
+                        if x not in every:
+                            every.append(x)
+                except Exception:
+                    pass
+            if every and v not in every:
+                def common(a, b):
+                    n = 0
+                    while n < len(a) and n < len(b) and a[len(a) - 1 - n].lower() == b[len(b) - 1 - n].lower():
+                        n += 1
+                    return n
+                close = [x for x in every if common(x, v) >= 8]
+                if len(close) == 1:
+                    v = close[0]
         if kind in ('number', 'integer'):
             try:
                 v = float(str(v).replace(',', '.'))
@@ -366,7 +433,9 @@ try:
                 node[seg] = dict()
             node = node[seg]
         node[path[-1]] = v
+        sent[k] = v
     config['body'] = out
+    vars['ff_req_' + FN] = ', '.join(str(k) + ' ' + str(sent[k]) for k in sent if k in MODEL_FIELDS)
 except Exception:
     pass
 '''
@@ -405,7 +474,8 @@ def service_tool(api, name, spec, description, post=None, pre=None, baked=None, 
                              "url": {"type": "string", "default": t["url"]}, "method": {"type": "string", "default": t["method"]},
                              "headers": {"type": "object", "properties": {"Content-Type": {"type": "string", "default": "application/json"}}},
                              "body": {"type": "object", "properties": props, "required": required}}}}}
-    hook = (snippet(NEST_PRE, PATHS_TEXT=json.dumps(paths)) if nested else "")
+    hook = (snippet(NEST_PRE, PATHS_TEXT=json.dumps(paths), FN=fn_name(name), FNS_TEXT=json.dumps(sorted(fn_name(x) for x in api)),
+                    MODEL_TEXT=json.dumps([k for k, pr in props.items() if str(pr.get("default") or "") == "{{" + k + "}}"])) if nested else "")
     if pre or hook: tool["pre_process_code"] = (pre + "\n" if pre else "") + hook
     if post: tool["post_process_code"] = post
     return tool
@@ -433,7 +503,7 @@ def build_workflow(spec, openapi):
     steps, end = spec["steps"], spec.get("end")
     ids = {s["name"]: node_id(i) for i, s in enumerate(steps)}
     cal = spec.get("calendar")
-    nodes = {"setup": code_node("setup", snippet(DATES, CAL_TEXT=json.dumps(cal or {}), NOW_VAR=str(spec["now_variable"]), HAS_CAL=bool(cal)), node_id(0))}
+    nodes = {"setup": code_node("setup", snippet(DATES, CAL_TEXT=json.dumps(cal or {}), NOW_VAR=str(spec["now_variable"]), HAS_CAL=bool(cal), FNS_TEXT=json.dumps(sorted(fn_name(x) for x in api))), node_id(0))}
 
     # wrap_up: the model gives the closing fields, code keeps them in variables, the route on fin_state leads to the goodbye
     end_props = {}
@@ -450,7 +520,7 @@ def build_workflow(spec, openapi):
         tools = []
         for name in s.get("tools") or []:
             t = api[name]
-            tools.append(service_tool(api, name, spec, (t["summary"] + ". " if t["summary"] else "") + "CALL it when the step instructions say so, with the field values they name.", post=snippet(TOOL_POST, FIELDS_TEXT=json.dumps(sorted(set(pth[-1] for x in api.values() for pth, _ in leaves(x.get("props") or {})))),
+            tools.append(service_tool(api, name, spec, (t["summary"] + ". " if t["summary"] else "") + "CALL it when the step instructions say so, with the field values they name.", post=snippet(TOOL_POST, FN=fn_name(name), NAME=name, FIELDS_TEXT=json.dumps(sorted(set(pth[-1] for x in api.values() for pth, _ in leaves(x.get("props") or {})))),
                                                                      OWN_TEXT=json.dumps(sorted(set(pth[-1] for pth, _ in leaves(t.get("props") or {})))))))
         tools.append(wrap_up)
         trans = []
@@ -464,7 +534,7 @@ def build_workflow(spec, openapi):
         nodes[node_id(i)] = {
             "name": node_id(i), "node_type": "conversation", "on_enter": on_enter, "on_enter_first_entry_only": True, "max_node_turns": 60, "max_turn_transition": after,
             "task_message": STEP.format(n=i + 1, total=len(steps), name=s["name"], goal=s.get("goal", ""), instructions=str(s["instructions"]).strip(), tools=", ".join(t["function"]["name"] + ("" if t["function"]["name"] == n0 else " (the service " + n0 + ")") for t, n0 in zip(tools, list(s.get("tools") or []) + ["wrap_up"])),
-                                        args=", ".join(end_props) if end_props else "",
+                                        args=", ".join(end_props) if end_props else "", answers="\n".join("{{ff_ans_" + fn_name(x) + "}}" for x in sorted(api) if "/" not in x or x.split("/")[-1] not in api),
                                         end_hint=("The system then makes the closing call " + end["tool"] + " with these values." if end else "")),
             "tools": tools, "transitions": trans}
     if has_bye: nodes["goodbye"] = say_node("goodbye", str(spec["goodbye"]), "close" if end else "end")
@@ -499,7 +569,7 @@ def lint(wf):
     walk(wf)
     nodes = wf["nodes"]
     if wf["initial_node"] not in nodes: raise ValueError("unknown initial node")
-    known = {"date_facts"} | set(wf.get("test_variables") or {})
+    known = {"date_facts"} | set(wf.get("test_variables") or {}) | set(re.findall(r"\{\{(ff_ans_\w+)\}\}", json.dumps(wf)))
     def tools_of(n): return (n.get("tools") or []) + (n.get("pre_actions") or [])
     for k, n in nodes.items():
         for t in n.get("transitions", []):
