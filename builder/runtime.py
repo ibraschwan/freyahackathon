@@ -1105,7 +1105,7 @@ try:
     cap = I.get('max_wrong')
     if isinstance(cap, dict) and (cap.get('total') is not None or cap.get('per_question') is not None):
         # the brief ends the check after fewer wrong answers than the service counts: the engine counts them itself
-        if d.get(R.get('verified') or 'verified') is not None and not flag('verified', 'verified') and not (hint and hint in (I.get('hints') or dict())):
+        if d.get(R.get('verified') or 'verified') is not None and not flag('verified', 'verified') and not (hint and hint in (I.get('hints') or dict())) and good(result, d):
             w = st.get('wrong') or dict()
             w['*'] = int(w.get('*') or 0) + 1
             w[asked] = int(w.get(asked) or 0) + 1
