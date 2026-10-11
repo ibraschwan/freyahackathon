@@ -51,6 +51,7 @@ Return one JSON object with exactly these keys:
 "language": the language the agent speaks, as an English word.
 "address": how to address the customer, from call variables in double braces, for example "{{title}} {{last_name}}".
 "call_variables": the names of the variables every call starts with, as the documents list them.
+"variable_fields": {<request field of the services>: <call variable>} for every request field that carries the value of a call variable under ANOTHER name than the variable's own (the system then fills it in every call; the model never has to know the value). {} when the names are the same.
 "now_variable": the call variable that holds the current date and time (ISO, for example 2026-01-05T11:00).
 "test_variables": one example value per call variable, from the documents' examples.
 "calendar": null when the documents have no date rules; otherwise {"weekend_days": numbers of the days that are NOT business days, Monday = 0 ... Sunday = 6, "holidays": ["YYYY-MM-DD", ...], "weekday_names": the seven day names in the agent's language, Monday first, "month_names": the twelve month names, January first}. The system then shows the model a table of the next 45 days with these facts, so the model never calculates a date.
@@ -60,7 +61,7 @@ Return one JSON object with exactly these keys:
    "entry_sentence": for every step after the first: the sentence the agent says when this step begins (for example an acknowledgement that the previous step succeeded); "" for the first step (the opening is spoken instead),
    "tools": [service names from the tool API the model may call in this step, exactly as the paths are named],
    "instructions": the complete instructions for the dialogue model in this step: explicit, ordered, literal; every sentence the documents prescribe for this step in the agent's language, in quotes; every rule of the documents that applies in this step; for every service: when exactly to CALL it and with what field values; what to say after each kind of result; what to do when the customer refuses, asks something else or gives no answer. Refer to dates only through the DATE TABLE the system shows. Write "CALL <service>(...)" for a tool call and "CALL wrap_up(...)" to end the call.
-   "next": null for the last step, otherwise {"to": the name of the next step, "when": {"tool": a service of this step, "field": a field of its response, "equals": the value (as a string, for example "true") that means the step is done}}}
+   "next": null for the last step, otherwise {"to": the name of the next step, "when": {"tool": a service of this step, "field": a field of its response (a field inside an object of the response is written as a path with dots, outer field first), "equals": the value (as a string, for example "true") that means the step is done}}}
 "global_rules": rules that hold in every step, one per entry: what must never be said or offered, the answer to "are you a robot", honesty when a tool call failed, what to say when asked something the documents do not answer, how the call ends. Exact sentences in quotes.
 "end": null if no service must close every call; otherwise {"tool": the service that must be the last call of every conversation, "fields": {<body field the model sets when ending>: how to choose its value, naming the allowed values and the situation for each}, "default": {<body field>: value} for a call that breaks off (the customer hangs up) with nothing decided}.
 "goodbye": the closing sentence the system speaks before the closing call.
@@ -138,10 +139,13 @@ def check(spec, openapi):
         if not isinstance(n, dict) or n.get("to") not in names: bad.append(f"steps[{i}].next.to must name a step ({names})"); continue
         w = n.get("when") or {}
         if w.get("tool") not in (s.get("tools") or []): bad.append(f"steps[{i}].next.when.tool must be one of the step's tools")
-        elif w.get("field") not in api[w["tool"]]["response"]: bad.append(f"steps[{i}].next.when.field: '{w['tool']}' returns no field '{w.get('field')}' (it returns {sorted(api[w['tool']]['response'])})")
+        elif str(w.get("field") or "").split(".")[0] not in api[w["tool"]]["response"]: bad.append(f"steps[{i}].next.when.field: '{w['tool']}' returns no field '{w.get('field')}' (it returns {sorted(api[w['tool']]['response'])})")
         if "equals" not in w: bad.append(f"steps[{i}].next.when.equals is missing")
     cv = set(spec["call_variables"] or [])
     if spec["now_variable"] not in cv: bad.append("now_variable is not a call variable")
+    for f, v in (spec.get("variable_fields") or {}).items():
+        if v not in cv: bad.append(f"variable_fields: '{v}' is not a call variable")
+        if not any(f in t.get("props", {}) for t in api.values()): bad.append(f"variable_fields: no service has a request field '{f}'")
     for k in ("opening", "goodbye", "address"):
         for v in re.findall(r"\{\{\s*(\w+)\s*\}\}", str(spec.get(k) or "")):
             if v not in cv: bad.append(f"{k} uses {{{{{v}}}}}, which is not a call variable")
@@ -279,8 +283,23 @@ def speaks(spec):
 def node_id(i): return f"step{i + 1}"
 
 # ------------------------------------------------------------------ the workflow
+def fn_name(service):
+    """The name under which the dialogue model calls a service: the service's name with everything but letters, digits and _ turned into _."""
+    return re.sub(r"\W", "_", str(service))
+
+def named(tool, service, spec):
+    """Gives a bank tool its callable name and fills the fields that carry a call variable under another name (spec.variable_fields)."""
+    tool["function"]["name"] = fn_name(service)
+    body = tool["function"]["parameters"]["properties"]["body"]
+    for field, var in (spec.get("variable_fields") or {}).items():
+        if field in body["properties"] or field in (spec.get("_all_fields") or {}).get(service, []):
+            body["properties"][field] = {"type": "string", "default": "{{" + str(var) + "}}"}
+            if field in (body.get("required") or []): body["required"].remove(field)
+    return tool
+
 def build_workflow(spec, openapi):
     api = read_api(openapi)
+    spec = dict(spec, _all_fields={k: list(v.get("props") or {}) for k, v in api.items()})
     bad = check(spec, openapi)
     if bad: raise ValueError("the free-form configuration fails the check: " + "; ".join(bad))
     call_vars = set(spec.get("call_variables") or [])
@@ -302,19 +321,19 @@ def build_workflow(spec, openapi):
         tools = []
         for name in s.get("tools") or []:
             t = api[name]
-            tools.append(bank_tool(api, name, call_vars, (t["summary"] + ". " if t["summary"] else "") + "CALL it when the step instructions say so, with the field values they name.", post=TOOL_POST))
+            tools.append(named(bank_tool(api, name, call_vars, (t["summary"] + ". " if t["summary"] else "") + "CALL it when the step instructions say so, with the field values they name.", post=TOOL_POST), name, spec))
         tools.append(wrap_up)
         trans = []
         if s.get("next"):
             w = s["next"]["when"]; val = str(w["equals"])
             vals = {val, val.lower(), val.capitalize()} if val.lower() in ("true", "false") else {val}       # booleans arrive as strings, in either case
-            trans.append(to(ids[s["next"]["to"]], f"{w['tool']} returned {w['field']} = {val}", eq_any([(f"{w['tool']}_response.data.{w['field']}", v) for v in sorted(vals)])))
+            trans.append(to(ids[s["next"]["to"]], f"{w['tool']} returned {w['field']} = {val}", eq_any([(f"{fn_name(w['tool'])}_response.data.{w['field']}", v) for v in sorted(vals)])))
         trans.append(fin)
         if i == 0: on_enter = {"type": "tts", "text": str(spec["opening"])}
         else: on_enter = {"type": "tts", "text": str(s["entry_sentence"])}
         nodes[node_id(i)] = {
             "name": node_id(i), "node_type": "conversation", "on_enter": on_enter, "on_enter_first_entry_only": True, "max_node_turns": 60, "max_turn_transition": "goodbye",
-            "task_message": STEP.format(n=i + 1, total=len(steps), name=s["name"], goal=s.get("goal", ""), instructions=str(s["instructions"]).strip(), tools=", ".join(t["function"]["name"] for t in tools),
+            "task_message": STEP.format(n=i + 1, total=len(steps), name=s["name"], goal=s.get("goal", ""), instructions=str(s["instructions"]).strip(), tools=", ".join(t["function"]["name"] + ("" if t["function"]["name"] == n0 else " (the service " + n0 + ")") for t, n0 in zip(tools, list(s.get("tools") or []) + ["wrap_up"])),
                                         args=", ".join(end_props) if end_props else "",
                                         end_hint=("The system then makes the closing call " + end["tool"] + " with these values." if end else "")),
             "tools": tools, "transitions": trans}
@@ -323,10 +342,10 @@ def build_workflow(spec, openapi):
     if end:
         baked = {k: "ff_end_" + k for k in api[end["tool"]]["props"] if k not in call_vars}
         pre = snippet(CLOSE_PRE, DEFAULT_TEXT=json.dumps(end.get("default") or {}))
-        nodes["close"] = api_node("close", bank_tool(api, end["tool"], call_vars, "Close the call in the bank's records.", baked=baked, retries=1, pre=pre, post=CLOSE_POST), "end")
+        nodes["close"] = api_node("close", named(bank_tool(api, end["tool"], call_vars, "Close the call in the bank's records.", baked=baked, retries=1, pre=pre, post=CLOSE_POST), end["tool"], spec), "end")
         # safety net: a call that ends any other way (the customer hangs up, a step fails) is still closed, once
         fb = bank_tool(api, end["tool"], call_vars, "Record how the call ended.", baked=baked, pre=snippet(FALLBACK_PRE, DEFAULT_TEXT=json.dumps(end.get("default") or {})), config={"alwaysRunsAt": ["end_of_call"]})
-        fb["function"]["name"] = end["tool"] + "_at_end"
+        named(fb, end["tool"], spec); fb["function"]["name"] = fn_name(end["tool"]) + "_at_end"
         wf_tools.append(fb)
     nodes["end"] = {"name": "end", "node_type": "end_call", "on_enter": {"type": "silent"}, "disable_inactivity_monitor": True, "transitions": [],
                     "terminal": {"type": "function", "function": {"name": "call_closed", "handler": "__function__:end_call",
