@@ -27,19 +27,27 @@ class Trace:
             import shutil; shutil.copy(self.path, os.path.join(root, "traces", "history", time.strftime("%m%d-%H%M%S-") + os.path.basename(self.path)))
         except Exception: pass
 
-async def ask(trace, purpose, system, prompt, model=None):
-    """One model call. Returns the text of the answer."""
+async def ask(trace, purpose, system, prompt, model=None, tries=3):
+    """One model call. Returns the text of the answer. A call that fails or comes back empty is made again."""
     from claude_agent_sdk import AssistantMessage, ClaudeAgentOptions, ResultMessage, TextBlock, query
     model = model or MODEL
-    opts = ClaudeAgentOptions(model=model, system_prompt=system, allowed_tools=[], max_turns=1, setting_sources=[], permission_mode="dontAsk")
-    t0, text, cost = time.time(), "", None
-    async for m in query(prompt=prompt, options=opts):
-        if isinstance(m, AssistantMessage): text += "".join(b.text for b in m.content if isinstance(b, TextBlock))
-        elif isinstance(m, ResultMessage): cost = m.total_cost_usd
-    trace.calls += 1
-    trace.usd += float(cost or 0)
-    trace.log(f"MODEL CALL {trace.calls}: model={model} | purpose: {purpose} | {time.time() - t0:.0f} s | prompt {len(prompt)} chars, answer {len(text)} chars" + (f" | ${cost:.2f}" if cost else ""))
-    return text
+    # tools=[] takes every tool away from the model: with tools at hand it sometimes reaches for one, and the single turn it has then ends in an error
+    opts = ClaudeAgentOptions(model=model, system_prompt=system, tools=[], allowed_tools=[], max_turns=1, setting_sources=[], permission_mode="dontAsk")
+    for attempt in range(1, tries + 1):
+        t0, text, cost, err = time.time(), "", None, None
+        try:
+            async for m in query(prompt=prompt, options=opts):
+                if isinstance(m, AssistantMessage): text += "".join(b.text for b in m.content if isinstance(b, TextBlock))
+                elif isinstance(m, ResultMessage): cost = m.total_cost_usd
+        except Exception as e:
+            err = type(e).__name__ + ": " + " ".join(str(e).split())[:300]
+        trace.calls += 1
+        trace.usd += float(cost or 0)
+        trace.log(f"MODEL CALL {trace.calls}: model={model} | purpose: {purpose} | {time.time() - t0:.0f} s | prompt {len(prompt)} chars, answer {len(text)} chars" + (f" | ${cost:.2f}" if cost else "")
+                  + (f" | FAILED ({err or 'empty answer'}), try {attempt} of {tries}" if err or not text.strip() else ""))
+        if not err and text.strip(): return text
+        if attempt < tries: await asyncio.sleep(5 * attempt)
+    raise RuntimeError(f"the model call '{purpose}' failed {tries} times: {err or 'empty answer'}")
 
 def json_of(text):
     """The JSON object in a model answer: the last fenced block, or the outermost braces."""
