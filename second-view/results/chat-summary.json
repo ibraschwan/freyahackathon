@@ -1,0 +1,5249 @@
+[
+  {
+    "case": "SV1-01",
+    "call_id": "d70dd62d-2224-4b77-acad-36e9a6ea6e31",
+    "ledger_score": {
+      "pass": true,
+      "failed": []
+    },
+    "transport_errors": [],
+    "speech": [
+      {
+        "message_index": 0,
+        "role": "user",
+        "text": "Hello?",
+        "timestamp": "2026-10-11T14:17:59.903Z",
+        "seconds": 0.007295846939086914
+      },
+      {
+        "message_index": 1,
+        "role": "assistant",
+        "text": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Daniel Reyes?",
+        "timestamp": "2026-10-11T14:18:00.262Z",
+        "seconds": 0.022568941116333008
+      },
+      {
+        "message_index": 6,
+        "role": "user",
+        "text": "Yes, Daniel Reyes speaking.",
+        "timestamp": "2026-10-11T14:18:21.031Z",
+        "seconds": 21.1042959690094
+      },
+      {
+        "message_index": 8,
+        "role": "assistant",
+        "text": "What are the last four digits of your phone number?",
+        "timestamp": "2026-10-11T14:18:21.596Z",
+        "seconds": 21.154295921325684
+      },
+      {
+        "message_index": 11,
+        "role": "user",
+        "text": "4471",
+        "timestamp": "2026-10-11T14:19:30.531Z",
+        "seconds": 90.62329602241516
+      },
+      {
+        "message_index": 16,
+        "role": "assistant",
+        "text": "Thank you. What is your date of birth?",
+        "timestamp": "2026-10-11T14:19:33.088Z",
+        "seconds": 92.54829597473145
+      },
+      {
+        "message_index": 19,
+        "role": "user",
+        "text": "14 March 1988",
+        "timestamp": "2026-10-11T14:19:45.826Z",
+        "seconds": 105.9422960281372
+      },
+      {
+        "message_index": 33,
+        "role": "assistant",
+        "text": "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your credit card ending 4821 has arrears of 420.00 and is 6 days late. Can you pay the full arrears today, or on the next working day if payment today is no longer possible?",
+        "timestamp": "2026-10-11T14:19:49.031Z",
+        "seconds": 108.88229584693909
+      },
+      {
+        "message_index": 36,
+        "role": "user",
+        "text": "Yes, I can pay the full 420 today.",
+        "timestamp": "2026-10-11T14:20:17.118Z",
+        "seconds": 137.22629594802856
+      },
+      {
+        "message_index": 46,
+        "role": "assistant",
+        "text": "To confirm: you will pay 420.00 for your credit card ending 4821 on Wednesday 14 October 2026. May I record that commitment?",
+        "timestamp": "2026-10-11T14:20:19.487Z",
+        "seconds": 139.34829592704773
+      },
+      {
+        "message_index": 49,
+        "role": "user",
+        "text": "Yes, I confirm.",
+        "timestamp": "2026-10-11T14:20:39.495Z",
+        "seconds": 159.5582959651947
+      },
+      {
+        "message_index": 67,
+        "role": "assistant",
+        "text": "Your commitment is available in the online portal.",
+        "timestamp": "2026-10-11T14:20:59.675Z",
+        "seconds": 179.5492959022522
+      },
+      {
+        "message_index": 70,
+        "role": "user",
+        "text": "Nothing else, thank you. Goodbye.",
+        "timestamp": "2026-10-11T14:21:12.458Z",
+        "seconds": 192.54229593276978
+      },
+      {
+        "message_index": 80,
+        "role": "assistant",
+        "text": "Thank you for your time. Goodbye.",
+        "timestamp": "2026-10-11T14:21:16.022Z",
+        "seconds": 196.03329586982727
+      }
+    ],
+    "events": [
+      {
+        "message_index": 3,
+        "timestamp": "2026-10-11T14:18:00.295Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 1,
+        "userMessageId": "msg_1_1791728279882",
+        "finalAssistantMessageId": "msg_4_1791728279944",
+        "responseText": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Daniel Reyes?"
+      },
+      {
+        "message_index": 9,
+        "timestamp": "2026-10-11T14:18:21.787Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 2,
+        "userMessageId": "msg_2_1791728300979",
+        "finalAssistantMessageId": "msg_4_1791728301589",
+        "responseText": "What are the last four digits of your phone number?"
+      },
+      {
+        "message_index": 13,
+        "timestamp": "2026-10-11T14:19:32.012Z",
+        "node": "opening",
+        "event": "function_call_start",
+        "function": "verify_identity",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity",
+          "method": "POST",
+          "body": {
+            "field": "phone_last4",
+            "answer": "4471",
+            "customer_id": "c_ce415e65-890"
+          }
+        }
+      },
+      {
+        "message_index": 14,
+        "timestamp": "2026-10-11T14:19:32.396Z",
+        "node": "opening",
+        "event": "function_call_complete",
+        "function": "verify_identity",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": false,
+            "id_state": "open",
+            "what_to_do_next": "Correct (do not say so). Say \"Thank you.\" and ask the next security question: \"What is your date of birth?\""
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 17,
+        "timestamp": "2026-10-11T14:19:33.360Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 3,
+        "userMessageId": "msg_2_1791728370500",
+        "finalAssistantMessageId": "msg_7_1791728373080",
+        "responseText": "Thank you. What is your date of birth?"
+      },
+      {
+        "message_index": 21,
+        "timestamp": "2026-10-11T14:19:47.296Z",
+        "node": "opening",
+        "event": "function_call_start",
+        "function": "verify_identity",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity",
+          "method": "POST",
+          "body": {
+            "field": "date_of_birth",
+            "answer": "1988-03-14",
+            "customer_id": "c_ce415e65-890"
+          }
+        }
+      },
+      {
+        "message_index": 22,
+        "timestamp": "2026-10-11T14:19:48.080Z",
+        "node": "opening",
+        "event": "function_call_complete",
+        "function": "verify_identity",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": true,
+            "id_state": "verified",
+            "what_to_do_next": "All security answers are correct. Identity is verified. Say nothing about it yet."
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 25,
+        "timestamp": "2026-10-11T14:19:48.215Z",
+        "node": "get_account",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/get_account",
+          "method": "POST",
+          "body": {
+            "customer_id": "c_ce415e65-890"
+          }
+        }
+      },
+      {
+        "message_index": 26,
+        "timestamp": "2026-10-11T14:19:48.336Z",
+        "node": "get_account",
+        "event": "function_call_complete",
+        "function": "api_call",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "products": [
+              {
+                "product_id": "p1",
+                "type": "credit_card",
+                "card_last4": "4821",
+                "past_due": 420,
+                "days_late": 6,
+                "minimum_payment": 126
+              }
+            ]
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 34,
+        "timestamp": "2026-10-11T14:19:49.076Z",
+        "node": "negotiate",
+        "event": "turn_completed",
+        "turnIndex": 4,
+        "userMessageId": "msg_2_1791728385817",
+        "finalAssistantMessageId": "msg_16_1791728388753",
+        "responseText": "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your credit card ending 4821 has arrears of 420.00 and is 6 days late. Can you pay the full arrears today, or on the next working day if payment today is no longer possible?"
+      },
+      {
+        "message_index": 38,
+        "timestamp": "2026-10-11T14:20:18.190Z",
+        "node": "negotiate",
+        "event": "function_call_start",
+        "function": "check_terms",
+        "args": {
+          "params": {
+            "amount": "full",
+            "date": "2026-10-14",
+            "product_id": "p1"
+          },
+          "timeout_ms": 10000
+        }
+      },
+      {
+        "message_index": 39,
+        "timestamp": "2026-10-11T14:20:18.395Z",
+        "node": "negotiate",
+        "event": "function_call_complete",
+        "function": "check_terms",
+        "result": {
+          "status": "success",
+          "data": null,
+          "message": "Code executed successfully",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 47,
+        "timestamp": "2026-10-11T14:20:19.516Z",
+        "node": "negotiate",
+        "event": "turn_completed",
+        "turnIndex": 5,
+        "userMessageId": "msg_2_1791728417104",
+        "finalAssistantMessageId": "msg_12_1791728419220",
+        "responseText": "To confirm: you will pay 420.00 for your credit card ending 4821 on Wednesday 14 October 2026. May I record that commitment?"
+      },
+      {
+        "message_index": 51,
+        "timestamp": "2026-10-11T14:20:40.430Z",
+        "node": "negotiate",
+        "event": "function_call_start",
+        "function": "customer_confirmed",
+        "args": {
+          "timeout_ms": 10000
+        }
+      },
+      {
+        "message_index": 52,
+        "timestamp": "2026-10-11T14:20:44.675Z",
+        "node": "negotiate",
+        "event": "function_call_complete",
+        "function": "customer_confirmed",
+        "result": {
+          "status": "success",
+          "data": null,
+          "message": "Code executed successfully",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 59,
+        "timestamp": "2026-10-11T14:20:51.952Z",
+        "node": "create_promise",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/create_promise",
+          "method": "POST",
+          "body": {
+            "date": "2026-10-14",
+            "amount": 420.0,
+            "product_id": "p1",
+            "customer_id": "c_ce415e65-890"
+          }
+        }
+      },
+      {
+        "message_index": 60,
+        "timestamp": "2026-10-11T14:20:55.729Z",
+        "node": "create_promise",
+        "event": "function_call_complete",
+        "function": "api_call",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "promise_id": "pr1"
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 68,
+        "timestamp": "2026-10-11T14:20:59.818Z",
+        "node": "negotiate",
+        "event": "turn_completed",
+        "turnIndex": 6,
+        "userMessageId": "msg_2_1791728439435",
+        "finalAssistantMessageId": "msg_20_1791728459420",
+        "responseText": "Your commitment is available in the online portal."
+      },
+      {
+        "message_index": 72,
+        "timestamp": "2026-10-11T14:21:13.616Z",
+        "node": "negotiate",
+        "event": "function_call_start",
+        "function": "wrap_up",
+        "args": {
+          "params": {
+            "outcome": "promise"
+          },
+          "timeout_ms": 10000
+        }
+      },
+      {
+        "message_index": 73,
+        "timestamp": "2026-10-11T14:21:14.234Z",
+        "node": "negotiate",
+        "event": "function_call_complete",
+        "function": "wrap_up",
+        "result": {
+          "status": "success",
+          "data": null,
+          "message": "Code executed successfully",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 83,
+        "timestamp": "2026-10-11T14:21:16.755Z",
+        "node": "close_call",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/close_call",
+          "method": "POST",
+          "body": {
+            "outcome": "promise",
+            "customer_id": "c_ce415e65-890"
+          }
+        }
+      },
+      {
+        "message_index": 84,
+        "timestamp": "2026-10-11T14:21:17.747Z",
+        "node": "close_call",
+        "event": "function_call_complete",
+        "function": "api_call",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 87,
+        "timestamp": "2026-10-11T14:21:17.855Z",
+        "node": "end",
+        "event": "function_call_start",
+        "function": "end_call",
+        "args": {
+          "message_mode": "none"
+        }
+      },
+      {
+        "message_index": 89,
+        "timestamp": "2026-10-11T14:21:18.152Z",
+        "node": "end",
+        "event": "call_ended",
+        "reason": "assistant-ended-call"
+      },
+      {
+        "message_index": 90,
+        "timestamp": "2026-10-11T14:21:18.194Z",
+        "node": "end",
+        "event": "function_call_complete",
+        "function": "end_call",
+        "result": {
+          "status": "success",
+          "message": "Call ended"
+        }
+      },
+      {
+        "message_index": 91,
+        "timestamp": "2026-10-11T14:21:29.610Z",
+        "node": "end",
+        "event": "function_call_start",
+        "function": "close_call_at_end",
+        "args": {
+          "outcome": "promise",
+          "reason": "UNKNOWN"
+        }
+      },
+      {
+        "message_index": 92,
+        "timestamp": "2026-10-11T14:21:29.778Z",
+        "node": "end",
+        "event": "function_call_error",
+        "function": "close_call_at_end",
+        "error": "Traceback (most recent call last):\n  File \"<string>\", line 266, in <module>\n    raise Exception('already closed')\nException: already closed\n"
+      }
+    ],
+    "ledger": {
+      "ok": true,
+      "case": "PUB-01",
+      "team": "c354dcc1e41b4a34e576740f",
+      "now": "2026-10-14T11:00",
+      "verified": {
+        "phone_last4": true,
+        "date_of_birth": true
+      },
+      "wrong": 0,
+      "hinted": false,
+      "promises": [
+        {
+          "promise_id": "pr1",
+          "product_id": "p1",
+          "type": "credit_card",
+          "amount": 420,
+          "date": "2026-10-14"
+        }
+      ],
+      "notes": [],
+      "callbacks": [],
+      "transfers": [],
+      "outcome": "promise",
+      "reason": null,
+      "failures": {
+        "verify_identity": 0,
+        "get_account": 0,
+        "create_promise": 0,
+        "close_call": 0
+      },
+      "calls": [
+        {
+          "n": 1,
+          "tool": "verify_identity",
+          "args": {
+            "field": "phone_last4",
+            "answer": "4471"
+          },
+          "status": 200,
+          "result": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": false
+          }
+        },
+        {
+          "n": 2,
+          "tool": "verify_identity",
+          "args": {
+            "field": "date_of_birth",
+            "answer": "1988-03-14"
+          },
+          "status": 200,
+          "result": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": true
+          }
+        },
+        {
+          "n": 3,
+          "tool": "get_account",
+          "args": {},
+          "status": 200,
+          "result": {
+            "ok": true,
+            "products": [
+              {
+                "product_id": "p1",
+                "type": "credit_card",
+                "card_last4": "4821",
+                "past_due": 420,
+                "days_late": 6,
+                "minimum_payment": 126
+              }
+            ]
+          }
+        },
+        {
+          "n": 4,
+          "tool": "create_promise",
+          "args": {
+            "date": "2026-10-14",
+            "amount": 420,
+            "product_id": "p1"
+          },
+          "status": 200,
+          "result": {
+            "ok": true,
+            "promise_id": "pr1"
+          }
+        },
+        {
+          "n": 5,
+          "tool": "close_call",
+          "args": {
+            "outcome": "promise"
+          },
+          "status": 200,
+          "result": {
+            "ok": true
+          }
+        }
+      ],
+      "last_at": 1791728476771
+    },
+    "fetched_call_status": "16",
+    "bank_close_count": 1
+  },
+  {
+    "case": "SV1-02",
+    "call_id": "455d3494-596e-4e9c-bbcb-6eaef9438486",
+    "ledger_score": {
+      "pass": true,
+      "failed": []
+    },
+    "transport_errors": [
+      {
+        "user": "Nothing else, thank you. Goodbye.",
+        "elapsed_s": 33.312,
+        "platform_error": "POST /api/v2/chat/message -> 504: error code: 504\n"
+      }
+    ],
+    "speech": [
+      {
+        "message_index": 0,
+        "role": "user",
+        "text": "Hello?",
+        "timestamp": "2026-10-11T14:21:53.400Z",
+        "seconds": 0.008450031280517578
+      },
+      {
+        "message_index": 1,
+        "role": "assistant",
+        "text": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Priya Nair?",
+        "timestamp": "2026-10-11T14:21:53.710Z",
+        "seconds": 0.025326013565063477
+      },
+      {
+        "message_index": 6,
+        "role": "user",
+        "text": "Yes, Priya Nair speaking.",
+        "timestamp": "2026-10-11T14:21:54.982Z",
+        "seconds": 1.5114500522613525
+      },
+      {
+        "message_index": 8,
+        "role": "assistant",
+        "text": "What are the last four digits of your phone number?",
+        "timestamp": "2026-10-11T14:21:56.237Z",
+        "seconds": 1.5684499740600586
+      },
+      {
+        "message_index": 11,
+        "role": "user",
+        "text": "1502",
+        "timestamp": "2026-10-11T14:21:58.079Z",
+        "seconds": 4.655450105667114
+      },
+      {
+        "message_index": 16,
+        "role": "assistant",
+        "text": "Thank you. What is your date of birth?",
+        "timestamp": "2026-10-11T14:21:59.864Z",
+        "seconds": 5.705450057983398
+      },
+      {
+        "message_index": 19,
+        "role": "user",
+        "text": "1986-05-17",
+        "timestamp": "2026-10-11T14:22:01.547Z",
+        "seconds": 8.126450061798096
+      },
+      {
+        "message_index": 33,
+        "role": "assistant",
+        "text": "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your credit card ending 1903 has arrears of 2125.10 and is 12 days late. Can you pay the full arrears today, or on the next working day if payment today is no longer possible?",
+        "timestamp": "2026-10-11T14:22:06.179Z",
+        "seconds": 12.469449996948242
+      },
+      {
+        "message_index": 36,
+        "role": "user",
+        "text": "The full amount is too much for me.",
+        "timestamp": "2026-10-11T14:22:07.659Z",
+        "seconds": 14.267450094223022
+      },
+      {
+        "message_index": 46,
+        "role": "assistant",
+        "text": "Could you pay the minimum acceptable amount of 1062.55? Any remainder stays overdue.",
+        "timestamp": "2026-10-11T14:22:09.941Z",
+        "seconds": 16.180450201034546
+      },
+      {
+        "message_index": 49,
+        "role": "user",
+        "text": "Yes, I can pay 1062.55 today.",
+        "timestamp": "2026-10-11T14:22:11.322Z",
+        "seconds": 17.931450128555298
+      },
+      {
+        "message_index": 59,
+        "role": "assistant",
+        "text": "To confirm: you will pay 1062.55 for your credit card ending 1903 on Wednesday 14 October 2026. May I record that commitment?",
+        "timestamp": "2026-10-11T14:22:13.052Z",
+        "seconds": 19.282450199127197
+      },
+      {
+        "message_index": 62,
+        "role": "user",
+        "text": "Yes, I confirm.",
+        "timestamp": "2026-10-11T14:22:14.309Z",
+        "seconds": 20.911450147628784
+      },
+      {
+        "message_index": 80,
+        "role": "assistant",
+        "text": "Your commitment is available in the online portal.",
+        "timestamp": "2026-10-11T14:22:15.828Z",
+        "seconds": 22.20644998550415
+      },
+      {
+        "message_index": 83,
+        "role": "user",
+        "text": "Nothing else, thank you. Goodbye.",
+        "timestamp": "2026-10-11T14:22:17.098Z",
+        "seconds": 23.656450033187866
+      },
+      {
+        "message_index": 93,
+        "role": "assistant",
+        "text": "Thank you for your time. Goodbye.",
+        "timestamp": "2026-10-11T14:22:24.342Z",
+        "seconds": 30.87945008277893
+      }
+    ],
+    "events": [
+      {
+        "message_index": 3,
+        "timestamp": "2026-10-11T14:21:53.744Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 1,
+        "userMessageId": "msg_1_1791728513364",
+        "finalAssistantMessageId": "msg_4_1791728513434",
+        "responseText": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Priya Nair?"
+      },
+      {
+        "message_index": 9,
+        "timestamp": "2026-10-11T14:21:56.498Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 2,
+        "userMessageId": "msg_2_1791728514865",
+        "finalAssistantMessageId": "msg_4_1791728516229",
+        "responseText": "What are the last four digits of your phone number?"
+      },
+      {
+        "message_index": 13,
+        "timestamp": "2026-10-11T14:21:58.754Z",
+        "node": "opening",
+        "event": "function_call_start",
+        "function": "verify_identity",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity",
+          "method": "POST",
+          "body": {
+            "field": "phone_last4",
+            "answer": "1502",
+            "customer_id": "c_cbe8eace-701"
+          }
+        }
+      },
+      {
+        "message_index": 14,
+        "timestamp": "2026-10-11T14:21:59.040Z",
+        "node": "opening",
+        "event": "function_call_complete",
+        "function": "verify_identity",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": false,
+            "id_state": "open",
+            "what_to_do_next": "Correct (do not say so). Say \"Thank you.\" and ask the next security question: \"What is your date of birth?\""
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 17,
+        "timestamp": "2026-10-11T14:22:00.109Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 3,
+        "userMessageId": "msg_2_1791728518009",
+        "finalAssistantMessageId": "msg_7_1791728519855",
+        "responseText": "Thank you. What is your date of birth?"
+      },
+      {
+        "message_index": 21,
+        "timestamp": "2026-10-11T14:22:02.452Z",
+        "node": "opening",
+        "event": "function_call_start",
+        "function": "verify_identity",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity",
+          "method": "POST",
+          "body": {
+            "field": "date_of_birth",
+            "answer": "1986-05-17",
+            "customer_id": "c_cbe8eace-701"
+          }
+        }
+      },
+      {
+        "message_index": 22,
+        "timestamp": "2026-10-11T14:22:03.662Z",
+        "node": "opening",
+        "event": "function_call_complete",
+        "function": "verify_identity",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": true,
+            "id_state": "verified",
+            "what_to_do_next": "All security answers are correct. Identity is verified. Say nothing about it yet."
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 25,
+        "timestamp": "2026-10-11T14:22:03.790Z",
+        "node": "get_account",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/get_account",
+          "method": "POST",
+          "body": {
+            "customer_id": "c_cbe8eace-701"
+          }
+        }
+      },
+      {
+        "message_index": 26,
+        "timestamp": "2026-10-11T14:22:04.731Z",
+        "node": "get_account",
+        "event": "function_call_complete",
+        "function": "api_call",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "products": [
+              {
+                "product_id": "p1",
+                "type": "credit_card",
+                "card_last4": "1903",
+                "past_due": 2125.1,
+                "days_late": 12,
+                "minimum_payment": 637.5
+              }
+            ]
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 34,
+        "timestamp": "2026-10-11T14:22:06.239Z",
+        "node": "negotiate",
+        "event": "turn_completed",
+        "turnIndex": 4,
+        "userMessageId": "msg_2_1791728521484",
+        "finalAssistantMessageId": "msg_16_1791728525821",
+        "responseText": "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your credit card ending 1903 has arrears of 2125.10 and is 12 days late. Can you pay the full arrears today, or on the next working day if payment today is no longer possible?"
+      },
+      {
+        "message_index": 38,
+        "timestamp": "2026-10-11T14:22:09.174Z",
+        "node": "negotiate",
+        "event": "function_call_start",
+        "function": "customer_refused",
+        "args": {
+          "params": {
+            "kind": "full_amount_too_much",
+            "product_id": "p1"
+          },
+          "timeout_ms": 10000
+        }
+      },
+      {
+        "message_index": 39,
+        "timestamp": "2026-10-11T14:22:09.367Z",
+        "node": "negotiate",
+        "event": "function_call_complete",
+        "function": "customer_refused",
+        "result": {
+          "status": "success",
+          "data": null,
+          "message": "Code executed successfully",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 47,
+        "timestamp": "2026-10-11T14:22:09.983Z",
+        "node": "negotiate",
+        "event": "turn_completed",
+        "turnIndex": 5,
+        "userMessageId": "msg_2_1791728527621",
+        "finalAssistantMessageId": "msg_12_1791728529530",
+        "responseText": "Could you pay the minimum acceptable amount of 1062.55? Any remainder stays overdue."
+      },
+      {
+        "message_index": 51,
+        "timestamp": "2026-10-11T14:22:12.274Z",
+        "node": "negotiate",
+        "event": "function_call_start",
+        "function": "check_terms",
+        "args": {
+          "params": {
+            "amount": "floor",
+            "date": "2026-10-14",
+            "product_id": "p1"
+          },
+          "timeout_ms": 10000
+        }
+      },
+      {
+        "message_index": 52,
+        "timestamp": "2026-10-11T14:22:12.440Z",
+        "node": "negotiate",
+        "event": "function_call_complete",
+        "function": "check_terms",
+        "result": {
+          "status": "success",
+          "data": null,
+          "message": "Code executed successfully",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 60,
+        "timestamp": "2026-10-11T14:22:13.096Z",
+        "node": "negotiate",
+        "event": "turn_completed",
+        "turnIndex": 6,
+        "userMessageId": "msg_2_1791728531285",
+        "finalAssistantMessageId": "msg_12_1791728532633",
+        "responseText": "To confirm: you will pay 1062.55 for your credit card ending 1903 on Wednesday 14 October 2026. May I record that commitment?"
+      },
+      {
+        "message_index": 64,
+        "timestamp": "2026-10-11T14:22:14.587Z",
+        "node": "negotiate",
+        "event": "function_call_start",
+        "function": "customer_confirmed",
+        "args": {
+          "timeout_ms": 10000
+        }
+      },
+      {
+        "message_index": 65,
+        "timestamp": "2026-10-11T14:22:14.831Z",
+        "node": "negotiate",
+        "event": "function_call_complete",
+        "function": "customer_confirmed",
+        "result": {
+          "status": "success",
+          "data": null,
+          "message": "Code executed successfully",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 72,
+        "timestamp": "2026-10-11T14:22:15.212Z",
+        "node": "create_promise",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/create_promise",
+          "method": "POST",
+          "body": {
+            "date": "2026-10-14",
+            "amount": 1062.55,
+            "product_id": "p1",
+            "customer_id": "c_cbe8eace-701"
+          }
+        }
+      },
+      {
+        "message_index": 73,
+        "timestamp": "2026-10-11T14:22:15.275Z",
+        "node": "create_promise",
+        "event": "function_call_complete",
+        "function": "api_call",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "promise_id": "pr1"
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 81,
+        "timestamp": "2026-10-11T14:22:15.863Z",
+        "node": "negotiate",
+        "event": "turn_completed",
+        "turnIndex": 7,
+        "userMessageId": "msg_2_1791728534266",
+        "finalAssistantMessageId": "msg_20_1791728535557",
+        "responseText": "Your commitment is available in the online portal."
+      },
+      {
+        "message_index": 85,
+        "timestamp": "2026-10-11T14:22:17.799Z",
+        "node": "negotiate",
+        "event": "function_call_start",
+        "function": "wrap_up",
+        "args": {
+          "params": {
+            "outcome": "promise"
+          },
+          "timeout_ms": 10000
+        }
+      },
+      {
+        "message_index": 86,
+        "timestamp": "2026-10-11T14:22:20.630Z",
+        "node": "negotiate",
+        "event": "function_call_complete",
+        "function": "wrap_up",
+        "result": {
+          "status": "success",
+          "data": null,
+          "message": "Code executed successfully",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 96,
+        "timestamp": "2026-10-11T14:22:28.276Z",
+        "node": "close_call",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/close_call",
+          "method": "POST",
+          "body": {
+            "outcome": "promise",
+            "customer_id": "c_cbe8eace-701"
+          }
+        }
+      },
+      {
+        "message_index": 97,
+        "timestamp": "2026-10-11T14:22:31.964Z",
+        "node": "close_call",
+        "event": "function_call_complete",
+        "function": "api_call",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 100,
+        "timestamp": "2026-10-11T14:22:32.058Z",
+        "node": "end",
+        "event": "function_call_start",
+        "function": "end_call",
+        "args": {
+          "message_mode": "none"
+        }
+      },
+      {
+        "message_index": 102,
+        "timestamp": "2026-10-11T14:22:32.327Z",
+        "node": "end",
+        "event": "call_ended",
+        "reason": "assistant-ended-call"
+      },
+      {
+        "message_index": 103,
+        "timestamp": "2026-10-11T14:22:32.368Z",
+        "node": "end",
+        "event": "function_call_complete",
+        "function": "end_call",
+        "result": {
+          "status": "success",
+          "message": "Call ended"
+        }
+      },
+      {
+        "message_index": 104,
+        "timestamp": "2026-10-11T14:22:45.401Z",
+        "node": "end",
+        "event": "function_call_start",
+        "function": "close_call_at_end",
+        "args": {
+          "outcome": "promise",
+          "reason": "UNKNOWN"
+        }
+      },
+      {
+        "message_index": 105,
+        "timestamp": "2026-10-11T14:22:45.537Z",
+        "node": "end",
+        "event": "function_call_error",
+        "function": "close_call_at_end",
+        "error": "Traceback (most recent call last):\n  File \"<string>\", line 266, in <module>\n    raise Exception('already closed')\nException: already closed\n"
+      }
+    ],
+    "ledger": {
+      "ok": true,
+      "case": "PUB-06",
+      "team": "c354dcc1e41b4a34e576740f",
+      "now": "2026-10-14T11:00",
+      "verified": {
+        "phone_last4": true,
+        "date_of_birth": true
+      },
+      "wrong": 0,
+      "hinted": false,
+      "promises": [
+        {
+          "promise_id": "pr1",
+          "product_id": "p1",
+          "type": "credit_card",
+          "amount": 1062.55,
+          "date": "2026-10-14"
+        }
+      ],
+      "notes": [],
+      "callbacks": [],
+      "transfers": [],
+      "outcome": "promise",
+      "reason": null,
+      "failures": {
+        "verify_identity": 0,
+        "get_account": 0,
+        "create_promise": 0,
+        "close_call": 0
+      },
+      "calls": [
+        {
+          "n": 1,
+          "tool": "verify_identity",
+          "args": {
+            "field": "phone_last4",
+            "answer": "1502"
+          },
+          "status": 200,
+          "result": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": false
+          }
+        },
+        {
+          "n": 2,
+          "tool": "verify_identity",
+          "args": {
+            "field": "date_of_birth",
+            "answer": "1986-05-17"
+          },
+          "status": 200,
+          "result": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": true
+          }
+        },
+        {
+          "n": 3,
+          "tool": "get_account",
+          "args": {},
+          "status": 200,
+          "result": {
+            "ok": true,
+            "products": [
+              {
+                "product_id": "p1",
+                "type": "credit_card",
+                "card_last4": "1903",
+                "past_due": 2125.1,
+                "days_late": 12,
+                "minimum_payment": 637.5
+              }
+            ]
+          }
+        },
+        {
+          "n": 4,
+          "tool": "create_promise",
+          "args": {
+            "date": "2026-10-14",
+            "amount": 1062.55,
+            "product_id": "p1"
+          },
+          "status": 200,
+          "result": {
+            "ok": true,
+            "promise_id": "pr1"
+          }
+        },
+        {
+          "n": 5,
+          "tool": "close_call",
+          "args": {
+            "outcome": "promise"
+          },
+          "status": 200,
+          "result": {
+            "ok": true
+          }
+        }
+      ],
+      "last_at": 1791728548286
+    },
+    "fetched_call_status": "16",
+    "bank_close_count": 1
+  },
+  {
+    "case": "SV1-03",
+    "call_id": "335747f9-d12d-4681-b970-434f74da6450",
+    "ledger_score": {
+      "pass": false,
+      "failed": [
+        "outcome (None, None), expected ('not_verified', 'failed')",
+        "the call was not closed with close_call"
+      ]
+    },
+    "transport_errors": [],
+    "speech": [
+      {
+        "message_index": 0,
+        "role": "user",
+        "text": "Hello?",
+        "timestamp": "2026-10-11T14:22:52.832Z",
+        "seconds": 0.01026606559753418
+      },
+      {
+        "message_index": 1,
+        "role": "assistant",
+        "text": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Owen Park?",
+        "timestamp": "2026-10-11T14:22:53.169Z",
+        "seconds": 0.034277915954589844
+      },
+      {
+        "message_index": 6,
+        "role": "user",
+        "text": "Yes, Owen Park speaking.",
+        "timestamp": "2026-10-11T14:22:54.138Z",
+        "seconds": 1.3012659549713135
+      },
+      {
+        "message_index": 8,
+        "role": "assistant",
+        "text": "What are the last four digits of your phone number?",
+        "timestamp": "2026-10-11T14:22:55.874Z",
+        "seconds": 1.3592660427093506
+      },
+      {
+        "message_index": 11,
+        "role": "user",
+        "text": "0000",
+        "timestamp": "2026-10-11T14:22:57.417Z",
+        "seconds": 4.521265983581543
+      },
+      {
+        "message_index": 16,
+        "role": "assistant",
+        "text": "That does not match our records. What are the last four digits of your phone number?",
+        "timestamp": "2026-10-11T14:23:08.428Z",
+        "seconds": 13.965265989303589
+      },
+      {
+        "message_index": 19,
+        "role": "user",
+        "text": "1111",
+        "timestamp": "2026-10-11T14:23:10.023Z",
+        "seconds": 17.069266080856323
+      },
+      {
+        "message_index": 24,
+        "role": "assistant",
+        "text": "That does not match our records. What are the last four digits of your phone number?",
+        "timestamp": "2026-10-11T14:23:15.015Z",
+        "seconds": 21.13926601409912
+      },
+      {
+        "message_index": 27,
+        "role": "user",
+        "text": "6630",
+        "timestamp": "2026-10-11T14:23:16.563Z",
+        "seconds": 23.69226598739624
+      },
+      {
+        "message_index": 32,
+        "role": "assistant",
+        "text": "Thank you. What is your date of birth?",
+        "timestamp": "2026-10-11T14:23:20.262Z",
+        "seconds": 26.665266036987305
+      },
+      {
+        "message_index": 35,
+        "role": "user",
+        "text": "1992-07-21",
+        "timestamp": "2026-10-11T14:23:21.821Z",
+        "seconds": 28.94826602935791
+      },
+      {
+        "message_index": 49,
+        "role": "assistant",
+        "text": "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your credit card ending 0377 has arrears of 95.00 and is 4 days late. Can you pay the full arrears today, or on the next working day if payment today is no longer possible?",
+        "timestamp": "2026-10-11T14:23:25.886Z",
+        "seconds": 32.78026604652405
+      }
+    ],
+    "events": [
+      {
+        "message_index": 4,
+        "timestamp": "2026-10-11T14:22:53.210Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 1,
+        "userMessageId": "msg_1_1791728572806",
+        "finalAssistantMessageId": "msg_4_1791728572899",
+        "responseText": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Owen Park?"
+      },
+      {
+        "message_index": 9,
+        "timestamp": "2026-10-11T14:22:56.127Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 2,
+        "userMessageId": "msg_2_1791728574093",
+        "finalAssistantMessageId": "msg_4_1791728575852",
+        "responseText": "What are the last four digits of your phone number?"
+      },
+      {
+        "message_index": 13,
+        "timestamp": "2026-10-11T14:23:01.628Z",
+        "node": "opening",
+        "event": "function_call_start",
+        "function": "verify_identity",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity",
+          "method": "POST",
+          "body": {
+            "field": "phone_last4",
+            "answer": "0000",
+            "customer_id": "c_be1fafd6-b79"
+          }
+        }
+      },
+      {
+        "message_index": 14,
+        "timestamp": "2026-10-11T14:23:06.780Z",
+        "node": "opening",
+        "event": "function_call_complete",
+        "function": "verify_identity",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "verified": false,
+            "wrong_answers_left": 2,
+            "all_verified": false,
+            "id_state": "open",
+            "what_to_do_next": "That answer is WRONG. Do not go on to the next question. Say: \"That does not match our records.\" and ask the SAME question once more: \"What are the last four digits of your phone number?\" Never say which part was wrong. Wrong answers left: 2."
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 17,
+        "timestamp": "2026-10-11T14:23:08.673Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 3,
+        "userMessageId": "msg_2_1791728577315",
+        "finalAssistantMessageId": "msg_7_1791728588419",
+        "responseText": "That does not match our records. What are the last four digits of your phone number?"
+      },
+      {
+        "message_index": 21,
+        "timestamp": "2026-10-11T14:23:12.144Z",
+        "node": "opening",
+        "event": "function_call_start",
+        "function": "verify_identity",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity",
+          "method": "POST",
+          "body": {
+            "field": "phone_last4",
+            "answer": "1111",
+            "customer_id": "c_be1fafd6-b79"
+          }
+        }
+      },
+      {
+        "message_index": 22,
+        "timestamp": "2026-10-11T14:23:13.912Z",
+        "node": "opening",
+        "event": "function_call_complete",
+        "function": "verify_identity",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "verified": false,
+            "wrong_answers_left": 1,
+            "all_verified": false,
+            "id_state": "open",
+            "what_to_do_next": "That answer is WRONG. Do not go on to the next question. Say: \"That does not match our records.\" and ask the SAME question once more: \"What are the last four digits of your phone number?\" Never say which part was wrong. Wrong answers left: 1."
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 25,
+        "timestamp": "2026-10-11T14:23:15.273Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 4,
+        "userMessageId": "msg_2_1791728589861",
+        "finalAssistantMessageId": "msg_7_1791728595006",
+        "responseText": "That does not match our records. What are the last four digits of your phone number?"
+      },
+      {
+        "message_index": 29,
+        "timestamp": "2026-10-11T14:23:18.660Z",
+        "node": "opening",
+        "event": "function_call_start",
+        "function": "verify_identity",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity",
+          "method": "POST",
+          "body": {
+            "field": "phone_last4",
+            "answer": "6630",
+            "customer_id": "c_be1fafd6-b79"
+          }
+        }
+      },
+      {
+        "message_index": 30,
+        "timestamp": "2026-10-11T14:23:19.440Z",
+        "node": "opening",
+        "event": "function_call_complete",
+        "function": "verify_identity",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 1,
+            "all_verified": false,
+            "id_state": "open",
+            "what_to_do_next": "Correct (do not say so). Say \"Thank you.\" and ask the next security question: \"What is your date of birth?\""
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 33,
+        "timestamp": "2026-10-11T14:23:20.437Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 5,
+        "userMessageId": "msg_2_1791728596483",
+        "finalAssistantMessageId": "msg_7_1791728600254",
+        "responseText": "Thank you. What is your date of birth?"
+      },
+      {
+        "message_index": 37,
+        "timestamp": "2026-10-11T14:23:23.554Z",
+        "node": "opening",
+        "event": "function_call_start",
+        "function": "verify_identity",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity",
+          "method": "POST",
+          "body": {
+            "field": "date_of_birth",
+            "answer": "1992-07-21",
+            "customer_id": "c_be1fafd6-b79"
+          }
+        }
+      },
+      {
+        "message_index": 38,
+        "timestamp": "2026-10-11T14:23:24.044Z",
+        "node": "opening",
+        "event": "function_call_complete",
+        "function": "verify_identity",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 1,
+            "all_verified": true,
+            "id_state": "verified",
+            "what_to_do_next": "All security answers are correct. Identity is verified. Say nothing about it yet."
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 41,
+        "timestamp": "2026-10-11T14:23:24.161Z",
+        "node": "get_account",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/get_account",
+          "method": "POST",
+          "body": {
+            "customer_id": "c_be1fafd6-b79"
+          }
+        }
+      },
+      {
+        "message_index": 42,
+        "timestamp": "2026-10-11T14:23:24.743Z",
+        "node": "get_account",
+        "event": "function_call_complete",
+        "function": "api_call",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "products": [
+              {
+                "product_id": "p1",
+                "type": "credit_card",
+                "card_last4": "0377",
+                "past_due": 95,
+                "days_late": 4,
+                "minimum_payment": 28.5
+              }
+            ]
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 50,
+        "timestamp": "2026-10-11T14:23:25.928Z",
+        "node": "negotiate",
+        "event": "turn_completed",
+        "turnIndex": 6,
+        "userMessageId": "msg_2_1791728601740",
+        "finalAssistantMessageId": "msg_16_1791728605569",
+        "responseText": "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your credit card ending 0377 has arrears of 95.00 and is 4 days late. Can you pay the full arrears today, or on the next working day if payment today is no longer possible?"
+      }
+    ],
+    "ledger": {
+      "ok": true,
+      "case": "PUB-03",
+      "team": "c354dcc1e41b4a34e576740f",
+      "now": "2026-10-14T11:00",
+      "verified": {
+        "phone_last4": true,
+        "date_of_birth": true
+      },
+      "wrong": 2,
+      "hinted": false,
+      "promises": [],
+      "notes": [],
+      "callbacks": [],
+      "transfers": [],
+      "outcome": null,
+      "reason": null,
+      "failures": {
+        "verify_identity": 0,
+        "get_account": 0
+      },
+      "calls": [
+        {
+          "n": 1,
+          "tool": "verify_identity",
+          "args": {
+            "field": "phone_last4",
+            "answer": "0000"
+          },
+          "status": 200,
+          "result": {
+            "ok": true,
+            "verified": false,
+            "wrong_answers_left": 2,
+            "all_verified": false
+          }
+        },
+        {
+          "n": 2,
+          "tool": "verify_identity",
+          "args": {
+            "field": "phone_last4",
+            "answer": "1111"
+          },
+          "status": 200,
+          "result": {
+            "ok": true,
+            "verified": false,
+            "wrong_answers_left": 1,
+            "all_verified": false
+          }
+        },
+        {
+          "n": 3,
+          "tool": "verify_identity",
+          "args": {
+            "field": "phone_last4",
+            "answer": "6630"
+          },
+          "status": 200,
+          "result": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 1,
+            "all_verified": false
+          }
+        },
+        {
+          "n": 4,
+          "tool": "verify_identity",
+          "args": {
+            "field": "date_of_birth",
+            "answer": "1992-07-21"
+          },
+          "status": 200,
+          "result": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 1,
+            "all_verified": true
+          }
+        },
+        {
+          "n": 5,
+          "tool": "get_account",
+          "args": {},
+          "status": 200,
+          "result": {
+            "ok": true,
+            "products": [
+              {
+                "product_id": "p1",
+                "type": "credit_card",
+                "card_last4": "0377",
+                "past_due": 95,
+                "days_late": 4,
+                "minimum_payment": 28.5
+              }
+            ]
+          }
+        }
+      ],
+      "last_at": 1791728604063
+    },
+    "fetched_call_status": "180",
+    "bank_close_count": 0
+  },
+  {
+    "case": "SV1-04",
+    "call_id": "9f2f93bc-6696-438c-8f9b-41e7651b69e4",
+    "ledger_score": {
+      "pass": true,
+      "failed": []
+    },
+    "transport_errors": [
+      {
+        "user": "Nothing else, thank you. Goodbye.",
+        "elapsed_s": 60.286,
+        "platform_error": "POST /api/v2/chat/message -> 504: error code: 504\n"
+      }
+    ],
+    "speech": [
+      {
+        "message_index": 0,
+        "role": "user",
+        "text": "Hello?",
+        "timestamp": "2026-10-11T14:23:29.265Z",
+        "seconds": 0.009418964385986328
+      },
+      {
+        "message_index": 1,
+        "role": "assistant",
+        "text": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Daniel Reyes?",
+        "timestamp": "2026-10-11T14:23:29.617Z",
+        "seconds": 0.028174161911010742
+      },
+      {
+        "message_index": 6,
+        "role": "user",
+        "text": "Yes, Daniel Reyes speaking.",
+        "timestamp": "2026-10-11T14:23:30.917Z",
+        "seconds": 1.6424188613891602
+      },
+      {
+        "message_index": 8,
+        "role": "assistant",
+        "text": "What are the last four digits of your phone number?",
+        "timestamp": "2026-10-11T14:23:31.200Z",
+        "seconds": 1.6914188861846924
+      },
+      {
+        "message_index": 11,
+        "role": "user",
+        "text": "4471",
+        "timestamp": "2026-10-11T14:23:33.031Z",
+        "seconds": 3.6834189891815186
+      },
+      {
+        "message_index": 16,
+        "role": "assistant",
+        "text": "Thank you. What is your date of birth?",
+        "timestamp": "2026-10-11T14:23:43.195Z",
+        "seconds": 13.436419010162354
+      },
+      {
+        "message_index": 19,
+        "role": "user",
+        "text": "1988-03-14",
+        "timestamp": "2026-10-11T14:23:45.837Z",
+        "seconds": 16.55441904067993
+      },
+      {
+        "message_index": 33,
+        "role": "assistant",
+        "text": "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your credit card ending 4821 has arrears of 420.00 and is 6 days late. Can you pay the full arrears today, or on the next working day if payment today is no longer possible?",
+        "timestamp": "2026-10-11T14:23:49.337Z",
+        "seconds": 19.79141902923584
+      },
+      {
+        "message_index": 36,
+        "role": "user",
+        "text": "I can pay the full 420 tomorrow, Friday the 16th.",
+        "timestamp": "2026-10-11T14:23:50.951Z",
+        "seconds": 21.639418840408325
+      },
+      {
+        "message_index": 41,
+        "role": "assistant",
+        "text": "Friday 16 October 2026 is a bank holiday, so it is not a working day. Would Saturday 17 October 2026 work instead?",
+        "timestamp": "2026-10-11T14:23:55.084Z",
+        "seconds": 25.20741891860962
+      },
+      {
+        "message_index": 44,
+        "role": "user",
+        "text": "Saturday the 17th works. I can pay the full 420 then.",
+        "timestamp": "2026-10-11T14:23:56.652Z",
+        "seconds": 27.358418941497803
+      },
+      {
+        "message_index": 54,
+        "role": "assistant",
+        "text": "To confirm: you will pay 420.00 for your credit card ending 4821 on Saturday 17 October 2026. May I record that commitment?",
+        "timestamp": "2026-10-11T14:23:58.203Z",
+        "seconds": 28.638418912887573
+      },
+      {
+        "message_index": 57,
+        "role": "user",
+        "text": "Yes, I confirm.",
+        "timestamp": "2026-10-11T14:23:59.713Z",
+        "seconds": 30.417418956756592
+      },
+      {
+        "message_index": 75,
+        "role": "assistant",
+        "text": "Your commitment is available in the online portal.",
+        "timestamp": "2026-10-11T14:24:08.187Z",
+        "seconds": 38.67141890525818
+      },
+      {
+        "message_index": 78,
+        "role": "user",
+        "text": "Nothing else, thank you. Goodbye.",
+        "timestamp": "2026-10-11T14:24:09.942Z",
+        "seconds": 40.6544189453125
+      },
+      {
+        "message_index": 88,
+        "role": "assistant",
+        "text": "Thank you for your time. Goodbye.",
+        "timestamp": "2026-10-11T14:24:21.411Z",
+        "seconds": 52.03441905975342
+      }
+    ],
+    "events": [
+      {
+        "message_index": 4,
+        "timestamp": "2026-10-11T14:23:29.714Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 1,
+        "userMessageId": "msg_1_1791728609248",
+        "finalAssistantMessageId": "msg_4_1791728609324",
+        "responseText": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Daniel Reyes?"
+      },
+      {
+        "message_index": 9,
+        "timestamp": "2026-10-11T14:23:31.432Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 2,
+        "userMessageId": "msg_2_1791728610879",
+        "finalAssistantMessageId": "msg_4_1791728611192",
+        "responseText": "What are the last four digits of your phone number?"
+      },
+      {
+        "message_index": 13,
+        "timestamp": "2026-10-11T14:23:37.576Z",
+        "node": "opening",
+        "event": "function_call_start",
+        "function": "verify_identity",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity",
+          "method": "POST",
+          "body": {
+            "field": "phone_last4",
+            "answer": "4471",
+            "customer_id": "c_a3b18062-30e"
+          }
+        }
+      },
+      {
+        "message_index": 14,
+        "timestamp": "2026-10-11T14:23:42.661Z",
+        "node": "opening",
+        "event": "function_call_complete",
+        "function": "verify_identity",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": false,
+            "id_state": "open",
+            "what_to_do_next": "Correct (do not say so). Say \"Thank you.\" and ask the next security question: \"What is your date of birth?\""
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 17,
+        "timestamp": "2026-10-11T14:23:43.442Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 3,
+        "userMessageId": "msg_2_1791728612922",
+        "finalAssistantMessageId": "msg_7_1791728623179",
+        "responseText": "Thank you. What is your date of birth?"
+      },
+      {
+        "message_index": 21,
+        "timestamp": "2026-10-11T14:23:47.904Z",
+        "node": "opening",
+        "event": "function_call_start",
+        "function": "verify_identity",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity",
+          "method": "POST",
+          "body": {
+            "field": "date_of_birth",
+            "answer": "1988-03-14",
+            "customer_id": "c_a3b18062-30e"
+          }
+        }
+      },
+      {
+        "message_index": 22,
+        "timestamp": "2026-10-11T14:23:48.207Z",
+        "node": "opening",
+        "event": "function_call_complete",
+        "function": "verify_identity",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": true,
+            "id_state": "verified",
+            "what_to_do_next": "All security answers are correct. Identity is verified. Say nothing about it yet."
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 25,
+        "timestamp": "2026-10-11T14:23:48.488Z",
+        "node": "get_account",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/get_account",
+          "method": "POST",
+          "body": {
+            "customer_id": "c_a3b18062-30e"
+          }
+        }
+      },
+      {
+        "message_index": 26,
+        "timestamp": "2026-10-11T14:23:48.619Z",
+        "node": "get_account",
+        "event": "function_call_complete",
+        "function": "api_call",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "products": [
+              {
+                "product_id": "p1",
+                "type": "credit_card",
+                "card_last4": "4821",
+                "past_due": 420,
+                "days_late": 6,
+                "minimum_payment": 126
+              }
+            ]
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 34,
+        "timestamp": "2026-10-11T14:23:49.368Z",
+        "node": "negotiate",
+        "event": "turn_completed",
+        "turnIndex": 4,
+        "userMessageId": "msg_2_1791728625791",
+        "finalAssistantMessageId": "msg_16_1791728629024",
+        "responseText": "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your credit card ending 4821 has arrears of 420.00 and is 6 days late. Can you pay the full arrears today, or on the next working day if payment today is no longer possible?"
+      },
+      {
+        "message_index": 38,
+        "timestamp": "2026-10-11T14:23:51.949Z",
+        "node": "negotiate",
+        "event": "function_call_start",
+        "function": "check_terms",
+        "args": {
+          "params": {
+            "amount": "full",
+            "date": "2026-10-16",
+            "product_id": "p1"
+          },
+          "timeout_ms": 10000
+        }
+      },
+      {
+        "message_index": 39,
+        "timestamp": "2026-10-11T14:23:54.483Z",
+        "node": "negotiate",
+        "event": "function_call_error",
+        "function": "check_terms",
+        "error": "Traceback (most recent call last):\n  File \"<string>\", line 285, in <module>\n    _result = __user_main__()\n  File \"<string>\", line 271, in __user_main__\n    raise Exception('RULE: ' + say(dt) + ' is ' + why(dt) + ', not a business day. Nothing was noted. ' + str(G.get('not_business_day') or 'Offer the next business day, <next>.').replace('<next>', say(nb)) + ' If the customer accepts, CALL check_terms with ' + nb.isoformat() + '.')\nException: RULE: Friday 16 October 2026 is a bank holiday, not a business day. Nothing was noted. That day is not a working day. Do not move it forward to Saturday 17 October 2026: propose the working day before it, or the earliest permitted date if that would be earlier, explain the change and get the customer's consent. If the customer accepts, CALL check_terms with 2026-10-17.\n"
+      },
+      {
+        "message_index": 42,
+        "timestamp": "2026-10-11T14:23:55.349Z",
+        "node": "negotiate",
+        "event": "turn_completed",
+        "turnIndex": 5,
+        "userMessageId": "msg_2_1791728630876",
+        "finalAssistantMessageId": "msg_7_1791728635075",
+        "responseText": "Friday 16 October 2026 is a bank holiday, so it is not a working day. Would Saturday 17 October 2026 work instead?"
+      },
+      {
+        "message_index": 46,
+        "timestamp": "2026-10-11T14:23:57.418Z",
+        "node": "negotiate",
+        "event": "function_call_start",
+        "function": "check_terms",
+        "args": {
+          "params": {
+            "amount": "full",
+            "date": "2026-10-17",
+            "product_id": "p1"
+          },
+          "timeout_ms": 10000
+        }
+      },
+      {
+        "message_index": 47,
+        "timestamp": "2026-10-11T14:23:57.578Z",
+        "node": "negotiate",
+        "event": "function_call_complete",
+        "function": "check_terms",
+        "result": {
+          "status": "success",
+          "data": null,
+          "message": "Code executed successfully",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 55,
+        "timestamp": "2026-10-11T14:23:58.246Z",
+        "node": "negotiate",
+        "event": "turn_completed",
+        "turnIndex": 6,
+        "userMessageId": "msg_2_1791728636599",
+        "finalAssistantMessageId": "msg_12_1791728637873",
+        "responseText": "To confirm: you will pay 420.00 for your credit card ending 4821 on Saturday 17 October 2026. May I record that commitment?"
+      },
+      {
+        "message_index": 59,
+        "timestamp": "2026-10-11T14:24:00.042Z",
+        "node": "negotiate",
+        "event": "function_call_start",
+        "function": "customer_confirmed",
+        "args": {
+          "timeout_ms": 10000
+        }
+      },
+      {
+        "message_index": 60,
+        "timestamp": "2026-10-11T14:24:02.961Z",
+        "node": "negotiate",
+        "event": "function_call_complete",
+        "function": "customer_confirmed",
+        "result": {
+          "status": "success",
+          "data": null,
+          "message": "Code executed successfully",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 67,
+        "timestamp": "2026-10-11T14:24:05.281Z",
+        "node": "create_promise",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/create_promise",
+          "method": "POST",
+          "body": {
+            "date": "2026-10-17",
+            "amount": 420.0,
+            "product_id": "p1",
+            "customer_id": "c_a3b18062-30e"
+          }
+        }
+      },
+      {
+        "message_index": 68,
+        "timestamp": "2026-10-11T14:24:06.544Z",
+        "node": "create_promise",
+        "event": "function_call_complete",
+        "function": "api_call",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "promise_id": "pr1"
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 76,
+        "timestamp": "2026-10-11T14:24:08.260Z",
+        "node": "negotiate",
+        "event": "turn_completed",
+        "turnIndex": 7,
+        "userMessageId": "msg_2_1791728639658",
+        "finalAssistantMessageId": "msg_20_1791728647905",
+        "responseText": "Your commitment is available in the online portal."
+      },
+      {
+        "message_index": 80,
+        "timestamp": "2026-10-11T14:24:10.374Z",
+        "node": "negotiate",
+        "event": "function_call_start",
+        "function": "wrap_up",
+        "args": {
+          "params": {
+            "outcome": "promise"
+          },
+          "timeout_ms": 10000
+        }
+      },
+      {
+        "message_index": 81,
+        "timestamp": "2026-10-11T14:24:15.753Z",
+        "node": "negotiate",
+        "event": "function_call_complete",
+        "function": "wrap_up",
+        "result": {
+          "status": "success",
+          "data": null,
+          "message": "Code executed successfully",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 91,
+        "timestamp": "2026-10-11T14:24:27.235Z",
+        "node": "close_call",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/close_call",
+          "method": "POST",
+          "body": {
+            "outcome": "promise",
+            "customer_id": "c_a3b18062-30e"
+          }
+        }
+      },
+      {
+        "message_index": 93,
+        "timestamp": "2026-10-11T14:24:41.292Z",
+        "node": "close_call",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/close_call",
+          "method": "POST",
+          "body": {
+            "outcome": "promise",
+            "customer_id": "c_a3b18062-30e"
+          }
+        }
+      },
+      {
+        "message_index": 96,
+        "timestamp": "2026-10-11T14:24:46.392Z",
+        "node": "end",
+        "event": "function_call_start",
+        "function": "end_call",
+        "args": {
+          "message_mode": "none"
+        }
+      },
+      {
+        "message_index": 98,
+        "timestamp": "2026-10-11T14:24:46.689Z",
+        "node": "end",
+        "event": "call_ended",
+        "reason": "assistant-ended-call"
+      },
+      {
+        "message_index": 99,
+        "timestamp": "2026-10-11T14:24:46.751Z",
+        "node": "end",
+        "event": "function_call_complete",
+        "function": "end_call",
+        "result": {
+          "status": "success",
+          "message": "Call ended"
+        }
+      },
+      {
+        "message_index": 100,
+        "timestamp": "2026-10-11T14:25:05.997Z",
+        "node": "end",
+        "event": "function_call_start",
+        "function": "close_call_at_end",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/close_call",
+          "method": "POST",
+          "body": {
+            "outcome": "promise",
+            "customer_id": "c_a3b18062-30e"
+          }
+        }
+      },
+      {
+        "message_index": 101,
+        "timestamp": "2026-10-11T14:25:06.123Z",
+        "node": "end",
+        "event": "function_call_complete",
+        "function": "close_call_at_end",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": false,
+            "error": "the call is already closed"
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200,
+          "header": {
+            "Date": "Sun, 11 Oct 2026 14:25:06 GMT",
+            "Content-Type": "application/json",
+            "Content-Length": "49",
+            "Connection": "keep-alive",
+            "Report-To": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=gyPvJYzy60HfUFzmzqJ5OKsaccvJ%2BYaCzFYCXPPdb3OZBBW4%2FL%2B1YwlNAKAVFWmuwXGeEVSYXmHrx0OHdT0R4nZ%2B%2Fb0sMscNvdg78gzcigewpZWqFzGVq9518523zlmtNPZgOB0Dwf5qqvGvqMfjH65sMBEtloUn9A%3D%3D\"}]}",
+            "Nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+            "Server": "cloudflare",
+            "CF-RAY": "a48e883c59bf1e30-FRA",
+            "alt-svc": "h3=\":443\"; ma=86400"
+          }
+        }
+      }
+    ],
+    "ledger": {
+      "ok": true,
+      "case": "PUB-01",
+      "team": "c354dcc1e41b4a34e576740f",
+      "now": "2026-10-14T11:00",
+      "verified": {
+        "phone_last4": true,
+        "date_of_birth": true
+      },
+      "wrong": 0,
+      "hinted": false,
+      "promises": [
+        {
+          "promise_id": "pr1",
+          "product_id": "p1",
+          "type": "credit_card",
+          "amount": 420,
+          "date": "2026-10-17"
+        }
+      ],
+      "notes": [],
+      "callbacks": [],
+      "transfers": [],
+      "outcome": "promise",
+      "reason": null,
+      "failures": {
+        "verify_identity": 0,
+        "get_account": 0,
+        "create_promise": 0,
+        "close_call": 0
+      },
+      "calls": [
+        {
+          "n": 1,
+          "tool": "verify_identity",
+          "args": {
+            "field": "phone_last4",
+            "answer": "4471"
+          },
+          "status": 200,
+          "result": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": false
+          }
+        },
+        {
+          "n": 2,
+          "tool": "verify_identity",
+          "args": {
+            "field": "date_of_birth",
+            "answer": "1988-03-14"
+          },
+          "status": 200,
+          "result": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": true
+          }
+        },
+        {
+          "n": 3,
+          "tool": "get_account",
+          "args": {},
+          "status": 200,
+          "result": {
+            "ok": true,
+            "products": [
+              {
+                "product_id": "p1",
+                "type": "credit_card",
+                "card_last4": "4821",
+                "past_due": 420,
+                "days_late": 6,
+                "minimum_payment": 126
+              }
+            ]
+          }
+        },
+        {
+          "n": 4,
+          "tool": "create_promise",
+          "args": {
+            "date": "2026-10-17",
+            "amount": 420,
+            "product_id": "p1"
+          },
+          "status": 200,
+          "result": {
+            "ok": true,
+            "promise_id": "pr1"
+          }
+        },
+        {
+          "n": 5,
+          "tool": "close_call",
+          "args": {
+            "outcome": "promise"
+          },
+          "status": 200,
+          "result": {
+            "ok": true
+          }
+        },
+        {
+          "n": 6,
+          "tool": "close_call",
+          "args": {
+            "outcome": "promise"
+          },
+          "status": 200,
+          "result": {
+            "ok": false,
+            "error": "the call is already closed"
+          }
+        },
+        {
+          "n": 7,
+          "tool": "close_call",
+          "args": {
+            "outcome": "promise"
+          },
+          "status": 200,
+          "result": {
+            "ok": false,
+            "error": "the call is already closed"
+          }
+        }
+      ],
+      "last_at": 1791728667240
+    },
+    "fetched_call_status": "16",
+    "bank_close_count": 3
+  },
+  {
+    "case": "SV1-05",
+    "call_id": "bfa5bad1-d5f9-44ac-b778-d7c23a30099c",
+    "ledger_score": {
+      "pass": false,
+      "failed": [
+        "outcome ('not_reached', 'no_callback'), expected ('not_reached', 'callback')",
+        "callbacks [], expected [{'date': '2026-10-17', 'time': '11:30'}]"
+      ]
+    },
+    "transport_errors": [
+      {
+        "user": "Saturday the 17th at 11:30 in the morning is fine.",
+        "elapsed_s": 19.07,
+        "platform_error": "POST /api/v2/chat/message -> 504: error code: 504\n"
+      }
+    ],
+    "speech": [
+      {
+        "message_index": 0,
+        "role": "user",
+        "text": "Hello?",
+        "timestamp": "2026-10-11T14:25:12.309Z",
+        "seconds": 0.010541915893554688
+      },
+      {
+        "message_index": 1,
+        "role": "assistant",
+        "text": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Maria Costa?",
+        "timestamp": "2026-10-11T14:25:12.666Z",
+        "seconds": 0.03222799301147461
+      },
+      {
+        "message_index": 6,
+        "role": "user",
+        "text": "No, this is her husband. What is this about? I can pay for her.",
+        "timestamp": "2026-10-11T14:25:13.778Z",
+        "seconds": 1.4435420036315918
+      },
+      {
+        "message_index": 8,
+        "role": "assistant",
+        "text": "I can only discuss that with Maria Costa personally. Would you like me to call Maria Costa back at another time?",
+        "timestamp": "2026-10-11T14:25:14.728Z",
+        "seconds": 1.5145418643951416
+      },
+      {
+        "message_index": 11,
+        "role": "user",
+        "text": "Please call her on Friday the 16th at 11:30 in the morning.",
+        "timestamp": "2026-10-11T14:25:16.314Z",
+        "seconds": 3.9685418605804443
+      },
+      {
+        "message_index": 16,
+        "role": "assistant",
+        "text": "That time is not available. Could you please suggest another time from 09:15 to 12:45 on one of the next two working days, not today?",
+        "timestamp": "2026-10-11T14:25:24.070Z",
+        "seconds": 10.700541973114014
+      },
+      {
+        "message_index": 19,
+        "role": "user",
+        "text": "Saturday the 17th at 11:30 in the morning is fine.",
+        "timestamp": "2026-10-11T14:25:25.596Z",
+        "seconds": 13.27554202079773
+      },
+      {
+        "message_index": 32,
+        "role": "assistant",
+        "text": "Thank you for your time. Goodbye.",
+        "timestamp": "2026-10-11T14:25:28.088Z",
+        "seconds": 15.598541975021362
+      }
+    ],
+    "events": [
+      {
+        "message_index": 3,
+        "timestamp": "2026-10-11T14:25:12.700Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 1,
+        "userMessageId": "msg_1_1791728712293",
+        "finalAssistantMessageId": "msg_4_1791728712385",
+        "responseText": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Maria Costa?"
+      },
+      {
+        "message_index": 9,
+        "timestamp": "2026-10-11T14:25:14.977Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 2,
+        "userMessageId": "msg_2_1791728713724",
+        "finalAssistantMessageId": "msg_4_1791728714711",
+        "responseText": "I can only discuss that with Maria Costa personally. Would you like me to call Maria Costa back at another time?"
+      },
+      {
+        "message_index": 13,
+        "timestamp": "2026-10-11T14:25:22.971Z",
+        "node": "opening",
+        "event": "function_call_start",
+        "function": "schedule_callback",
+        "args": {
+          "date": "2025-05-16",
+          "time": "11:30"
+        }
+      },
+      {
+        "message_index": 14,
+        "timestamp": "2026-10-11T14:25:22.997Z",
+        "node": "opening",
+        "event": "function_call_error",
+        "function": "schedule_callback",
+        "error": "Traceback (most recent call last):\n  File \"<string>\", line 286, in <module>\n    raise Exception('RULE: ' + what + ' is OUTSIDE the callback window. Nothing was booked. Allowed: ' + allowed_text() + '. ' + G.get('callback_outside_first', 'Ask once for another time.'))\nException: RULE: Friday 16 May 2025 at 11:30 is OUTSIDE the callback window. Nothing was booked. Allowed: Thursday 15 October 2026 from 09:15 to 12:45; Saturday 17 October 2026 from 09:15 to 12:45. Ask once for a replacement: a time from 09:15 to 12:45 on one of the next two working days, not today.\n"
+      },
+      {
+        "message_index": 17,
+        "timestamp": "2026-10-11T14:25:24.299Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 3,
+        "userMessageId": "msg_2_1791728716248",
+        "finalAssistantMessageId": "msg_7_1791728724059",
+        "responseText": "That time is not available. Could you please suggest another time from 09:15 to 12:45 on one of the next two working days, not today?"
+      },
+      {
+        "message_index": 21,
+        "timestamp": "2026-10-11T14:25:26.914Z",
+        "node": "opening",
+        "event": "function_call_start",
+        "function": "schedule_callback",
+        "args": {
+          "date": "2025-05-17",
+          "time": "11:30"
+        }
+      },
+      {
+        "message_index": 22,
+        "timestamp": "2026-10-11T14:25:26.957Z",
+        "node": "opening",
+        "event": "function_call_error",
+        "function": "schedule_callback",
+        "error": "Traceback (most recent call last):\n  File \"<string>\", line 287, in <module>\n    raise Exception('RULE: ' + what + ' is again OUTSIDE the callback window. Nothing was booked. ' + G.get('callback_outside_second', 'Do not schedule a callback. End the call.'))\nException: RULE: Saturday 17 May 2025 at 11:30 is again OUTSIDE the callback window. Nothing was booked. Do not book a callback. Call wrap_up(\"not_reached\", \"no_callback\").\n"
+      },
+      {
+        "message_index": 24,
+        "timestamp": "2026-10-11T14:25:27.327Z",
+        "node": "opening",
+        "event": "function_call_start",
+        "function": "wrap_up",
+        "args": {
+          "params": {
+            "outcome": "not_reached",
+            "reason": "no_callback"
+          },
+          "timeout_ms": 10000
+        }
+      },
+      {
+        "message_index": 25,
+        "timestamp": "2026-10-11T14:25:27.553Z",
+        "node": "opening",
+        "event": "function_call_complete",
+        "function": "wrap_up",
+        "result": {
+          "status": "success",
+          "data": null,
+          "message": "Code executed successfully",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 35,
+        "timestamp": "2026-10-11T14:25:28.286Z",
+        "node": "close_call",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/close_call",
+          "method": "POST",
+          "body": {
+            "reason": "no_callback",
+            "outcome": "not_reached",
+            "customer_id": "c_383639b9-78e"
+          }
+        }
+      },
+      {
+        "message_index": 36,
+        "timestamp": "2026-10-11T14:25:28.336Z",
+        "node": "close_call",
+        "event": "function_call_complete",
+        "function": "api_call",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 39,
+        "timestamp": "2026-10-11T14:25:28.715Z",
+        "node": "end",
+        "event": "function_call_start",
+        "function": "end_call",
+        "args": {
+          "message_mode": "none"
+        }
+      },
+      {
+        "message_index": 41,
+        "timestamp": "2026-10-11T14:25:28.785Z",
+        "node": "end",
+        "event": "call_ended",
+        "reason": "assistant-ended-call"
+      },
+      {
+        "message_index": 42,
+        "timestamp": "2026-10-11T14:25:28.827Z",
+        "node": "end",
+        "event": "function_call_complete",
+        "function": "end_call",
+        "result": {
+          "status": "success",
+          "message": "Call ended"
+        }
+      },
+      {
+        "message_index": 43,
+        "timestamp": "2026-10-11T14:25:42.779Z",
+        "node": "end",
+        "event": "function_call_start",
+        "function": "close_call_at_end",
+        "args": {
+          "outcome": "not_reached",
+          "reason": "no_callback"
+        }
+      },
+      {
+        "message_index": 44,
+        "timestamp": "2026-10-11T14:25:42.925Z",
+        "node": "end",
+        "event": "function_call_error",
+        "function": "close_call_at_end",
+        "error": "Traceback (most recent call last):\n  File \"<string>\", line 266, in <module>\n    raise Exception('already closed')\nException: already closed\n"
+      }
+    ],
+    "ledger": {
+      "ok": true,
+      "case": "PUB-02",
+      "team": "c354dcc1e41b4a34e576740f",
+      "now": "2026-10-14T11:00",
+      "verified": {},
+      "wrong": 0,
+      "hinted": false,
+      "promises": [],
+      "notes": [],
+      "callbacks": [],
+      "transfers": [],
+      "outcome": "not_reached",
+      "reason": "no_callback",
+      "failures": {
+        "close_call": 0
+      },
+      "calls": [
+        {
+          "n": 1,
+          "tool": "close_call",
+          "args": {
+            "reason": "no_callback",
+            "outcome": "not_reached"
+          },
+          "status": 200,
+          "result": {
+            "ok": true
+          }
+        }
+      ],
+      "last_at": 1791728728139
+    },
+    "fetched_call_status": "16",
+    "bank_close_count": 1
+  },
+  {
+    "case": "SV1-06",
+    "call_id": "d2e46e8d-7cd7-488e-ab57-bf9a0c8155f5",
+    "ledger_score": {
+      "pass": true,
+      "failed": []
+    },
+    "transport_errors": [
+      {
+        "user": "I refuse to pay anything on this loan.",
+        "elapsed_s": 20.618,
+        "platform_error": "POST /api/v2/chat/message -> 504: error code: 504\n"
+      }
+    ],
+    "speech": [
+      {
+        "message_index": 0,
+        "role": "user",
+        "text": "Hello?",
+        "timestamp": "2026-10-11T14:25:46.640Z",
+        "seconds": 0.00592803955078125
+      },
+      {
+        "message_index": 1,
+        "role": "assistant",
+        "text": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Tomas Novak?",
+        "timestamp": "2026-10-11T14:25:46.926Z",
+        "seconds": 0.018075942993164062
+      },
+      {
+        "message_index": 6,
+        "role": "user",
+        "text": "Yes, Tomas Novak speaking.",
+        "timestamp": "2026-10-11T14:25:47.948Z",
+        "seconds": 1.2839279174804688
+      },
+      {
+        "message_index": 8,
+        "role": "assistant",
+        "text": "What are the last four digits of your phone number?",
+        "timestamp": "2026-10-11T14:25:48.383Z",
+        "seconds": 1.3689279556274414
+      },
+      {
+        "message_index": 11,
+        "role": "user",
+        "text": "8846",
+        "timestamp": "2026-10-11T14:25:50.455Z",
+        "seconds": 3.7919280529022217
+      },
+      {
+        "message_index": 16,
+        "role": "assistant",
+        "text": "Thank you. What is your date of birth?",
+        "timestamp": "2026-10-11T14:25:59.302Z",
+        "seconds": 12.030927896499634
+      },
+      {
+        "message_index": 19,
+        "role": "user",
+        "text": "1990-09-09",
+        "timestamp": "2026-10-11T14:26:00.963Z",
+        "seconds": 14.309927940368652
+      },
+      {
+        "message_index": 33,
+        "role": "assistant",
+        "text": "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your personal loan has arrears of 780.00 and is 21 days late. Can you pay the full arrears today, or on the next working day if payment today is no longer possible?",
+        "timestamp": "2026-10-11T14:26:27.076Z",
+        "seconds": 40.16392803192139
+      },
+      {
+        "message_index": 36,
+        "role": "user",
+        "text": "I refuse to pay anything on this loan.",
+        "timestamp": "2026-10-11T14:26:28.326Z",
+        "seconds": 41.650928020477295
+      },
+      {
+        "message_index": 38,
+        "role": "assistant",
+        "text": "I understand.",
+        "timestamp": "2026-10-11T14:26:28.761Z",
+        "seconds": 41.707927942276
+      },
+      {
+        "message_index": 59,
+        "role": "assistant",
+        "text": "Thank you for your time. Goodbye.",
+        "timestamp": "2026-10-11T14:26:30.158Z",
+        "seconds": 43.38192796707153
+      }
+    ],
+    "events": [
+      {
+        "message_index": 3,
+        "timestamp": "2026-10-11T14:25:46.959Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 1,
+        "userMessageId": "msg_1_1791728746623",
+        "finalAssistantMessageId": "msg_4_1791728746676",
+        "responseText": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Tomas Novak?"
+      },
+      {
+        "message_index": 9,
+        "timestamp": "2026-10-11T14:25:48.641Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 2,
+        "userMessageId": "msg_2_1791728747904",
+        "finalAssistantMessageId": "msg_4_1791728748374",
+        "responseText": "What are the last four digits of your phone number?"
+      },
+      {
+        "message_index": 13,
+        "timestamp": "2026-10-11T14:25:53.685Z",
+        "node": "opening",
+        "event": "function_call_start",
+        "function": "verify_identity",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity",
+          "method": "POST",
+          "body": {
+            "field": "phone_last4",
+            "answer": "8846",
+            "customer_id": "c_cecc905f-62f"
+          }
+        }
+      },
+      {
+        "message_index": 14,
+        "timestamp": "2026-10-11T14:25:58.639Z",
+        "node": "opening",
+        "event": "function_call_complete",
+        "function": "verify_identity",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": false,
+            "id_state": "open",
+            "what_to_do_next": "Correct (do not say so). Say \"Thank you.\" and ask the next security question: \"What is your date of birth?\""
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 17,
+        "timestamp": "2026-10-11T14:25:59.560Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 3,
+        "userMessageId": "msg_2_1791728750410",
+        "finalAssistantMessageId": "msg_7_1791728759293",
+        "responseText": "Thank you. What is your date of birth?"
+      },
+      {
+        "message_index": 21,
+        "timestamp": "2026-10-11T14:26:08.547Z",
+        "node": "opening",
+        "event": "function_call_start",
+        "function": "verify_identity",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity",
+          "method": "POST",
+          "body": {
+            "field": "date_of_birth",
+            "answer": "1990-09-09",
+            "customer_id": "c_cecc905f-62f"
+          }
+        }
+      },
+      {
+        "message_index": 22,
+        "timestamp": "2026-10-11T14:26:14.157Z",
+        "node": "opening",
+        "event": "function_call_complete",
+        "function": "verify_identity",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": true,
+            "id_state": "verified",
+            "what_to_do_next": "All security answers are correct. Identity is verified. Say nothing about it yet."
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 25,
+        "timestamp": "2026-10-11T14:26:14.407Z",
+        "node": "get_account",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/get_account",
+          "method": "POST",
+          "body": {
+            "customer_id": "c_cecc905f-62f"
+          }
+        }
+      },
+      {
+        "message_index": 26,
+        "timestamp": "2026-10-11T14:26:19.881Z",
+        "node": "get_account",
+        "event": "function_call_complete",
+        "function": "api_call",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "products": [
+              {
+                "product_id": "p1",
+                "type": "personal_loan",
+                "past_due": 780,
+                "days_late": 21,
+                "instalment_amount": 260
+              }
+            ]
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 34,
+        "timestamp": "2026-10-11T14:26:27.126Z",
+        "node": "negotiate",
+        "event": "turn_completed",
+        "turnIndex": 4,
+        "userMessageId": "msg_2_1791728760929",
+        "finalAssistantMessageId": "msg_16_1791728786778",
+        "responseText": "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your personal loan has arrears of 780.00 and is 21 days late. Can you pay the full arrears today, or on the next working day if payment today is no longer possible?"
+      },
+      {
+        "message_index": 39,
+        "timestamp": "2026-10-11T14:26:28.721Z",
+        "node": "negotiate",
+        "event": "function_call_start",
+        "function": "customer_refused",
+        "args": {
+          "params": {
+            "kind": "flat_refusal",
+            "product_id": "p1"
+          },
+          "timeout_ms": 10000
+        }
+      },
+      {
+        "message_index": 40,
+        "timestamp": "2026-10-11T14:26:29.078Z",
+        "node": "negotiate",
+        "event": "function_call_complete",
+        "function": "customer_refused",
+        "result": {
+          "status": "success",
+          "data": null,
+          "message": "Code executed successfully",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 51,
+        "timestamp": "2026-10-11T14:26:29.811Z",
+        "node": "add_note",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/add_note",
+          "method": "POST",
+          "body": {
+            "reason": "refused",
+            "product_id": "p1",
+            "customer_id": "c_cecc905f-62f"
+          }
+        }
+      },
+      {
+        "message_index": 52,
+        "timestamp": "2026-10-11T14:26:29.859Z",
+        "node": "add_note",
+        "event": "function_call_complete",
+        "function": "api_call",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 62,
+        "timestamp": "2026-10-11T14:26:30.293Z",
+        "node": "close_call",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/close_call",
+          "method": "POST",
+          "body": {
+            "reason": "refused",
+            "outcome": "no_promise",
+            "customer_id": "c_cecc905f-62f"
+          }
+        }
+      },
+      {
+        "message_index": 63,
+        "timestamp": "2026-10-11T14:26:30.561Z",
+        "node": "close_call",
+        "event": "function_call_complete",
+        "function": "api_call",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 66,
+        "timestamp": "2026-10-11T14:26:30.916Z",
+        "node": "end",
+        "event": "function_call_start",
+        "function": "end_call",
+        "args": {
+          "message_mode": "none"
+        }
+      },
+      {
+        "message_index": 68,
+        "timestamp": "2026-10-11T14:26:31.025Z",
+        "node": "end",
+        "event": "call_ended",
+        "reason": "assistant-ended-call"
+      },
+      {
+        "message_index": 69,
+        "timestamp": "2026-10-11T14:26:31.072Z",
+        "node": "end",
+        "event": "function_call_complete",
+        "function": "end_call",
+        "result": {
+          "status": "success",
+          "message": "Call ended"
+        }
+      },
+      {
+        "message_index": 70,
+        "timestamp": "2026-10-11T14:26:44.337Z",
+        "node": "end",
+        "event": "function_call_start",
+        "function": "close_call_at_end",
+        "args": {
+          "outcome": "no_promise",
+          "reason": "Customer refused to pay."
+        }
+      },
+      {
+        "message_index": 71,
+        "timestamp": "2026-10-11T14:26:44.453Z",
+        "node": "end",
+        "event": "function_call_error",
+        "function": "close_call_at_end",
+        "error": "Traceback (most recent call last):\n  File \"<string>\", line 266, in <module>\n    raise Exception('already closed')\nException: already closed\n"
+      }
+    ],
+    "ledger": {
+      "ok": true,
+      "case": "PUB-05",
+      "team": "c354dcc1e41b4a34e576740f",
+      "now": "2026-10-14T11:00",
+      "verified": {
+        "phone_last4": true,
+        "date_of_birth": true
+      },
+      "wrong": 0,
+      "hinted": false,
+      "promises": [],
+      "notes": [
+        {
+          "product_id": "p1",
+          "reason": "refused",
+          "text": ""
+        }
+      ],
+      "callbacks": [],
+      "transfers": [],
+      "outcome": "no_promise",
+      "reason": "refused",
+      "failures": {
+        "verify_identity": 0,
+        "get_account": 0,
+        "add_note": 0,
+        "close_call": 0
+      },
+      "calls": [
+        {
+          "n": 1,
+          "tool": "verify_identity",
+          "args": {
+            "field": "phone_last4",
+            "answer": "8846"
+          },
+          "status": 200,
+          "result": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": false
+          }
+        },
+        {
+          "n": 2,
+          "tool": "verify_identity",
+          "args": {
+            "field": "date_of_birth",
+            "answer": "1990-09-09"
+          },
+          "status": 200,
+          "result": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": true
+          }
+        },
+        {
+          "n": 3,
+          "tool": "get_account",
+          "args": {},
+          "status": 200,
+          "result": {
+            "ok": true,
+            "products": [
+              {
+                "product_id": "p1",
+                "type": "personal_loan",
+                "past_due": 780,
+                "days_late": 21,
+                "instalment_amount": 260
+              }
+            ]
+          }
+        },
+        {
+          "n": 4,
+          "tool": "add_note",
+          "args": {
+            "reason": "refused",
+            "product_id": "p1"
+          },
+          "status": 200,
+          "result": {
+            "ok": true
+          }
+        },
+        {
+          "n": 5,
+          "tool": "close_call",
+          "args": {
+            "reason": "refused",
+            "outcome": "no_promise"
+          },
+          "status": 200,
+          "result": {
+            "ok": true
+          }
+        }
+      ],
+      "last_at": 1791728790188
+    },
+    "fetched_call_status": "16",
+    "bank_close_count": 1
+  },
+  {
+    "case": "SV1-07",
+    "call_id": "a3563945-7f96-471e-ad2d-482751888f25",
+    "ledger_score": {
+      "pass": false,
+      "failed": [
+        "notes [], expected [('p1', 'dispute')]"
+      ]
+    },
+    "transport_errors": [
+      {
+        "user": "That account never belonged to me. This debt is not mine.",
+        "elapsed_s": 44.196,
+        "platform_error": "POST /api/v2/chat/message -> 504: error code: 504\n"
+      }
+    ],
+    "speech": [
+      {
+        "message_index": 0,
+        "role": "user",
+        "text": "Hello?",
+        "timestamp": "2026-10-11T14:26:50.772Z",
+        "seconds": 0.008828878402709961
+      },
+      {
+        "message_index": 1,
+        "role": "assistant",
+        "text": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Hannah Schmidt?",
+        "timestamp": "2026-10-11T14:26:51.129Z",
+        "seconds": 0.025649070739746094
+      },
+      {
+        "message_index": 6,
+        "role": "user",
+        "text": "Yes, Hannah Schmidt speaking.",
+        "timestamp": "2026-10-11T14:26:52.180Z",
+        "seconds": 1.380828857421875
+      },
+      {
+        "message_index": 8,
+        "role": "assistant",
+        "text": "What are the last four digits of your phone number?",
+        "timestamp": "2026-10-11T14:26:52.442Z",
+        "seconds": 1.4328289031982422
+      },
+      {
+        "message_index": 11,
+        "role": "user",
+        "text": "3317",
+        "timestamp": "2026-10-11T14:26:53.906Z",
+        "seconds": 3.1188290119171143
+      },
+      {
+        "message_index": 16,
+        "role": "assistant",
+        "text": "Thank you. What is your date of birth?",
+        "timestamp": "2026-10-11T14:27:11.272Z",
+        "seconds": 20.255828857421875
+      },
+      {
+        "message_index": 19,
+        "role": "user",
+        "text": "1993-04-28",
+        "timestamp": "2026-10-11T14:27:12.788Z",
+        "seconds": 21.987828969955444
+      },
+      {
+        "message_index": 33,
+        "role": "assistant",
+        "text": "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your credit card ending 5512 has arrears of 180.00 and is 5 days late. Can you pay the full arrears today, or on the next working day if payment today is no longer possible?",
+        "timestamp": "2026-10-11T14:27:20.976Z",
+        "seconds": 29.90782880783081
+      },
+      {
+        "message_index": 36,
+        "role": "user",
+        "text": "That account never belonged to me. This debt is not mine.",
+        "timestamp": "2026-10-11T14:27:22.398Z",
+        "seconds": 31.600828886032104
+      },
+      {
+        "message_index": 44,
+        "role": "assistant",
+        "text": "I am transferring you to a colleague now. Thank you for your time. Goodbye.",
+        "timestamp": "2026-10-11T14:27:45.664Z",
+        "seconds": 54.81882882118225
+      }
+    ],
+    "events": [
+      {
+        "message_index": 3,
+        "timestamp": "2026-10-11T14:26:51.172Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 1,
+        "userMessageId": "msg_1_1791728810755",
+        "finalAssistantMessageId": "msg_4_1791728810826",
+        "responseText": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Hannah Schmidt?"
+      },
+      {
+        "message_index": 9,
+        "timestamp": "2026-10-11T14:26:52.645Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 2,
+        "userMessageId": "msg_2_1791728812124",
+        "finalAssistantMessageId": "msg_4_1791728812434",
+        "responseText": "What are the last four digits of your phone number?"
+      },
+      {
+        "message_index": 13,
+        "timestamp": "2026-10-11T14:27:02.746Z",
+        "node": "opening",
+        "event": "function_call_start",
+        "function": "verify_identity",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity",
+          "method": "POST",
+          "body": {
+            "field": "phone_last4",
+            "answer": "3317",
+            "customer_id": "c_e2b8b611-04b"
+          }
+        }
+      },
+      {
+        "message_index": 14,
+        "timestamp": "2026-10-11T14:27:10.987Z",
+        "node": "opening",
+        "event": "function_call_complete",
+        "function": "verify_identity",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": false,
+            "id_state": "open",
+            "what_to_do_next": "Correct (do not say so). Say \"Thank you.\" and ask the next security question: \"What is your date of birth?\""
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 17,
+        "timestamp": "2026-10-11T14:27:11.545Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 3,
+        "userMessageId": "msg_2_1791728813867",
+        "finalAssistantMessageId": "msg_7_1791728831262",
+        "responseText": "Thank you. What is your date of birth?"
+      },
+      {
+        "message_index": 21,
+        "timestamp": "2026-10-11T14:27:15.331Z",
+        "node": "opening",
+        "event": "function_call_start",
+        "function": "verify_identity",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity",
+          "method": "POST",
+          "body": {
+            "field": "date_of_birth",
+            "answer": "1993-04-28",
+            "customer_id": "c_e2b8b611-04b"
+          }
+        }
+      },
+      {
+        "message_index": 22,
+        "timestamp": "2026-10-11T14:27:17.024Z",
+        "node": "opening",
+        "event": "function_call_complete",
+        "function": "verify_identity",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": true,
+            "id_state": "verified",
+            "what_to_do_next": "All security answers are correct. Identity is verified. Say nothing about it yet."
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 25,
+        "timestamp": "2026-10-11T14:27:17.183Z",
+        "node": "get_account",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/get_account",
+          "method": "POST",
+          "body": {
+            "customer_id": "c_e2b8b611-04b"
+          }
+        }
+      },
+      {
+        "message_index": 26,
+        "timestamp": "2026-10-11T14:27:19.455Z",
+        "node": "get_account",
+        "event": "function_call_complete",
+        "function": "api_call",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "products": [
+              {
+                "product_id": "p1",
+                "type": "credit_card",
+                "card_last4": "5512",
+                "past_due": 180,
+                "days_late": 5,
+                "minimum_payment": 54
+              }
+            ]
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 34,
+        "timestamp": "2026-10-11T14:27:21.018Z",
+        "node": "negotiate",
+        "event": "turn_completed",
+        "turnIndex": 4,
+        "userMessageId": "msg_2_1791728832736",
+        "finalAssistantMessageId": "msg_16_1791728840650",
+        "responseText": "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your credit card ending 5512 has arrears of 180.00 and is 5 days late. Can you pay the full arrears today, or on the next working day if payment today is no longer possible?"
+      },
+      {
+        "message_index": 38,
+        "timestamp": "2026-10-11T14:27:28.668Z",
+        "node": "negotiate",
+        "event": "function_call_start",
+        "function": "skip_product",
+        "args": {
+          "params": {
+            "product_id": "p1",
+            "reason": "dispute"
+          },
+          "timeout_ms": 10000
+        }
+      },
+      {
+        "message_index": 39,
+        "timestamp": "2026-10-11T14:27:36.770Z",
+        "node": "negotiate",
+        "event": "function_call_complete",
+        "function": "skip_product",
+        "result": {
+          "status": "success",
+          "data": null,
+          "message": "Code executed successfully",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 40,
+        "timestamp": "2026-10-11T14:27:36.803Z",
+        "node": "negotiate",
+        "event": "function_call_start",
+        "function": "transfer_to_agent",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/transfer_to_agent",
+          "method": "POST",
+          "body": {
+            "queue": "general",
+            "customer_id": "c_e2b8b611-04b"
+          }
+        }
+      },
+      {
+        "message_index": 41,
+        "timestamp": "2026-10-11T14:27:45.518Z",
+        "node": "negotiate",
+        "event": "function_call_complete",
+        "function": "transfer_to_agent",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "auto_state": "go",
+            "final_outcome": "transferred",
+            "final_reason": "human",
+            "final_line": "I am transferring you to a colleague now. Thank you for your time. Goodbye.",
+            "what_to_do_next": "The transfer is arranged. Say nothing more."
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 47,
+        "timestamp": "2026-10-11T14:27:45.799Z",
+        "node": "close_call",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/close_call",
+          "method": "POST",
+          "body": {
+            "reason": "human",
+            "outcome": "transferred",
+            "customer_id": "c_e2b8b611-04b"
+          }
+        }
+      },
+      {
+        "message_index": 48,
+        "timestamp": "2026-10-11T14:27:45.908Z",
+        "node": "close_call",
+        "event": "function_call_complete",
+        "function": "api_call",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 51,
+        "timestamp": "2026-10-11T14:27:46.034Z",
+        "node": "end",
+        "event": "function_call_start",
+        "function": "end_call",
+        "args": {
+          "message_mode": "none"
+        }
+      },
+      {
+        "message_index": 53,
+        "timestamp": "2026-10-11T14:27:46.336Z",
+        "node": "end",
+        "event": "call_ended",
+        "reason": "assistant-ended-call"
+      },
+      {
+        "message_index": 54,
+        "timestamp": "2026-10-11T14:27:46.380Z",
+        "node": "end",
+        "event": "function_call_complete",
+        "function": "end_call",
+        "result": {
+          "status": "success",
+          "message": "Call ended"
+        }
+      },
+      {
+        "message_index": 55,
+        "timestamp": "2026-10-11T14:28:05.022Z",
+        "node": "end",
+        "event": "function_call_start",
+        "function": "close_call_at_end",
+        "args": {
+          "outcome": "transferred",
+          "reason": "Customer disputed the debt, and the call was transferred to a human agent for resolution."
+        }
+      },
+      {
+        "message_index": 56,
+        "timestamp": "2026-10-11T14:28:05.130Z",
+        "node": "end",
+        "event": "function_call_error",
+        "function": "close_call_at_end",
+        "error": "Traceback (most recent call last):\n  File \"<string>\", line 266, in <module>\n    raise Exception('already closed')\nException: already closed\n"
+      }
+    ],
+    "ledger": {
+      "ok": true,
+      "case": "PUB-08",
+      "team": "c354dcc1e41b4a34e576740f",
+      "now": "2026-10-14T11:00",
+      "verified": {
+        "phone_last4": true,
+        "date_of_birth": true
+      },
+      "wrong": 0,
+      "hinted": false,
+      "promises": [],
+      "notes": [],
+      "callbacks": [],
+      "transfers": [
+        {
+          "queue": "general"
+        }
+      ],
+      "outcome": "transferred",
+      "reason": "human",
+      "failures": {
+        "verify_identity": 0,
+        "get_account": 0,
+        "transfer_to_agent": 0,
+        "close_call": 0
+      },
+      "calls": [
+        {
+          "n": 1,
+          "tool": "verify_identity",
+          "args": {
+            "field": "phone_last4",
+            "answer": "3317"
+          },
+          "status": 200,
+          "result": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": false
+          }
+        },
+        {
+          "n": 2,
+          "tool": "verify_identity",
+          "args": {
+            "field": "date_of_birth",
+            "answer": "1993-04-28"
+          },
+          "status": 200,
+          "result": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": true
+          }
+        },
+        {
+          "n": 3,
+          "tool": "get_account",
+          "args": {},
+          "status": 200,
+          "result": {
+            "ok": true,
+            "products": [
+              {
+                "product_id": "p1",
+                "type": "credit_card",
+                "card_last4": "5512",
+                "past_due": 180,
+                "days_late": 5,
+                "minimum_payment": 54
+              }
+            ]
+          }
+        },
+        {
+          "n": 4,
+          "tool": "transfer_to_agent",
+          "args": {
+            "queue": "general"
+          },
+          "status": 200,
+          "result": {
+            "ok": true
+          }
+        },
+        {
+          "n": 5,
+          "tool": "close_call",
+          "args": {
+            "reason": "human",
+            "outcome": "transferred"
+          },
+          "status": 200,
+          "result": {
+            "ok": true
+          }
+        }
+      ],
+      "last_at": 1791728865749
+    },
+    "fetched_call_status": "16",
+    "bank_close_count": 1
+  },
+  {
+    "case": "SV1-08",
+    "call_id": "51afc781-5357-4256-a562-4d938cdd518d",
+    "ledger_score": {
+      "pass": true,
+      "failed": []
+    },
+    "transport_errors": [
+      {
+        "user": "Nothing else, thank you. Goodbye.",
+        "elapsed_s": 30.328,
+        "platform_error": "POST /api/v2/chat/message -> 504: error code: 504\n"
+      }
+    ],
+    "speech": [
+      {
+        "message_index": 0,
+        "role": "user",
+        "text": "Hello?",
+        "timestamp": "2026-10-11T14:28:37.406Z",
+        "seconds": 0.006279945373535156
+      },
+      {
+        "message_index": 1,
+        "role": "assistant",
+        "text": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Elena Rossi?",
+        "timestamp": "2026-10-11T14:28:37.718Z",
+        "seconds": 0.02079916000366211
+      },
+      {
+        "message_index": 6,
+        "role": "user",
+        "text": "Yes, Elena Rossi speaking.",
+        "timestamp": "2026-10-11T14:28:38.915Z",
+        "seconds": 1.4952800273895264
+      },
+      {
+        "message_index": 8,
+        "role": "assistant",
+        "text": "What are the last four digits of your phone number?",
+        "timestamp": "2026-10-11T14:28:39.382Z",
+        "seconds": 1.5432801246643066
+      },
+      {
+        "message_index": 11,
+        "role": "user",
+        "text": "6604",
+        "timestamp": "2026-10-11T14:28:40.797Z",
+        "seconds": 3.3632800579071045
+      },
+      {
+        "message_index": 16,
+        "role": "assistant",
+        "text": "Thank you. What is your date of birth?",
+        "timestamp": "2026-10-11T14:28:42.612Z",
+        "seconds": 4.942280054092407
+      },
+      {
+        "message_index": 19,
+        "role": "user",
+        "text": "1991-01-08",
+        "timestamp": "2026-10-11T14:28:44.567Z",
+        "seconds": 7.090280055999756
+      },
+      {
+        "message_index": 33,
+        "role": "assistant",
+        "text": "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your credit card ending 6604 has arrears of 300.00 and is 4 days late. Your personal loan has arrears of 900.00 and is 20 days late. Let us take these one at a time, starting with the first one I mentioned. Can you pay its full arrears today, or on the next working day if payment today is no longer possible?",
+        "timestamp": "2026-10-11T14:29:18.563Z",
+        "seconds": 40.9002799987793
+      },
+      {
+        "message_index": 36,
+        "role": "user",
+        "text": "I can pay the personal loan of 900 in full today.",
+        "timestamp": "2026-10-11T14:29:19.880Z",
+        "seconds": 42.43928003311157
+      },
+      {
+        "message_index": 46,
+        "role": "assistant",
+        "text": "Now your credit card ending 6604. Could you pay the full amount of 300.00 for your credit card ending 6604 by Friday 23 October 2026?",
+        "timestamp": "2026-10-11T14:29:21.860Z",
+        "seconds": 44.17428016662598
+      },
+      {
+        "message_index": 49,
+        "role": "user",
+        "text": "Yes, I confirm the personal loan payment of 900 today.",
+        "timestamp": "2026-10-11T14:29:23.211Z",
+        "seconds": 45.77828001976013
+      },
+      {
+        "message_index": 51,
+        "role": "assistant",
+        "text": "I understand. Could you tell me if you can pay the full amount for your credit card ending 6604 by Friday 23 October 2026?",
+        "timestamp": "2026-10-11T14:29:23.812Z",
+        "seconds": 45.84728002548218
+      },
+      {
+        "message_index": 54,
+        "role": "user",
+        "text": "I already paid the credit card arrears this morning.",
+        "timestamp": "2026-10-11T14:29:25.934Z",
+        "seconds": 48.506279945373535
+      },
+      {
+        "message_index": 64,
+        "role": "assistant",
+        "text": "Payments may take two working days to appear. To confirm: you will pay 900.00 for your personal loan on Wednesday 14 October 2026. May I record that commitment?",
+        "timestamp": "2026-10-11T14:29:44.826Z",
+        "seconds": 67.03828001022339
+      },
+      {
+        "message_index": 67,
+        "role": "user",
+        "text": "Yes, I confirm the personal loan payment of 900 today.",
+        "timestamp": "2026-10-11T14:29:46.214Z",
+        "seconds": 68.77728009223938
+      },
+      {
+        "message_index": 85,
+        "role": "assistant",
+        "text": "Your commitment is available in the online portal.",
+        "timestamp": "2026-10-11T14:29:57.753Z",
+        "seconds": 80.10628008842468
+      },
+      {
+        "message_index": 88,
+        "role": "user",
+        "text": "Nothing else, thank you. Goodbye.",
+        "timestamp": "2026-10-11T14:29:59.155Z",
+        "seconds": 81.71327996253967
+      },
+      {
+        "message_index": 106,
+        "role": "assistant",
+        "text": "Thank you for your time. Goodbye.",
+        "timestamp": "2026-10-11T14:30:06.742Z",
+        "seconds": 89.24828004837036
+      }
+    ],
+    "events": [
+      {
+        "message_index": 3,
+        "timestamp": "2026-10-11T14:28:37.767Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 1,
+        "userMessageId": "msg_1_1791728917389",
+        "finalAssistantMessageId": "msg_4_1791728917445",
+        "responseText": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Elena Rossi?"
+      },
+      {
+        "message_index": 9,
+        "timestamp": "2026-10-11T14:28:39.592Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 2,
+        "userMessageId": "msg_2_1791728918877",
+        "finalAssistantMessageId": "msg_4_1791728919374",
+        "responseText": "What are the last four digits of your phone number?"
+      },
+      {
+        "message_index": 13,
+        "timestamp": "2026-10-11T14:28:42.013Z",
+        "node": "opening",
+        "event": "function_call_start",
+        "function": "verify_identity",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity",
+          "method": "POST",
+          "body": {
+            "field": "phone_last4",
+            "answer": "6604",
+            "customer_id": "c_21609415-807"
+          }
+        }
+      },
+      {
+        "message_index": 14,
+        "timestamp": "2026-10-11T14:28:42.292Z",
+        "node": "opening",
+        "event": "function_call_complete",
+        "function": "verify_identity",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": false,
+            "id_state": "open",
+            "what_to_do_next": "Correct (do not say so). Say \"Thank you.\" and ask the next security question: \"What is your date of birth?\""
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 17,
+        "timestamp": "2026-10-11T14:28:42.850Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 3,
+        "userMessageId": "msg_2_1791728920749",
+        "finalAssistantMessageId": "msg_7_1791728922602",
+        "responseText": "Thank you. What is your date of birth?"
+      },
+      {
+        "message_index": 21,
+        "timestamp": "2026-10-11T14:28:52.781Z",
+        "node": "opening",
+        "event": "function_call_start",
+        "function": "verify_identity",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity",
+          "method": "POST",
+          "body": {
+            "field": "date_of_birth",
+            "answer": "1991-01-08",
+            "customer_id": "c_21609415-807"
+          }
+        }
+      },
+      {
+        "message_index": 22,
+        "timestamp": "2026-10-11T14:29:01.476Z",
+        "node": "opening",
+        "event": "function_call_complete",
+        "function": "verify_identity",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": true,
+            "id_state": "verified",
+            "what_to_do_next": "All security answers are correct. Identity is verified. Say nothing about it yet."
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 25,
+        "timestamp": "2026-10-11T14:29:01.571Z",
+        "node": "get_account",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/get_account",
+          "method": "POST",
+          "body": {
+            "customer_id": "c_21609415-807"
+          }
+        }
+      },
+      {
+        "message_index": 26,
+        "timestamp": "2026-10-11T14:29:10.850Z",
+        "node": "get_account",
+        "event": "function_call_complete",
+        "function": "api_call",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "products": [
+              {
+                "product_id": "p1",
+                "type": "credit_card",
+                "card_last4": "6604",
+                "past_due": 300,
+                "days_late": 4,
+                "minimum_payment": 90
+              },
+              {
+                "product_id": "p2",
+                "type": "personal_loan",
+                "past_due": 900,
+                "days_late": 20,
+                "instalment_amount": 300
+              }
+            ]
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 34,
+        "timestamp": "2026-10-11T14:29:18.598Z",
+        "node": "negotiate",
+        "event": "turn_completed",
+        "turnIndex": 4,
+        "userMessageId": "msg_2_1791728924475",
+        "finalAssistantMessageId": "msg_16_1791728958280",
+        "responseText": "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your credit card ending 6604 has arrears of 300.00 and is 4 days late. Your personal loan has arrears of 900.00 and is 20 days late. Let us take these one at a time, starting with the first one I mentioned. Can you pay its full arrears today, or on the next working day if payment today is no longer possible?"
+      },
+      {
+        "message_index": 38,
+        "timestamp": "2026-10-11T14:29:20.686Z",
+        "node": "negotiate",
+        "event": "function_call_start",
+        "function": "check_terms",
+        "args": {
+          "params": {
+            "amount": "full",
+            "date": "2026-10-14",
+            "product_id": "p2"
+          },
+          "timeout_ms": 10000
+        }
+      },
+      {
+        "message_index": 39,
+        "timestamp": "2026-10-11T14:29:21.224Z",
+        "node": "negotiate",
+        "event": "function_call_complete",
+        "function": "check_terms",
+        "result": {
+          "status": "success",
+          "data": null,
+          "message": "Code executed successfully",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 47,
+        "timestamp": "2026-10-11T14:29:21.911Z",
+        "node": "negotiate",
+        "event": "turn_completed",
+        "turnIndex": 5,
+        "userMessageId": "msg_2_1791728959826",
+        "finalAssistantMessageId": "msg_12_1791728961555",
+        "responseText": "Now your credit card ending 6604. Could you pay the full amount of 300.00 for your credit card ending 6604 by Friday 23 October 2026?"
+      },
+      {
+        "message_index": 52,
+        "timestamp": "2026-10-11T14:29:24.067Z",
+        "node": "negotiate",
+        "event": "turn_completed",
+        "turnIndex": 6,
+        "userMessageId": "msg_2_1791728963161",
+        "finalAssistantMessageId": "msg_4_1791728963801",
+        "responseText": "I understand. Could you tell me if you can pay the full amount for your credit card ending 6604 by Friday 23 October 2026?"
+      },
+      {
+        "message_index": 56,
+        "timestamp": "2026-10-11T14:29:27.409Z",
+        "node": "negotiate",
+        "event": "function_call_start",
+        "function": "skip_product",
+        "args": {
+          "params": {
+            "product_id": "p1",
+            "reason": "paid"
+          },
+          "timeout_ms": 10000
+        }
+      },
+      {
+        "message_index": 57,
+        "timestamp": "2026-10-11T14:29:35.996Z",
+        "node": "negotiate",
+        "event": "function_call_complete",
+        "function": "skip_product",
+        "result": {
+          "status": "success",
+          "data": null,
+          "message": "Code executed successfully",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 65,
+        "timestamp": "2026-10-11T14:29:44.882Z",
+        "node": "negotiate",
+        "event": "turn_completed",
+        "turnIndex": 7,
+        "userMessageId": "msg_2_1791728965891",
+        "finalAssistantMessageId": "msg_12_1791728984419",
+        "responseText": "Payments may take two working days to appear. To confirm: you will pay 900.00 for your personal loan on Wednesday 14 October 2026. May I record that commitment?"
+      },
+      {
+        "message_index": 69,
+        "timestamp": "2026-10-11T14:29:46.744Z",
+        "node": "negotiate",
+        "event": "function_call_start",
+        "function": "customer_confirmed",
+        "args": {
+          "timeout_ms": 10000
+        }
+      },
+      {
+        "message_index": 70,
+        "timestamp": "2026-10-11T14:29:51.238Z",
+        "node": "negotiate",
+        "event": "function_call_complete",
+        "function": "customer_confirmed",
+        "result": {
+          "status": "success",
+          "data": null,
+          "message": "Code executed successfully",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 77,
+        "timestamp": "2026-10-11T14:29:56.461Z",
+        "node": "create_promise",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/create_promise",
+          "method": "POST",
+          "body": {
+            "date": "2026-10-14",
+            "amount": 900.0,
+            "product_id": "p2",
+            "customer_id": "c_21609415-807"
+          }
+        }
+      },
+      {
+        "message_index": 78,
+        "timestamp": "2026-10-11T14:29:57.046Z",
+        "node": "create_promise",
+        "event": "function_call_complete",
+        "function": "api_call",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "promise_id": "pr1"
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 86,
+        "timestamp": "2026-10-11T14:29:57.851Z",
+        "node": "negotiate",
+        "event": "turn_completed",
+        "turnIndex": 8,
+        "userMessageId": "msg_2_1791728986162",
+        "finalAssistantMessageId": "msg_20_1791728997486",
+        "responseText": "Your commitment is available in the online portal."
+      },
+      {
+        "message_index": 90,
+        "timestamp": "2026-10-11T14:29:59.667Z",
+        "node": "negotiate",
+        "event": "function_call_start",
+        "function": "wrap_up",
+        "args": {
+          "params": {
+            "outcome": "promise"
+          },
+          "timeout_ms": 10000
+        }
+      },
+      {
+        "message_index": 91,
+        "timestamp": "2026-10-11T14:30:00.129Z",
+        "node": "negotiate",
+        "event": "function_call_complete",
+        "function": "wrap_up",
+        "result": {
+          "status": "success",
+          "data": null,
+          "message": "Code executed successfully",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 98,
+        "timestamp": "2026-10-11T14:30:01.262Z",
+        "node": "add_note",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/add_note",
+          "method": "POST",
+          "body": {
+            "reason": "paid",
+            "product_id": "p1",
+            "customer_id": "c_21609415-807"
+          }
+        }
+      },
+      {
+        "message_index": 99,
+        "timestamp": "2026-10-11T14:30:03.988Z",
+        "node": "add_note",
+        "event": "function_call_complete",
+        "function": "api_call",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 109,
+        "timestamp": "2026-10-11T14:30:08.791Z",
+        "node": "close_call",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/close_call",
+          "method": "POST",
+          "body": {
+            "outcome": "promise",
+            "customer_id": "c_21609415-807"
+          }
+        }
+      },
+      {
+        "message_index": 110,
+        "timestamp": "2026-10-11T14:30:10.657Z",
+        "node": "close_call",
+        "event": "function_call_complete",
+        "function": "api_call",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 113,
+        "timestamp": "2026-10-11T14:30:11.065Z",
+        "node": "end",
+        "event": "function_call_start",
+        "function": "end_call",
+        "args": {
+          "message_mode": "none"
+        }
+      },
+      {
+        "message_index": 115,
+        "timestamp": "2026-10-11T14:30:11.189Z",
+        "node": "end",
+        "event": "call_ended",
+        "reason": "assistant-ended-call"
+      },
+      {
+        "message_index": 116,
+        "timestamp": "2026-10-11T14:30:11.230Z",
+        "node": "end",
+        "event": "function_call_complete",
+        "function": "end_call",
+        "result": {
+          "status": "success",
+          "message": "Call ended"
+        }
+      },
+      {
+        "message_index": 117,
+        "timestamp": "2026-10-11T14:30:24.522Z",
+        "node": "end",
+        "event": "function_call_start",
+        "function": "close_call_at_end",
+        "args": {
+          "outcome": "promise",
+          "reason": "The customer committed to paying the personal loan arrears of 900.00 today."
+        }
+      },
+      {
+        "message_index": 118,
+        "timestamp": "2026-10-11T14:30:24.692Z",
+        "node": "end",
+        "event": "function_call_error",
+        "function": "close_call_at_end",
+        "error": "Traceback (most recent call last):\n  File \"<string>\", line 266, in <module>\n    raise Exception('already closed')\nException: already closed\n"
+      }
+    ],
+    "ledger": {
+      "ok": true,
+      "case": "PUB-13",
+      "team": "c354dcc1e41b4a34e576740f",
+      "now": "2026-10-14T11:00",
+      "verified": {
+        "phone_last4": true,
+        "date_of_birth": true
+      },
+      "wrong": 0,
+      "hinted": false,
+      "promises": [
+        {
+          "promise_id": "pr1",
+          "product_id": "p2",
+          "type": "personal_loan",
+          "amount": 900,
+          "date": "2026-10-14"
+        }
+      ],
+      "notes": [
+        {
+          "product_id": "p1",
+          "reason": "paid",
+          "text": ""
+        }
+      ],
+      "callbacks": [],
+      "transfers": [],
+      "outcome": "promise",
+      "reason": null,
+      "failures": {
+        "verify_identity": 0,
+        "get_account": 0,
+        "create_promise": 0,
+        "add_note": 0,
+        "close_call": 0
+      },
+      "calls": [
+        {
+          "n": 1,
+          "tool": "verify_identity",
+          "args": {
+            "field": "phone_last4",
+            "answer": "6604"
+          },
+          "status": 200,
+          "result": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": false
+          }
+        },
+        {
+          "n": 2,
+          "tool": "verify_identity",
+          "args": {
+            "field": "date_of_birth",
+            "answer": "1991-01-08"
+          },
+          "status": 200,
+          "result": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": true
+          }
+        },
+        {
+          "n": 3,
+          "tool": "get_account",
+          "args": {},
+          "status": 200,
+          "result": {
+            "ok": true,
+            "products": [
+              {
+                "product_id": "p1",
+                "type": "credit_card",
+                "card_last4": "6604",
+                "past_due": 300,
+                "days_late": 4,
+                "minimum_payment": 90
+              },
+              {
+                "product_id": "p2",
+                "type": "personal_loan",
+                "past_due": 900,
+                "days_late": 20,
+                "instalment_amount": 300
+              }
+            ]
+          }
+        },
+        {
+          "n": 4,
+          "tool": "create_promise",
+          "args": {
+            "date": "2026-10-14",
+            "amount": 900,
+            "product_id": "p2"
+          },
+          "status": 200,
+          "result": {
+            "ok": true,
+            "promise_id": "pr1"
+          }
+        },
+        {
+          "n": 5,
+          "tool": "add_note",
+          "args": {
+            "reason": "paid",
+            "product_id": "p1"
+          },
+          "status": 200,
+          "result": {
+            "ok": true
+          }
+        },
+        {
+          "n": 6,
+          "tool": "close_call",
+          "args": {
+            "outcome": "promise"
+          },
+          "status": 200,
+          "result": {
+            "ok": true
+          }
+        }
+      ],
+      "last_at": 1791729008894
+    },
+    "fetched_call_status": "16",
+    "bank_close_count": 1
+  },
+  {
+    "case": "SV1-09",
+    "call_id": "6bf36202-69d3-47c2-809b-88a08bbec2a2",
+    "ledger_score": {
+      "pass": true,
+      "failed": []
+    },
+    "transport_errors": [
+      {
+        "user": "Saturday 17 October 2026 at 11:30 in the morning is fine.",
+        "elapsed_s": 29.689,
+        "platform_error": "POST /api/v2/chat/message -> 504: error code: 504\n"
+      }
+    ],
+    "speech": [
+      {
+        "message_index": 0,
+        "role": "user",
+        "text": "Hello?",
+        "timestamp": "2026-10-11T14:31:35.179Z",
+        "seconds": 0.01079702377319336
+      },
+      {
+        "message_index": 1,
+        "role": "assistant",
+        "text": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Maria Costa?",
+        "timestamp": "2026-10-11T14:31:35.525Z",
+        "seconds": 0.03078293800354004
+      },
+      {
+        "message_index": 6,
+        "role": "user",
+        "text": "No, this is her husband. What is this about? I can pay for her.",
+        "timestamp": "2026-10-11T14:31:36.467Z",
+        "seconds": 1.277796983718872
+      },
+      {
+        "message_index": 8,
+        "role": "assistant",
+        "text": "I can only discuss that with Maria Costa personally. Would you like me to call Maria Costa back at another time?",
+        "timestamp": "2026-10-11T14:31:37.274Z",
+        "seconds": 1.345797061920166
+      },
+      {
+        "message_index": 11,
+        "role": "user",
+        "text": "Please call her on Friday 16 October 2026 at 11:30 in the morning.",
+        "timestamp": "2026-10-11T14:31:38.989Z",
+        "seconds": 3.7497971057891846
+      },
+      {
+        "message_index": 16,
+        "role": "assistant",
+        "text": "That time is not available. Could you please choose a time from 09:15 to 12:45 on either Thursday, October 15th or Saturday, October 17th?",
+        "timestamp": "2026-10-11T14:31:46.696Z",
+        "seconds": 9.855797052383423
+      },
+      {
+        "message_index": 19,
+        "role": "user",
+        "text": "Saturday 17 October 2026 at 11:30 in the morning is fine.",
+        "timestamp": "2026-10-11T14:31:48.433Z",
+        "seconds": 13.229797124862671
+      },
+      {
+        "message_index": 25,
+        "role": "assistant",
+        "text": "The callback is booked. Thank you for your time. Goodbye.",
+        "timestamp": "2026-10-11T14:31:54.191Z",
+        "seconds": 18.88979697227478
+      }
+    ],
+    "events": [
+      {
+        "message_index": 3,
+        "timestamp": "2026-10-11T14:31:35.567Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 1,
+        "userMessageId": "msg_1_1791729095161",
+        "finalAssistantMessageId": "msg_4_1791729095252",
+        "responseText": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Maria Costa?"
+      },
+      {
+        "message_index": 9,
+        "timestamp": "2026-10-11T14:31:37.533Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 2,
+        "userMessageId": "msg_2_1791729096426",
+        "finalAssistantMessageId": "msg_4_1791729097236",
+        "responseText": "I can only discuss that with Maria Costa personally. Would you like me to call Maria Costa back at another time?"
+      },
+      {
+        "message_index": 13,
+        "timestamp": "2026-10-11T14:31:44.981Z",
+        "node": "opening",
+        "event": "function_call_start",
+        "function": "schedule_callback",
+        "args": {
+          "date": "2026-10-16",
+          "time": "11:30"
+        }
+      },
+      {
+        "message_index": 14,
+        "timestamp": "2026-10-11T14:31:45.012Z",
+        "node": "opening",
+        "event": "function_call_error",
+        "function": "schedule_callback",
+        "error": "Traceback (most recent call last):\n  File \"<string>\", line 286, in <module>\n    raise Exception('RULE: ' + what + ' is OUTSIDE the callback window. Nothing was booked. Allowed: ' + allowed_text() + '. ' + G.get('callback_outside_first', 'Ask once for another time.'))\nException: RULE: Friday 16 October 2026 at 11:30 is OUTSIDE the callback window. Nothing was booked. Allowed: Thursday 15 October 2026 from 09:15 to 12:45; Saturday 17 October 2026 from 09:15 to 12:45. Ask once for a replacement: a time from 09:15 to 12:45 on one of the next two working days, not today.\n"
+      },
+      {
+        "message_index": 17,
+        "timestamp": "2026-10-11T14:31:46.940Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 3,
+        "userMessageId": "msg_2_1791729098898",
+        "finalAssistantMessageId": "msg_7_1791729106688",
+        "responseText": "That time is not available. Could you please choose a time from 09:15 to 12:45 on either Thursday, October 15th or Saturday, October 17th?"
+      },
+      {
+        "message_index": 21,
+        "timestamp": "2026-10-11T14:31:52.453Z",
+        "node": "opening",
+        "event": "function_call_start",
+        "function": "schedule_callback",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/schedule_callback",
+          "method": "POST",
+          "body": {
+            "date": "2026-10-17",
+            "time": "11:30",
+            "customer_id": "c_2d2762a1-f37"
+          }
+        }
+      },
+      {
+        "message_index": 22,
+        "timestamp": "2026-10-11T14:31:54.027Z",
+        "node": "opening",
+        "event": "function_call_complete",
+        "function": "schedule_callback",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "auto_state": "go",
+            "final_outcome": "not_reached",
+            "final_reason": "callback",
+            "final_line": "The callback is booked. Thank you for your time. Goodbye.",
+            "what_to_do_next": "The callback is booked. Say nothing more."
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 28,
+        "timestamp": "2026-10-11T14:31:55.517Z",
+        "node": "close_call",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/close_call",
+          "method": "POST",
+          "body": {
+            "reason": "callback",
+            "outcome": "not_reached",
+            "customer_id": "c_2d2762a1-f37"
+          }
+        }
+      },
+      {
+        "message_index": 29,
+        "timestamp": "2026-10-11T14:31:57.291Z",
+        "node": "close_call",
+        "event": "function_call_complete",
+        "function": "api_call",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 32,
+        "timestamp": "2026-10-11T14:31:57.403Z",
+        "node": "end",
+        "event": "function_call_start",
+        "function": "end_call",
+        "args": {
+          "message_mode": "none"
+        }
+      },
+      {
+        "message_index": 34,
+        "timestamp": "2026-10-11T14:31:57.688Z",
+        "node": "end",
+        "event": "call_ended",
+        "reason": "assistant-ended-call"
+      },
+      {
+        "message_index": 35,
+        "timestamp": "2026-10-11T14:31:57.720Z",
+        "node": "end",
+        "event": "function_call_complete",
+        "function": "end_call",
+        "result": {
+          "status": "success",
+          "message": "Call ended"
+        }
+      },
+      {
+        "message_index": 36,
+        "timestamp": "2026-10-11T14:32:13.602Z",
+        "node": "end",
+        "event": "function_call_start",
+        "function": "close_call_at_end",
+        "args": {
+          "outcome": "not_reached",
+          "reason": "callback"
+        }
+      },
+      {
+        "message_index": 37,
+        "timestamp": "2026-10-11T14:32:13.697Z",
+        "node": "end",
+        "event": "function_call_error",
+        "function": "close_call_at_end",
+        "error": "Traceback (most recent call last):\n  File \"<string>\", line 266, in <module>\n    raise Exception('already closed')\nException: already closed\n"
+      }
+    ],
+    "ledger": {
+      "ok": true,
+      "case": "PUB-02",
+      "team": "c354dcc1e41b4a34e576740f",
+      "now": "2026-10-14T11:00",
+      "verified": {},
+      "wrong": 0,
+      "hinted": false,
+      "promises": [],
+      "notes": [],
+      "callbacks": [
+        {
+          "date": "2026-10-17",
+          "time": "11:30"
+        }
+      ],
+      "transfers": [],
+      "outcome": "not_reached",
+      "reason": "callback",
+      "failures": {
+        "schedule_callback": 0,
+        "close_call": 0
+      },
+      "calls": [
+        {
+          "n": 1,
+          "tool": "schedule_callback",
+          "args": {
+            "date": "2026-10-17",
+            "time": "11:30"
+          },
+          "status": 200,
+          "result": {
+            "ok": true
+          }
+        },
+        {
+          "n": 2,
+          "tool": "close_call",
+          "args": {
+            "reason": "callback",
+            "outcome": "not_reached"
+          },
+          "status": 200,
+          "result": {
+            "ok": true
+          }
+        }
+      ],
+      "last_at": 1791729115528
+    },
+    "fetched_call_status": "16",
+    "bank_close_count": 1
+  },
+  {
+    "case": "SV1-10",
+    "call_id": "ed343d1e-5fb0-4e00-958f-d4a73cb96465",
+    "ledger_score": {
+      "pass": false,
+      "failed": [
+        "promises [('p1', 420.0, '2026-10-15')], expected [('p1', 420.0, '2026-10-17')]"
+      ]
+    },
+    "transport_errors": [
+      {
+        "user": "Nothing else, thank you. Goodbye.",
+        "elapsed_s": 60.29,
+        "platform_error": "POST /api/v2/chat/message -> 504: error code: 504\n"
+      }
+    ],
+    "speech": [
+      {
+        "message_index": 0,
+        "role": "user",
+        "text": "Hello?",
+        "timestamp": "2026-10-11T14:32:20.009Z",
+        "seconds": 0.010785102844238281
+      },
+      {
+        "message_index": 1,
+        "role": "assistant",
+        "text": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Daniel Reyes?",
+        "timestamp": "2026-10-11T14:32:20.370Z",
+        "seconds": 0.03289985656738281
+      },
+      {
+        "message_index": 6,
+        "role": "user",
+        "text": "Yes, Daniel Reyes speaking.",
+        "timestamp": "2026-10-11T14:32:21.613Z",
+        "seconds": 1.5797851085662842
+      },
+      {
+        "message_index": 8,
+        "role": "assistant",
+        "text": "What are the last four digits of your phone number?",
+        "timestamp": "2026-10-11T14:32:24.165Z",
+        "seconds": 1.656785011291504
+      },
+      {
+        "message_index": 11,
+        "role": "user",
+        "text": "4471",
+        "timestamp": "2026-10-11T14:32:25.681Z",
+        "seconds": 5.656785011291504
+      },
+      {
+        "message_index": 16,
+        "role": "assistant",
+        "text": "Thank you. What is your date of birth?",
+        "timestamp": "2026-10-11T14:32:29.642Z",
+        "seconds": 7.3027849197387695
+      },
+      {
+        "message_index": 19,
+        "role": "user",
+        "text": "1988-03-14",
+        "timestamp": "2026-10-11T14:32:31.221Z",
+        "seconds": 11.188785076141357
+      },
+      {
+        "message_index": 33,
+        "role": "assistant",
+        "text": "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your credit card ending 4821 has arrears of 420.00 and is 6 days late. Can you pay the full arrears today, or on the next working day if payment today is no longer possible?",
+        "timestamp": "2026-10-11T14:32:41.831Z",
+        "seconds": 21.55978512763977
+      },
+      {
+        "message_index": 36,
+        "role": "user",
+        "text": "I can pay the full 420 today, Thursday 15 October 2026.",
+        "timestamp": "2026-10-11T14:32:43.094Z",
+        "seconds": 23.067785024642944
+      },
+      {
+        "message_index": 46,
+        "role": "assistant",
+        "text": "To confirm: you will pay 420.00 for your credit card ending 4821 on Thursday 15 October 2026. May I record that commitment?",
+        "timestamp": "2026-10-11T14:32:45.379Z",
+        "seconds": 25.151785135269165
+      },
+      {
+        "message_index": 49,
+        "role": "user",
+        "text": "Yes, that date works. I confirm.",
+        "timestamp": "2026-10-11T14:32:46.825Z",
+        "seconds": 26.79778504371643
+      },
+      {
+        "message_index": 67,
+        "role": "assistant",
+        "text": "Your commitment is available in the online portal.",
+        "timestamp": "2026-10-11T14:32:48.884Z",
+        "seconds": 28.5777850151062
+      },
+      {
+        "message_index": 70,
+        "role": "user",
+        "text": "Yes, I confirm.",
+        "timestamp": "2026-10-11T14:32:50.418Z",
+        "seconds": 30.39878511428833
+      },
+      {
+        "message_index": 75,
+        "role": "assistant",
+        "text": "I apologize, there was a mistake. May I record that commitment?",
+        "timestamp": "2026-10-11T14:32:55.569Z",
+        "seconds": 32.752784967422485
+      },
+      {
+        "message_index": 78,
+        "role": "user",
+        "text": "Nothing else, thank you. Goodbye.",
+        "timestamp": "2026-10-11T14:32:57.300Z",
+        "seconds": 37.28078508377075
+      },
+      {
+        "message_index": 88,
+        "role": "assistant",
+        "text": "Thank you for your time. Goodbye.",
+        "timestamp": "2026-10-11T14:33:16.583Z",
+        "seconds": 56.42978501319885
+      }
+    ],
+    "events": [
+      {
+        "message_index": 3,
+        "timestamp": "2026-10-11T14:32:20.436Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 1,
+        "userMessageId": "msg_1_1791729139986",
+        "finalAssistantMessageId": "msg_4_1791729140081",
+        "responseText": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Daniel Reyes?"
+      },
+      {
+        "message_index": 9,
+        "timestamp": "2026-10-11T14:32:24.397Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 2,
+        "userMessageId": "msg_2_1791729141553",
+        "finalAssistantMessageId": "msg_4_1791729144155",
+        "responseText": "What are the last four digits of your phone number?"
+      },
+      {
+        "message_index": 13,
+        "timestamp": "2026-10-11T14:32:26.914Z",
+        "node": "opening",
+        "event": "function_call_start",
+        "function": "verify_identity",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity",
+          "method": "POST",
+          "body": {
+            "field": "phone_last4",
+            "answer": "4471",
+            "customer_id": "c_84b76296-e68"
+          }
+        }
+      },
+      {
+        "message_index": 14,
+        "timestamp": "2026-10-11T14:32:27.243Z",
+        "node": "opening",
+        "event": "function_call_complete",
+        "function": "verify_identity",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": false,
+            "id_state": "open",
+            "what_to_do_next": "Correct (do not say so). Say \"Thank you.\" and ask the next security question: \"What is your date of birth?\""
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 17,
+        "timestamp": "2026-10-11T14:32:29.896Z",
+        "node": "opening",
+        "event": "turn_completed",
+        "turnIndex": 3,
+        "userMessageId": "msg_2_1791729145632",
+        "finalAssistantMessageId": "msg_7_1791729149632",
+        "responseText": "Thank you. What is your date of birth?"
+      },
+      {
+        "message_index": 21,
+        "timestamp": "2026-10-11T14:32:34.204Z",
+        "node": "opening",
+        "event": "function_call_start",
+        "function": "verify_identity",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/verify_identity",
+          "method": "POST",
+          "body": {
+            "field": "date_of_birth",
+            "answer": "1988-03-14",
+            "customer_id": "c_84b76296-e68"
+          }
+        }
+      },
+      {
+        "message_index": 22,
+        "timestamp": "2026-10-11T14:32:37.123Z",
+        "node": "opening",
+        "event": "function_call_complete",
+        "function": "verify_identity",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": true,
+            "id_state": "verified",
+            "what_to_do_next": "All security answers are correct. Identity is verified. Say nothing about it yet."
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 25,
+        "timestamp": "2026-10-11T14:32:37.264Z",
+        "node": "get_account",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/get_account",
+          "method": "POST",
+          "body": {
+            "customer_id": "c_84b76296-e68"
+          }
+        }
+      },
+      {
+        "message_index": 26,
+        "timestamp": "2026-10-11T14:32:39.110Z",
+        "node": "get_account",
+        "event": "function_call_complete",
+        "function": "api_call",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "products": [
+              {
+                "product_id": "p1",
+                "type": "credit_card",
+                "card_last4": "4821",
+                "past_due": 420,
+                "days_late": 6,
+                "minimum_payment": 126
+              }
+            ]
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 34,
+        "timestamp": "2026-10-11T14:32:41.874Z",
+        "node": "negotiate",
+        "event": "turn_completed",
+        "turnIndex": 4,
+        "userMessageId": "msg_2_1791729151160",
+        "finalAssistantMessageId": "msg_16_1791729161527",
+        "responseText": "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your credit card ending 4821 has arrears of 420.00 and is 6 days late. Can you pay the full arrears today, or on the next working day if payment today is no longer possible?"
+      },
+      {
+        "message_index": 38,
+        "timestamp": "2026-10-11T14:32:44.735Z",
+        "node": "negotiate",
+        "event": "function_call_start",
+        "function": "check_terms",
+        "args": {
+          "params": {
+            "amount": "full",
+            "date": "2026-10-15",
+            "product_id": "p1"
+          },
+          "timeout_ms": 10000
+        }
+      },
+      {
+        "message_index": 39,
+        "timestamp": "2026-10-11T14:32:44.883Z",
+        "node": "negotiate",
+        "event": "function_call_complete",
+        "function": "check_terms",
+        "result": {
+          "status": "success",
+          "data": null,
+          "message": "Code executed successfully",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 47,
+        "timestamp": "2026-10-11T14:32:45.416Z",
+        "node": "negotiate",
+        "event": "turn_completed",
+        "turnIndex": 5,
+        "userMessageId": "msg_2_1791729163041",
+        "finalAssistantMessageId": "msg_12_1791729165120",
+        "responseText": "To confirm: you will pay 420.00 for your credit card ending 4821 on Thursday 15 October 2026. May I record that commitment?"
+      },
+      {
+        "message_index": 51,
+        "timestamp": "2026-10-11T14:32:47.451Z",
+        "node": "negotiate",
+        "event": "function_call_start",
+        "function": "customer_confirmed",
+        "args": {
+          "timeout_ms": 10000
+        }
+      },
+      {
+        "message_index": 52,
+        "timestamp": "2026-10-11T14:32:47.750Z",
+        "node": "negotiate",
+        "event": "function_call_complete",
+        "function": "customer_confirmed",
+        "result": {
+          "status": "success",
+          "data": null,
+          "message": "Code executed successfully",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 59,
+        "timestamp": "2026-10-11T14:32:48.243Z",
+        "node": "create_promise",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/create_promise",
+          "method": "POST",
+          "body": {
+            "date": "2026-10-15",
+            "amount": 420.0,
+            "product_id": "p1",
+            "customer_id": "c_84b76296-e68"
+          }
+        }
+      },
+      {
+        "message_index": 60,
+        "timestamp": "2026-10-11T14:32:48.340Z",
+        "node": "create_promise",
+        "event": "function_call_complete",
+        "function": "api_call",
+        "result": {
+          "status": "success",
+          "data": {
+            "ok": true,
+            "promise_id": "pr1"
+          },
+          "message": "Successfully executed POST request",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 68,
+        "timestamp": "2026-10-11T14:32:48.934Z",
+        "node": "negotiate",
+        "event": "turn_completed",
+        "turnIndex": 6,
+        "userMessageId": "msg_2_1791729166772",
+        "finalAssistantMessageId": "msg_20_1791729168547",
+        "responseText": "Your commitment is available in the online portal."
+      },
+      {
+        "message_index": 72,
+        "timestamp": "2026-10-11T14:32:50.917Z",
+        "node": "negotiate",
+        "event": "function_call_start",
+        "function": "customer_confirmed",
+        "args": {
+          "timeout_ms": 10000
+        }
+      },
+      {
+        "message_index": 73,
+        "timestamp": "2026-10-11T14:32:52.702Z",
+        "node": "negotiate",
+        "event": "function_call_error",
+        "function": "customer_confirmed",
+        "error": "Traceback (most recent call last):\n  File \"<string>\", line 222, in <module>\n    _result = __user_main__()\n  File \"<string>\", line 219, in __user_main__\n    raise Exception('RULE: nothing is agreed yet, so there is nothing to record. First CALL check_terms for each product the customer agreed to pay. The system then reads it back. Only after a clear yes CALL customer_confirmed.')\nException: RULE: nothing is agreed yet, so there is nothing to record. First CALL check_terms for each product the customer agreed to pay. The system then reads it back. Only after a clear yes CALL customer_confirmed.\n"
+      },
+      {
+        "message_index": 76,
+        "timestamp": "2026-10-11T14:32:55.784Z",
+        "node": "negotiate",
+        "event": "turn_completed",
+        "turnIndex": 7,
+        "userMessageId": "msg_2_1791729170370",
+        "finalAssistantMessageId": "msg_7_1791729175559",
+        "responseText": "I apologize, there was a mistake. May I record that commitment?"
+      },
+      {
+        "message_index": 80,
+        "timestamp": "2026-10-11T14:32:58.811Z",
+        "node": "negotiate",
+        "event": "function_call_start",
+        "function": "wrap_up",
+        "args": {
+          "params": {
+            "outcome": "promise"
+          },
+          "timeout_ms": 10000
+        }
+      },
+      {
+        "message_index": 81,
+        "timestamp": "2026-10-11T14:33:08.096Z",
+        "node": "negotiate",
+        "event": "function_call_complete",
+        "function": "wrap_up",
+        "result": {
+          "status": "success",
+          "data": null,
+          "message": "Code executed successfully",
+          "status_code": 200
+        }
+      },
+      {
+        "message_index": 91,
+        "timestamp": "2026-10-11T14:33:25.010Z",
+        "node": "close_call",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/close_call",
+          "method": "POST",
+          "body": {
+            "outcome": "promise",
+            "customer_id": "c_84b76296-e68"
+          }
+        }
+      },
+      {
+        "message_index": 93,
+        "timestamp": "2026-10-11T14:33:35.249Z",
+        "node": "close_call",
+        "event": "function_call_start",
+        "function": "api_call",
+        "args": {
+          "url": "https://freya-bank-mock.freyavoice.workers.dev/v1/close_call",
+          "method": "POST",
+          "body": {
+            "outcome": "promise",
+            "customer_id": "c_84b76296-e68"
+          }
+        }
+      },
+      {
+        "message_index": 96,
+        "timestamp": "2026-10-11T14:33:41.501Z",
+        "node": "end",
+        "event": "function_call_start",
+        "function": "end_call",
+        "args": {
+          "message_mode": "none"
+        }
+      },
+      {
+        "message_index": 98,
+        "timestamp": "2026-10-11T14:33:41.858Z",
+        "node": "end",
+        "event": "call_ended",
+        "reason": "assistant-ended-call"
+      },
+      {
+        "message_index": 99,
+        "timestamp": "2026-10-11T14:33:41.910Z",
+        "node": "end",
+        "event": "function_call_complete",
+        "function": "end_call",
+        "result": {
+          "status": "success",
+          "message": "Call ended"
+        }
+      }
+    ],
+    "ledger": {
+      "ok": true,
+      "case": "PUB-01",
+      "team": "c354dcc1e41b4a34e576740f",
+      "now": "2026-10-14T11:00",
+      "verified": {
+        "phone_last4": true,
+        "date_of_birth": true
+      },
+      "wrong": 0,
+      "hinted": false,
+      "promises": [
+        {
+          "promise_id": "pr1",
+          "product_id": "p1",
+          "type": "credit_card",
+          "amount": 420,
+          "date": "2026-10-15"
+        }
+      ],
+      "notes": [],
+      "callbacks": [],
+      "transfers": [],
+      "outcome": "promise",
+      "reason": null,
+      "failures": {
+        "verify_identity": 0,
+        "get_account": 0,
+        "create_promise": 0,
+        "close_call": 0
+      },
+      "calls": [
+        {
+          "n": 1,
+          "tool": "verify_identity",
+          "args": {
+            "field": "phone_last4",
+            "answer": "4471"
+          },
+          "status": 200,
+          "result": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": false
+          }
+        },
+        {
+          "n": 2,
+          "tool": "verify_identity",
+          "args": {
+            "field": "date_of_birth",
+            "answer": "1988-03-14"
+          },
+          "status": 200,
+          "result": {
+            "ok": true,
+            "verified": true,
+            "wrong_answers_left": 3,
+            "all_verified": true
+          }
+        },
+        {
+          "n": 3,
+          "tool": "get_account",
+          "args": {},
+          "status": 200,
+          "result": {
+            "ok": true,
+            "products": [
+              {
+                "product_id": "p1",
+                "type": "credit_card",
+                "card_last4": "4821",
+                "past_due": 420,
+                "days_late": 6,
+                "minimum_payment": 126
+              }
+            ]
+          }
+        },
+        {
+          "n": 4,
+          "tool": "create_promise",
+          "args": {
+            "date": "2026-10-15",
+            "amount": 420,
+            "product_id": "p1"
+          },
+          "status": 200,
+          "result": {
+            "ok": true,
+            "promise_id": "pr1"
+          }
+        },
+        {
+          "n": 5,
+          "tool": "close_call",
+          "args": {
+            "outcome": "promise"
+          },
+          "status": 200,
+          "result": {
+            "ok": true
+          }
+        },
+        {
+          "n": 6,
+          "tool": "close_call",
+          "args": {
+            "outcome": "promise"
+          },
+          "status": 200,
+          "result": {
+            "ok": false,
+            "error": "the call is already closed"
+          }
+        }
+      ],
+      "last_at": 1791729205018
+    },
+    "fetched_call_status": "16",
+    "bank_close_count": 2
+  }
+]

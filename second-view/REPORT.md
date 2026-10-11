@@ -1,6 +1,6 @@
-# Independent organiser-perspective audit — preliminary report
+# Independent organiser-perspective audit — final report
 
-Checkpoint: 11 October 2026, 17:20 Istanbul (before the requested 17:45 first version). Audit baseline `de4f07e`; branch `ibraschwan/second-view`. Builder files are unchanged. This report will be updated with live-chat and Cedar results before 18:45.
+Final: 11 October 2026, before 18:45 Istanbul. Preliminary report was pushed at 17:20 (`40044c2`, evidence inclusion `8e660a4`), before the requested 17:45 checkpoint. Audit baseline `de4f07e`; branch `ibraschwan/second-view`. Builder files and the main candidate are unchanged. No fixes are proposed or deployed. The numbered findings below retain their checkpoint identifiers; F9 is the highest-exposure concrete API finding and F6 is the highest-severity live privacy finding.
 
 I would not expect this builder to hold reliably on an unseen brief that changes the *structure* of the policy. The most likely loss is a correctly read rule being forced into an engine that cannot express it, then silently approximated. A passing self-test does not expose that: the model itself explicitly identified unsupported floors, cutoff times, product ordering, per-product confirmations and transfer notes, but those warnings are discarded before the spec and trace are written. This is measured on an independent brief, not inferred from another Brief A run.
 
@@ -65,16 +65,62 @@ O14 line 36 says after two failed note writes close no_promise/service_error. Th
 
 In brief order: bank/opening/automated/recording text; phone then birth-date question order; DMY dates and swapped-month hint; immediate first security refusal; Sunday/Monday closures and all three holidays; callback exclusion of today, two-working-day horizon and 09:15–12:45 window; all three band boundaries, business-day offsets and 2/1/0 budgets; deadline-based persuasion offers; immediate human queue and outcome pairs in prompts; paid two-working-day sentence; confirmation question, portal sentence, no-SMS instruction and branch direction for later changes. Local probes confirmed first security refusal, Saturday acceptance, two-day callback and singleton zero-persuasion closure with a note.
 
-## Build/live inventory and spend (checkpoint)
+## Final live evidence, strict policy judgment and platform separation
+
+One conversation per original customer, not three repetitions. `results/chat-SV1-XX.json` contains complete fetched provider messages, bank ledger and turn timings; `results/chat-summary.json` gives indexed speech/events. The built-in ledger scorer passes 5/8 original cases, but two of those violate conversation/tool policy. Only SV1-01, 02 and 06 have correct observed records and policy in these observations, all with ending-transport qualifications. **This is not a hidden-case pass-rate estimate.**
+
+| Case / call id | Records and strict audit | Transport |
+|---|---|---|
+| 01 / d70dd62d-2224-4b77-acad-36e9a6ea6e31 | 420 today, portal sentence, one close: correct observed | Ending 504, 21.758s; concurrent auditor end/send confounds ending timing; see transport note |
+| 02 / 455d3494-596e-4e9c-bbcb-6eaef9438486 | Floor 1062.55, explicit consent and portal: correct observed | Ending 504, 33.312s |
+| 03 / 335747f9-d12d-4681-b970-434f74da6450 | **Fail O3:** two wrong answers followed by third phone attempt, DOB, account fetch and disclosure of 95 arrears. Expected failed verification without disclosure | No 504; ledger snapshot has no close |
+| 04 / 9f2f93bc-6696-438c-8f9b-41e7651b69e4 | Date 17 October correct, ledger score passes; **fail O15:** three close_call bank invocations, two rejected as already closed | Ending 504, 60.286s |
+| 05 / bfa5bad1-d5f9-44ac-b778-d7c23a30099c | **Fail O5:** requested Friday 16 then Saturday 17; model sent May 2025 twice, used replacement allowance, no callback. Expected 17 October 2026 11:30 | Ending 504, 19.070s; wrong tool dates precede it |
+| 06 / d2e46e8d-7cd7-488e-ab57-bf9a0c8155f5 | Zero extra persuasion, singleton refused note and correct closure: correct observed | Ending 504, 20.618s |
+| 07 / a3563945-7f96-471e-ad2d-482751888f25 | **Fail O12/O15:** general transfer but no dispute note | Ending 504, 44.196s; missing note is separately in bank records |
+| 08 / 51afc781-5357-4256-a562-4d938cdd518d | Eventual loan promise 900 and card paid note correct; **fail O6:** card first despite loan older, asks next product before individual loan readback | Ending 504, 30.328s |
+
+F6 is now a **proven live failure**, not just a missing deterministic guarantee. In case 03 provider messages 13/21 are the first two checks, 24 asks illegally again, 29 verifies the third answer, 37 verifies DOB, 41 fetches account and 49 discloses the debt. Expected not_verified/failed, no account fetch. Its later ending cannot undo that disclosure. The reviewed prompt's two-wrong patch lost to engine guidance.
+
+F3 is live-confirmed in case 07: provider messages 38/40 show skip_product then transfer, but ledger has zero notes versus expected dispute note. The model did mark the dispute; the engine transfer gate loses it. F4 is live-confirmed in case 08: account order and deferred readback are directly observable. The script includes an unsolicited loan confirmation before the agent's loan readback; it correctly ignores that, which does not excuse wrong order already observed earlier.
+
+Seven original calls encountered an ending 504. These are **not scored as policy failures merely because they timed out**: retrieved transcripts and bank writes show substantial completion, including goodbyes. Attribution between platform routing, workflow execution and ending behavior is unresolved. Case 01 also has an auditor concurrency mistake: end was initiated while the last send was pending, and concurrent saves lost that error row. `results/chat-SV1-01-transport.md` preserves it; do not use that ending as clean latency evidence.
+
+### F9 — Nested API contracts cannot be validated or executed; fake bank hides the mismatch
+
+Cedar preserves the seven guaranteed operation names but changes body fields, response envelope and success enum. `results/cedar-api-sv-two.json` uses the recovered **intermediate** reconciled policy, not a completed spec/workflow. The reading correctly maps dotted fields, but extraction validation rejects 14 body paths because it only sees top-level member_token/request. `engine.bank_tool` converts the nested request object to string and defaults member_token to its own variable rather than documented customer_id alias. Runtime reads flat dotted keys and boolean success, not nested result.state=ACCEPTED.
+
+Controlled local comparison with the same policy/account: existing Sim verifies all three challenges and loads one facility; NativeResponseSim returning actual nested contract stays unverified with zero products. Thus a passing spec-shaped fake-bank result is not evidence of actual API compatibility. Origin: schema validation, compilation and runtime API adapter, not unclear brief. Exposure: any nested request/response or enum-success API, potentially all 30 customers if universally required. No fix commit; a generic recursive adapter would also require matching fake-bank contracts and regression checks. Cedar build additionally fails during repair (F7), so no deployed Cedar score is claimed.
+
+### F10 — Implicit callback dates acquire an invented month/year
+
+Case 05 above invents 2025-05-16 and 2025-05-17 despite callback guidance specifying October 2026, then exhausts the customer's replacement allowance on its own date errors. Diagnostic control 09, call `6bf36202-69d3-47c2-809b-88a08bbec2a2`, repeats the behavior with explicit month/year: correct callback 2026-10-17 11:30 and not_reached/callback, one close, but ending 504 29.689s. Origin: dialogue date interpretation and retry charging; explicit-date success separates it from calendar-window extraction. One paired observation, no general reliability estimate. Cost: N implicit-date customers among 30, unknown. No fix commit.
+
+### F11 — Exactly-one closure is not assured; ledger scorer misses duplicate attempts
+
+Case 04 has three bank close invocations: provider messages 91 and 93 in close_call, 100 in end/close_call_at_end. First succeeds, later attempts return already closed. O15 requires exactly one; `tools/score.py` examines the last closure, not the count. Runtime CLOSE_PRE lacks a closed guard; fallback has one, so platform replay/state propagation is also a plausible cause. Do not attribute all three solely to the dialogue model. Exposure: closure replay/end-hook interactions, prevalence unknown, N affected customers out of 30. No fix commit; idempotency and persisted state need verification.
+
+Diagnostic control 10, call `ed343d1e-5fb0-4e00-958f-d4a73cb96465`, supplies workflow now=2026-10-15T15:00 and explicitly offers 15 October. It records that date and says the portal sentence, while expected earliest is 17 October; two closes and ending 504 60.290s. **Clock caveat:** practice ledger still reports its session clock 2026-10-14T11:00, so this is not an independent bank-clock cutoff test. Workflow receives overridden now; local F5 at cutoff is the unconfounded engine test. Case 04's correct holiday adjustment does not establish cutoff enforcement.
+
+## Build/live inventory and spend (final)
 
 | Slot | Result | Workflow | Agent | Reported cost |
 |---|---|---|---|---:|
 | sv-one | extraction failed | none | none | $0.79 completed calls + unreported failed call |
 | sv-one-b | deployed, 341s, 5 calls | fc696bd6-e957-4890-9a66-5ba29138d0c8 | 58b2c2b3-0668-4e83-9f17-cdaf0dcabc9b | $1.47 |
-| sv-two | no-deploy build running | none | none | pending |
+| sv-two | no-deploy extraction/repair failed; about 401s | none | none | $1.08 completed calls + unreported failed call |
+| sv-two-renamed | existing-spec compile rejected missing required tool names; no model calls | none | none | $0 |
 
-Reserve $0.50 for the first failure's unreported call when enforcing the $5 ceiling. Inherited auto/spend.tsv rows belong to the baseline and are excluded; the missing failed-run cost means that file alone understates this audit. No simulations, personas, non-sv workflows or candidate mutations.
+Known completed-call costs total **$3.34**. Two failed SDK calls have no returned monetary cost; reserve $0.50 each, for a conservative working envelope of **$4.34**, not a verified final bill. Each failed session recorded roughly 20–21k cache-creation input, 10.6k cache-read input and 0.8–1.1k output tokens; usage is in model-evidence.json. No further paid builds were launched. Inherited auto/spend.tsv rows belong to baseline; failed invocations produce no row and understate audit spend. No simulations, personas, non-sv workflows or candidate mutations. Deployed Alder export is intentionally not committed under submission/.
 
-## In progress / not established
+Cedar completed policy calls at $0.35/$0.36 and reconciliation $0.37, then validator rejection triggers repair whose Bash search attempt hits SDK maximum turns=1. Thus F7 happened in two of three full build invocations; this small audit is not a frequency estimate. Both fail well within 30 minutes, but leave no deliverable or completed trace. Successful Alder is 341.4s, 14 steps, workflow 470515 bytes. Trace/secret checks are in artifact-check.json, with zero secret matches.
 
-Live chat judgments and exact ledger scores are in progress, not claimed as passes. Cedar build and strict nested API execution are pending. Two full successful independent builds per brief have NOT been achieved; a failed build is not a second policy measurement. A .txt + overriding memo is in the Cedar invocation; contradictions and renamed-tool behavior are not yet run. No fixes to builder/ have been made. No hidden-case pass rate is estimated. The hypotheses above will be qualified by final evidence rather than retroactively changing our briefs to suit the builder.
+## Repeated readings, correct rules and uncompleted coverage
+
+`results/reading-comparison.json` compares recovered policy JSON readings, not independent completed agents. First Alder pair differs on loan floor: 50% versus instalment. Neither fully expresses O8. Cedar initial pair differs on extra-offer counts: correct 1/1/1 versus incorrect 2/2/2; reconciled intermediate returns correct counts. This is extraction variability even though no second completed Cedar build exists.
+
+In Cedar rule order: C1 bank name and opening/privacy instructions extracted correctly. C2 all three questions extracted, but wrong-count ceiling lacks deterministic per-challenge implementation. C3 memo M1's 60% overrides 40% in all recovered readings, and revised 4/2/1 deadlines are extracted; ceiling limitation remains (F2), and initial extra-offer counts vary. C4 calendar, forward adjustment wording and memo M2's callback 10:20–14:40 are extracted. C5 nested product mapping is read but not executable (F9); rank order and individual recording have no engine setting (F4). C6 exact memo M3 office sentence and no-SMS rule are extracted, but ACCEPTED success enum cannot be consumed correctly (F9). C7 escalation/note policy meets the same transfer-note engine limitation. C8 custom outcome/reason codes are read, but exactly-one closure is not proven (F11 class). Correct extraction does not establish executable Cedar behavior.
+
+Deliverable coverage: .md table brief succeeds; .txt plus overriding memo is accepted and read, but later API repair fails. Renamed operations are intentionally **outside** final's seven-name guarantee: zero-model existing-spec compile rejects all seven missing names (`results/renamed-tools-console.log`), not a scored contract-valid defect. This is not a fresh Cedar reading. Artifact checker confirms builder unchanged and no credentials in audit artifacts.
+
+Not completed: two successful full builds per brief; eight Cedar customer conversations; repeated live runs for robustness; hard contradictory-brief test; full live hardship, note-write-failure, rounding, swapped-hint and persuasion-question dialogues. Some have extraction/local evidence only, identified above. No hidden cases accessed; no fixes or regression suites run because builder was not changed. There is one full successful build, two failed builds, 16 Alder local probes, one Cedar paired response-shape probe, eight original live conversations and two post-observation controls. Do not reinterpret SDK sub-readings or controls as fulfilling missing full builds or predesigned customer coverage.

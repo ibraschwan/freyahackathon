@@ -1,0 +1,29 @@
+CASE SV1-09
+{"user": "Hello?", "elapsed_s": 1.477, "response": {"response": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Maria Costa?", "callId": "6bf36202-69d3-47c2-809b-88a08bbec2a2", "messageId": "msg_4_1791729095252"}}
+
+{"user": "No, this is her husband. What is this about? I can pay for her.", "elapsed_s": 2.323, "response": {"response": "I can only discuss that with Maria Costa personally. Would you like me to call Maria Costa back at another time?", "callId": "6bf36202-69d3-47c2-809b-88a08bbec2a2", "messageId": "msg_4_1791729097236"}}
+
+{"user": "Please call her on Friday 16 October 2026 at 11:30 in the morning.", "elapsed_s": 9.382, "response": {"response": "That time is not available. Could you please choose a time from 09:15 to 12:45 on either Thursday, October 15th or Saturday, October 17th?", "callId": "6bf36202-69d3-47c2-809b-88a08bbec2a2", "messageId": "msg_7_1791729106688"}}
+
+{"user": "Saturday 17 October 2026 at 11:30 in the morning is fine.", "elapsed_s": 29.689, "platform_error": "POST /api/v2/chat/message -> 504: error code: 504\n"}
+
+{"call_id": "6bf36202-69d3-47c2-809b-88a08bbec2a2", "score": {"pass": true, "failed": []}, "ledger": {"ok": true, "case": "PUB-02", "team": "c354dcc1e41b4a34e576740f", "now": "2026-10-14T11:00", "verified": {}, "wrong": 0, "hinted": false, "promises": [], "notes": [], "callbacks": [{"date": "2026-10-17", "time": "11:30"}], "transfers": [], "outcome": "not_reached", "reason": "callback", "failures": {"schedule_callback": 0, "close_call": 0}, "calls": [{"n": 1, "tool": "schedule_callback", "args": {"date": "2026-10-17", "time": "11:30"}, "status": 200, "result": {"ok": true}}, {"n": 2, "tool": "close_call", "args": {"reason": "callback", "outcome": "not_reached"}, "status": 200, "result": {"ok": true}}], "last_at": 1791729115528}}
+
+CASE SV1-10
+{"user": "Hello?", "elapsed_s": 1.45, "response": {"response": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Daniel Reyes?", "callId": "ed343d1e-5fb0-4e00-958f-d4a73cb96465", "messageId": "msg_4_1791729140081"}}
+
+{"user": "Yes, Daniel Reyes speaking.", "elapsed_s": 4.092, "response": {"response": "What are the last four digits of your phone number?", "callId": "ed343d1e-5fb0-4e00-958f-d4a73cb96465", "messageId": "msg_4_1791729144155"}}
+
+{"user": "4471", "elapsed_s": 5.48, "response": {"response": "Thank you. What is your date of birth?", "callId": "ed343d1e-5fb0-4e00-958f-d4a73cb96465", "messageId": "msg_7_1791729149632"}}
+
+{"user": "1988-03-14", "elapsed_s": 11.855, "response": {"response": "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your credit card ending 4821 has arrears of 420.00 and is 6 days late. Can you pay the full arrears today, or on the next working day if payment today is no longer possible?", "callId": "ed343d1e-5fb0-4e00-958f-d4a73cb96465", "messageId": "msg_16_1791729161527"}}
+
+{"user": "I can pay the full 420 today, Thursday 15 October 2026.", "elapsed_s": 3.492, "response": {"response": "To confirm: you will pay 420.00 for your credit card ending 4821 on Thursday 15 October 2026. May I record that commitment?", "callId": "ed343d1e-5fb0-4e00-958f-d4a73cb96465", "messageId": "msg_12_1791729165120"}}
+
+{"user": "Yes, that date works. I confirm.", "elapsed_s": 3.701, "response": {"response": "Your commitment is available in the online portal.", "callId": "ed343d1e-5fb0-4e00-958f-d4a73cb96465", "messageId": "msg_20_1791729168547"}}
+
+{"user": "Yes, I confirm.", "elapsed_s": 6.799, "response": {"response": "I apologize, there was a mistake. May I record that commitment?", "callId": "ed343d1e-5fb0-4e00-958f-d4a73cb96465", "messageId": "msg_7_1791729175559"}}
+
+{"user": "Nothing else, thank you. Goodbye.", "elapsed_s": 60.29, "platform_error": "POST /api/v2/chat/message -> 504: error code: 504\n"}
+
+{"call_id": "ed343d1e-5fb0-4e00-958f-d4a73cb96465", "score": {"pass": false, "failed": ["promises [('p1', 420.0, '2026-10-15')], expected [('p1', 420.0, '2026-10-17')]"]}, "ledger": {"ok": true, "case": "PUB-01", "team": "c354dcc1e41b4a34e576740f", "now": "2026-10-14T11:00", "verified": {"phone_last4": true, "date_of_birth": true}, "wrong": 0, "hinted": false, "promises": [{"promise_id": "pr1", "product_id": "p1", "type": "credit_card", "amount": 420, "date": "2026-10-15"}], "notes": [], "callbacks": [], "transfers": [], "outcome": "promise", "reason": null, "failures": {"verify_identity": 0, "get_account": 0, "create_promise": 0, "close_call": 0}, "calls": [{"n": 1, "tool": "verify_identity", "args": {"field": "phone_last4", "answer": "4471"}, "status": 200, "result": {"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": false}}, {"n": 2, "tool": "verify_identity", "args": {"field": "date_of_birth", "answer": "1988-03-14"}, "status": 200, "result": {"ok": true, "verified": true, "wrong_answers_left": 3, "all_verified": true}}, {"n": 3, "tool": "get_account", "args": {}, "status": 200, "result": {"ok": true, "products": [{"product_id": "p1", "type": "credit_card", "card_last4": "4821", "past_due": 420, "days_late": 6, "minimum_payment": 126}]}}, {"n": 4, "tool": "create_promise", "args": {"date": "2026-10-15", "amount": 420, "product_id": "p1"}, "status": 200, "result": {"ok": true, "promise_id": "pr1"}}, {"n": 5, "tool": "close_call", "args": {"outcome": "promise"}, "status": 200, "result": {"ok": true}}, {"n": 6, "tool": "close_call", "args": {"outcome": "promise"}, "status": 200, "result": {"ok": false, "error": "the call is already closed"}}], "last_at": 1791729205018}}

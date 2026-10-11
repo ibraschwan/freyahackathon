@@ -1,0 +1,316 @@
+{
+  "source": "recovered SDK session ca76048c-a148-4efb-aaff-b0ebc7b7ea18",
+  "intermediate_not_completed_build": true,
+  "check_errors": [
+    "tools.verify_identity.question: the tool API has no body field 'request.challenge' (it has ['member_token', 'request'])",
+    "tools.verify_identity.answer: the tool API has no body field 'request.response_text' (it has ['member_token', 'request'])",
+    "tools.create_promise.product: the tool API has no body field 'request.facility_key' (it has ['member_token', 'request'])",
+    "tools.create_promise.amount: the tool API has no body field 'request.committed_sum' (it has ['member_token', 'request'])",
+    "tools.create_promise.date: the tool API has no body field 'request.due_on' (it has ['member_token', 'request'])",
+    "tools.schedule_callback.date: the tool API has no body field 'request.return_day' (it has ['member_token', 'request'])",
+    "tools.schedule_callback.time: the tool API has no body field 'request.return_time' (it has ['member_token', 'request'])",
+    "tools.transfer_to_agent.queue: the tool API has no body field 'request.destination' (it has ['member_token', 'request'])",
+    "tools.close_call.outcome: the tool API has no body field 'request.resolution' (it has ['member_token', 'request'])",
+    "tools.close_call.reason: the tool API has no body field 'request.explanation' (it has ['member_token', 'request'])",
+    "tools.close_call.outcome: the tool API has no body field 'request.resolution' (it has ['member_token', 'request'])",
+    "tools.transfer_to_agent.queue: the tool API has no body field 'request.destination' (it has ['member_token', 'request'])",
+    "tools.verify_identity.question: the tool API has no body field 'request.challenge' (it has ['member_token', 'request'])",
+    "tools.add_note.reason: the tool API has no body field 'request.note_code' (it has ['member_token', 'request'])"
+  ],
+  "compiled_identity_body_schema": {
+    "type": "object",
+    "properties": {
+      "member_token": {
+        "type": "string",
+        "default": "{{member_token}}",
+        "description": "The call variable customer_id; identifies the synthetic session"
+      },
+      "request": {
+        "type": "string",
+        "default": "{{request}}"
+      }
+    },
+    "required": [
+      "member_token",
+      "request"
+    ]
+  },
+  "contract_identity_body_schema": {
+    "type": "object",
+    "properties": {
+      "member_token": {
+        "type": "string",
+        "description": "The call variable customer_id; identifies the synthetic session"
+      },
+      "request": {
+        "type": "object",
+        "properties": {
+          "challenge": {
+            "type": "string",
+            "enum": [
+              "membership_word",
+              "postal_code",
+              "birth_year"
+            ]
+          },
+          "response_text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "challenge",
+          "response_text"
+        ]
+      }
+    },
+    "required": [
+      "member_token",
+      "request"
+    ]
+  },
+  "results": {
+    "Sim": {
+      "errors": [],
+      "state": {
+        "stage": "verified",
+        "id": "verified",
+        "idv": [
+          "membership_word",
+          "postal_code",
+          "birth_year"
+        ],
+        "products": [
+          {
+            "id": "f1",
+            "type": "revolving",
+            "words": "revolving credit",
+            "full": 300.01,
+            "floor": 180.01,
+            "floor_name": "minimum accepted amount",
+            "late": 12,
+            "band": "10-29",
+            "deadline": "2026-10-16",
+            "attempts": 1,
+            "offers": [
+              {
+                "amount": "full",
+                "date": "2026-10-16",
+                "text": ""
+              }
+            ]
+          }
+        ],
+        "plan": {},
+        "pnotes": {},
+        "promises": {},
+        "tries": {},
+        "perr": [],
+        "notes": {},
+        "ntries": {},
+        "transfer": "",
+        "callback": "",
+        "closed": "",
+        "pend": "",
+        "npend": "",
+        "prop": {},
+        "toomuch": [],
+        "floored": [],
+        "given": [],
+        "said": [],
+        "mo": "",
+        "mr": "",
+        "fin": ""
+      },
+      "ledger": {
+        "promises": [],
+        "notes": [],
+        "callbacks": [],
+        "transfers": [],
+        "outcome": null,
+        "reason": null,
+        "calls": [
+          {
+            "tool": "verify_identity",
+            "args": {
+              "request.challenge": "membership_word",
+              "request.response_text": "maple"
+            },
+            "status": 200,
+            "result": {
+              "result.state": true,
+              "payload.challenge_passed": true,
+              "payload.remaining_for_challenge": 3,
+              "payload.fully_authenticated": false,
+              "id_state": "open",
+              "what_to_do_next": "Correct (do not say so). Say \"Thank you.\" and ask the next security question: \"What is your postal code?\""
+            }
+          },
+          {
+            "tool": "verify_identity",
+            "args": {
+              "request.challenge": "postal_code",
+              "request.response_text": "K2A7"
+            },
+            "status": 200,
+            "result": {
+              "result.state": true,
+              "payload.challenge_passed": true,
+              "payload.remaining_for_challenge": 3,
+              "payload.fully_authenticated": false,
+              "id_state": "open",
+              "what_to_do_next": "Correct (do not say so). Say \"Thank you.\" and ask the next security question: \"What is your year of birth?\""
+            }
+          },
+          {
+            "tool": "verify_identity",
+            "args": {
+              "request.challenge": "birth_year",
+              "request.response_text": "1981"
+            },
+            "status": 200,
+            "result": {
+              "result.state": true,
+              "payload.challenge_passed": true,
+              "payload.remaining_for_challenge": 3,
+              "payload.fully_authenticated": true,
+              "id_state": "verified",
+              "what_to_do_next": "All security answers are correct. Identity is verified. Say nothing about it yet."
+            }
+          },
+          {
+            "tool": "get_account",
+            "args": {},
+            "status": 200,
+            "result": {
+              "result.state": true,
+              "payload.facilities": [
+                {
+                  "facility_key": "f1",
+                  "kind": "revolving",
+                  "overdue_total": 300.01,
+                  "late_days": 12,
+                  "urgency_rank": 2
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "said": [
+        "Thank you, your identity is confirmed. I am calling from Cedar Cooperative about overdue payments on your account. Your revolving credit has 300.01 overdue and is 12 days late. Can you pay the full amount today?"
+      ]
+    },
+    "NativeResponseSim": {
+      "errors": [],
+      "state": {
+        "stage": "opening",
+        "id": "open",
+        "idv": [],
+        "products": [],
+        "plan": {},
+        "pnotes": {},
+        "promises": {},
+        "tries": {},
+        "perr": [],
+        "notes": {},
+        "ntries": {},
+        "transfer": "",
+        "callback": "",
+        "closed": "",
+        "pend": "",
+        "npend": "",
+        "prop": {},
+        "toomuch": [],
+        "floored": [],
+        "given": [],
+        "said": [],
+        "mo": "",
+        "mr": "",
+        "fin": ""
+      },
+      "ledger": {
+        "promises": [],
+        "notes": [],
+        "callbacks": [],
+        "transfers": [],
+        "outcome": null,
+        "reason": null,
+        "calls": [
+          {
+            "tool": "verify_identity",
+            "args": {
+              "request.challenge": "membership_word",
+              "request.response_text": "maple"
+            },
+            "status": 200,
+            "result": {
+              "result.state": true,
+              "payload.challenge_passed": true,
+              "payload.remaining_for_challenge": 3,
+              "payload.fully_authenticated": false
+            },
+            "native_response": {
+              "result": {
+                "state": "ACCEPTED"
+              },
+              "payload": {
+                "challenge_passed": true,
+                "remaining_for_challenge": 3,
+                "fully_authenticated": false
+              }
+            }
+          },
+          {
+            "tool": "verify_identity",
+            "args": {
+              "request.challenge": "postal_code",
+              "request.response_text": "K2A7"
+            },
+            "status": 200,
+            "result": {
+              "result.state": true,
+              "payload.challenge_passed": true,
+              "payload.remaining_for_challenge": 3,
+              "payload.fully_authenticated": false
+            },
+            "native_response": {
+              "result": {
+                "state": "ACCEPTED"
+              },
+              "payload": {
+                "challenge_passed": true,
+                "remaining_for_challenge": 3,
+                "fully_authenticated": false
+              }
+            }
+          },
+          {
+            "tool": "verify_identity",
+            "args": {
+              "request.challenge": "birth_year",
+              "request.response_text": "1981"
+            },
+            "status": 200,
+            "result": {
+              "result.state": true,
+              "payload.challenge_passed": true,
+              "payload.remaining_for_challenge": 3,
+              "payload.fully_authenticated": true
+            },
+            "native_response": {
+              "result": {
+                "state": "ACCEPTED"
+              },
+              "payload": {
+                "challenge_passed": true,
+                "remaining_for_challenge": 3,
+                "fully_authenticated": true
+              }
+            }
+          }
+        ]
+      },
+      "said": []
+    }
+  }
+}

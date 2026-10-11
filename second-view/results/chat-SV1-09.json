@@ -1,0 +1,3431 @@
+{
+  "case": "SV1-09",
+  "slot": "sv-one-b",
+  "workflow_id": "fc696bd6-e957-4890-9a66-5ba29138d0c8",
+  "agent_id": "58b2c2b3-0668-4e83-9f17-cdaf0dcabc9b",
+  "version": 1,
+  "variables": {
+    "customer_id": "c_2d2762a1-f37",
+    "first_name": "Maria",
+    "last_name": "Costa",
+    "title": "Ms",
+    "now": "2026-10-14T11:00"
+  },
+  "turns": [
+    {
+      "user": "Hello?",
+      "elapsed_s": 1.477,
+      "response": {
+        "response": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Maria Costa?",
+        "callId": "6bf36202-69d3-47c2-809b-88a08bbec2a2",
+        "messageId": "msg_4_1791729095252"
+      }
+    },
+    {
+      "user": "No, this is her husband. What is this about? I can pay for her.",
+      "elapsed_s": 2.323,
+      "response": {
+        "response": "I can only discuss that with Maria Costa personally. Would you like me to call Maria Costa back at another time?",
+        "callId": "6bf36202-69d3-47c2-809b-88a08bbec2a2",
+        "messageId": "msg_4_1791729097236"
+      }
+    },
+    {
+      "user": "Please call her on Friday 16 October 2026 at 11:30 in the morning.",
+      "elapsed_s": 9.382,
+      "response": {
+        "response": "That time is not available. Could you please choose a time from 09:15 to 12:45 on either Thursday, October 15th or Saturday, October 17th?",
+        "callId": "6bf36202-69d3-47c2-809b-88a08bbec2a2",
+        "messageId": "msg_7_1791729106688"
+      }
+    },
+    {
+      "user": "Saturday 17 October 2026 at 11:30 in the morning is fine.",
+      "elapsed_s": 29.689,
+      "platform_error": "POST /api/v2/chat/message -> 504: error code: 504\n"
+    }
+  ],
+  "started_at": "2026-10-11T17:31:34+0300",
+  "call_id": "6bf36202-69d3-47c2-809b-88a08bbec2a2",
+  "end_response": {
+    "callId": "6bf36202-69d3-47c2-809b-88a08bbec2a2",
+    "ended": true,
+    "endedReason": "assistant-ended-call",
+    "alreadyEnded": true
+  },
+  "call": {
+    "id": "6bf36202-69d3-47c2-809b-88a08bbec2a2",
+    "externalCallId": null,
+    "sipCallId": null,
+    "workspaceId": "686221c4-a7e8-4c9d-af8f-db0781714a4f",
+    "isArchived": false,
+    "isImported": false,
+    "phoneNumberId": null,
+    "phoneNumber": null,
+    "assistantId": "58b2c2b3-0668-4e83-9f17-cdaf0dcabc9b",
+    "assistantName": "sv-one-b 1011-165051",
+    "assistantEntityType": "workflow",
+    "assistantWorkflowId": "fc696bd6-e957-4890-9a66-5ba29138d0c8",
+    "entityVersionId": "2883a3aa-15f2-440e-bfe5-7d4dc1b33722",
+    "originCallId": null,
+    "entityVersionNumber": 1,
+    "customerNumber": "",
+    "customerLabel": null,
+    "startedAt": "2026-10-11T14:31:35.141Z",
+    "endedAt": "2026-10-11T14:31:57.647Z",
+    "duration": 23,
+    "status": "16",
+    "type": "webCall",
+    "modality": "text",
+    "channel": null,
+    "endedReason": "assistant-ended-call",
+    "transcript": "User (0.0s): Hello?\n\nAssistant (0.0s): Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Maria Costa?\n\nUser (1.3s): No, this is her husband. What is this about? I can pay for her.\n\nAssistant (1.3s): I can only discuss that with Maria Costa personally. Would you like me to call Maria Costa back at another time?\n\nUser (3.7s): Please call her on Friday 16 October 2026 at 11:30 in the morning.\n\nAssistant (9.9s): That time is not available. Could you please choose a time from 09:15 to 12:45 on either Thursday, October 15th or Saturday, October 17th?\n\nUser (13.2s): Saturday 17 October 2026 at 11:30 in the morning is fine.\n\nAssistant (18.9s): The callback is booked. Thank you for your time. Goodbye.",
+    "messages": [
+      {
+        "role": "user",
+        "message": "Hello?",
+        "messageId": "msg_1_1791729095161",
+        "secondsFromStart": 0.01079702377319336,
+        "nodeId": "setup",
+        "workflowSnapshot": {
+          "currentNode": "setup",
+          "previousNode": null,
+          "nodeTurnCount": 0,
+          "totalTurnCount": 0,
+          "nodeTotalTurnCounts": {},
+          "transitionHistory": [],
+          "enteredNodes": [],
+          "variableTable": {
+            "end.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135831+00:00"
+            },
+            "end.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135886+00:00"
+            },
+            "sync.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135836+00:00"
+            },
+            "sync.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135888+00:00"
+            },
+            "setup.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135884+00:00"
+            },
+            "setup.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135890+00:00"
+            },
+            "stall.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135844+00:00"
+            },
+            "stall.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135892+00:00"
+            },
+            "goodbye.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135848+00:00"
+            },
+            "goodbye.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135893+00:00"
+            },
+            "opening.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135852+00:00"
+            },
+            "opening.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135895+00:00"
+            },
+            "prepare.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135855+00:00"
+            },
+            "prepare.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135897+00:00"
+            },
+            "add_note.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135858+00:00"
+            },
+            "add_note.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135899+00:00"
+            },
+            "rec_next.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135862+00:00"
+            },
+            "rec_next.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135900+00:00"
+            },
+            "negotiate.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135865+00:00"
+            },
+            "negotiate.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135902+00:00"
+            },
+            "note_next.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135869+00:00"
+            },
+            "note_next.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135904+00:00"
+            },
+            "close_call.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135872+00:00"
+            },
+            "close_call.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135906+00:00"
+            },
+            "get_account.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135876+00:00"
+            },
+            "get_account.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135907+00:00"
+            },
+            "create_promise.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135880+00:00"
+            },
+            "create_promise.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135909+00:00"
+            },
+            "now": {
+              "value": "2026-10-14T11:00",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135912+00:00"
+            },
+            "title": {
+              "value": "Ms",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135913+00:00"
+            },
+            "last_name": {
+              "value": "Costa",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135915+00:00"
+            },
+            "first_name": {
+              "value": "Maria",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135916+00:00"
+            },
+            "customer_id": {
+              "value": "c_2d2762a1-f37",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135918+00:00"
+            },
+            "call.customer_phone_number": {
+              "value": "",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135919+00:00"
+            },
+            "call.phone_number": {
+              "value": "",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135921+00:00"
+            },
+            "call.call_id": {
+              "value": "6bf36202-69d3-47c2-809b-88a08bbec2a2",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135922+00:00"
+            },
+            "call.direction": {
+              "value": "web",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135924+00:00"
+            },
+            "system.iso_utc_now": {
+              "value": "2026-10-11T14:31:34.948513Z",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135926+00:00"
+            },
+            "system.todays_date_en_cst": {
+              "value": "11 October 2026 Sunday 08:31",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135928+00:00"
+            },
+            "system.todays_date_en_est": {
+              "value": "11 October 2026 Sunday 09:31",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135929+00:00"
+            },
+            "system.todays_date_tr": {
+              "value": "11 Ekim 2026 Pazar 17:31",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135931+00:00"
+            },
+            "system.todays_date_tr.iso_8601": {
+              "value": "2026-10-11",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135933+00:00"
+            },
+            "system.uuid4()": {
+              "value": "dfda2d7b01a745cab0c3304a2242d5c9",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135935+00:00"
+            }
+          },
+          "identity": {
+            "agentId": "58b2c2b3-0668-4e83-9f17-cdaf0dcabc9b",
+            "entityVersionId": "2883a3aa-15f2-440e-bfe5-7d4dc1b33722"
+          },
+          "controlFlags": {
+            "terminalActionFired": false
+          }
+        },
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:35.179Z",
+        "wasBlocked": false
+      },
+      {
+        "role": "assistant",
+        "message": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Maria Costa?",
+        "messageId": "msg_4_1791729095252",
+        "secondsFromStart": 0.03078293800354004,
+        "nodeId": "opening",
+        "workflowSnapshot": {
+          "currentNode": "opening",
+          "previousNode": "setup",
+          "nodeTurnCount": 0,
+          "totalTurnCount": 0,
+          "nodeTotalTurnCounts": {},
+          "transitionHistory": [
+            {
+              "from": "setup",
+              "to": "opening",
+              "reason": "always always"
+            }
+          ],
+          "enteredNodes": [
+            "opening"
+          ],
+          "variableTable": {
+            "end.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135831+00:00"
+            },
+            "end.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135886+00:00"
+            },
+            "sync.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135836+00:00"
+            },
+            "sync.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135888+00:00"
+            },
+            "setup.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.179362+00:00"
+            },
+            "setup.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135890+00:00"
+            },
+            "stall.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135844+00:00"
+            },
+            "stall.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135892+00:00"
+            },
+            "goodbye.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135848+00:00"
+            },
+            "goodbye.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135893+00:00"
+            },
+            "opening.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.179366+00:00"
+            },
+            "opening.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.179369+00:00"
+            },
+            "prepare.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135855+00:00"
+            },
+            "prepare.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135897+00:00"
+            },
+            "add_note.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135858+00:00"
+            },
+            "add_note.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135899+00:00"
+            },
+            "rec_next.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135862+00:00"
+            },
+            "rec_next.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135900+00:00"
+            },
+            "negotiate.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135865+00:00"
+            },
+            "negotiate.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135902+00:00"
+            },
+            "note_next.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135869+00:00"
+            },
+            "note_next.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135904+00:00"
+            },
+            "close_call.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135872+00:00"
+            },
+            "close_call.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135906+00:00"
+            },
+            "get_account.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135876+00:00"
+            },
+            "get_account.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135907+00:00"
+            },
+            "create_promise.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135880+00:00"
+            },
+            "create_promise.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135909+00:00"
+            },
+            "now": {
+              "value": "2026-10-14T11:00",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135912+00:00"
+            },
+            "title": {
+              "value": "Ms",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135913+00:00"
+            },
+            "last_name": {
+              "value": "Costa",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135915+00:00"
+            },
+            "first_name": {
+              "value": "Maria",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135916+00:00"
+            },
+            "customer_id": {
+              "value": "c_2d2762a1-f37",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135918+00:00"
+            },
+            "call.customer_phone_number": {
+              "value": "",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135919+00:00"
+            },
+            "call.phone_number": {
+              "value": "",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135921+00:00"
+            },
+            "call.call_id": {
+              "value": "6bf36202-69d3-47c2-809b-88a08bbec2a2",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135922+00:00"
+            },
+            "call.direction": {
+              "value": "web",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135924+00:00"
+            },
+            "system.iso_utc_now": {
+              "value": "2026-10-11T14:31:34.948513Z",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135926+00:00"
+            },
+            "system.todays_date_en_cst": {
+              "value": "11 October 2026 Sunday 08:31",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135928+00:00"
+            },
+            "system.todays_date_en_est": {
+              "value": "11 October 2026 Sunday 09:31",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135929+00:00"
+            },
+            "system.todays_date_tr": {
+              "value": "11 Ekim 2026 Pazar 17:31",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135931+00:00"
+            },
+            "system.todays_date_tr.iso_8601": {
+              "value": "2026-10-11",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135933+00:00"
+            },
+            "system.uuid4()": {
+              "value": "dfda2d7b01a745cab0c3304a2242d5c9",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135935+00:00"
+            }
+          },
+          "identity": {
+            "agentId": "58b2c2b3-0668-4e83-9f17-cdaf0dcabc9b",
+            "entityVersionId": "2883a3aa-15f2-440e-bfe5-7d4dc1b33722"
+          },
+          "controlFlags": {
+            "terminalActionFired": false
+          }
+        },
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:35.525Z",
+        "wasBlocked": false
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"route_evaluated\",\"matched\":true,\"from_node\":\"setup\",\"target\":\"opening\",\"confidence\":1.0,\"reason\":\"always always\",\"branches\":[{\"target\":\"opening\",\"description\":\"always\",\"result\":true,\"condition_results\":{\"operator\":\"always\",\"result\":true}}],\"variable_table\":{\"end.current_turns\":0,\"end.total_turns\":0,\"sync.current_turns\":0,\"sync.total_turns\":0,\"setup.current_turns\":0,\"setup.total_turns\":0,\"stall.current_turns\":0,\"stall.total_turns\":0,\"goodbye.current_turns\":0,\"goodbye.total_turns\":0,\"opening.current_turns\":0,\"opening.total_turns\":0,\"prepare.current_turns\":0,\"prepare.total_turns\":0,\"add_note.current_turns\":0,\"add_note.total_turns\":0,\"rec_next.current_turns\":0,\"rec_next.total_turns\":0,\"negotiate.current_turns\":0,\"negotiate.total_turns\":0,\"note_next.current_turns\":0,\"note_next.total_turns\":0,\"close_call.current_turns\":0,\"close_call.total_turns\":0,\"get_account.current_turns\":0,\"get_account.total_turns\":0,\"create_promise.current_turns\":0,\"create_promise.total_turns\":0,\"now\":\"2026-10-14T11:00\",\"title\":\"Ms\",\"last_name\":\"Costa\",\"first_name\":\"Maria\",\"customer_id\":\"c_2d2762a1-f37\",\"call.customer_phone_number\":\"\",\"call.phone_number\":\"\",\"call.call_id\":\"6bf36202-69d3-47c2-809b-88a08bbec2a2\",\"call.direction\":\"web\",\"system.iso_utc_now\":\"2026-10-11T14:31:34.948513Z\",\"system.todays_date_en_cst\":\"11 October 2026 Sunday 08:31\",\"system.todays_date_en_est\":\"11 October 2026 Sunday 09:31\",\"system.todays_date_tr\":\"11 Ekim 2026 Pazar 17:31\",\"system.todays_date_tr.iso_8601\":\"2026-10-11\",\"system.uuid4()\":\"dfda2d7b01a745cab0c3304a2242d5c9\"}}",
+        "messageId": "msg_2_1791729095179",
+        "secondsFromStart": 0.03790616989135742,
+        "nodeId": "setup",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:35.219Z"
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"turn_completed\",\"turnIndex\":1,\"userMessageId\":\"msg_1_1791729095161\",\"finalAssistantMessageId\":\"msg_4_1791729095252\",\"responseText\":\"Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Maria Costa?\"}",
+        "messageId": "msg_5_1791729095268",
+        "secondsFromStart": 0.051650047302246094,
+        "nodeId": "opening",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:35.567Z"
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"node_enter\",\"node\":\"opening\",\"from_node\":\"setup\",\"reason\":\"always always\"}",
+        "messageId": "msg_3_1791729095198",
+        "secondsFromStart": 0.05697202682495117,
+        "nodeId": "opening",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:35.279Z"
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"conversation_resumed\",\"fromMessageId\":\"msg_4_1791729095252\",\"isBranch\":false}",
+        "messageId": "msg_1_1791729096404",
+        "secondsFromStart": 1.263625144958496,
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:36.429Z"
+      },
+      {
+        "role": "user",
+        "message": "No, this is her husband. What is this about? I can pay for her.",
+        "messageId": "msg_2_1791729096426",
+        "secondsFromStart": 1.277796983718872,
+        "nodeId": "opening",
+        "workflowSnapshot": {
+          "currentNode": "opening",
+          "previousNode": "setup",
+          "nodeTurnCount": 0,
+          "totalTurnCount": 0,
+          "nodeTotalTurnCounts": {},
+          "transitionHistory": [
+            {
+              "from": "setup",
+              "to": "opening",
+              "reason": "always always"
+            }
+          ],
+          "enteredNodes": [
+            "opening"
+          ],
+          "variableTable": {
+            "end.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135831+00:00"
+            },
+            "end.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135886+00:00"
+            },
+            "sync.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135836+00:00"
+            },
+            "sync.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135888+00:00"
+            },
+            "setup.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.179362+00:00"
+            },
+            "setup.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135890+00:00"
+            },
+            "stall.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135844+00:00"
+            },
+            "stall.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135892+00:00"
+            },
+            "goodbye.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135848+00:00"
+            },
+            "goodbye.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135893+00:00"
+            },
+            "opening.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.179366+00:00"
+            },
+            "opening.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.179369+00:00"
+            },
+            "prepare.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135855+00:00"
+            },
+            "prepare.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135897+00:00"
+            },
+            "add_note.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135858+00:00"
+            },
+            "add_note.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135899+00:00"
+            },
+            "rec_next.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135862+00:00"
+            },
+            "rec_next.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135900+00:00"
+            },
+            "negotiate.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135865+00:00"
+            },
+            "negotiate.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135902+00:00"
+            },
+            "note_next.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135869+00:00"
+            },
+            "note_next.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135904+00:00"
+            },
+            "close_call.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135872+00:00"
+            },
+            "close_call.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135906+00:00"
+            },
+            "get_account.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135876+00:00"
+            },
+            "get_account.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135907+00:00"
+            },
+            "create_promise.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135880+00:00"
+            },
+            "create_promise.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135909+00:00"
+            },
+            "now": {
+              "value": "2026-10-14T11:00",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135912+00:00"
+            },
+            "title": {
+              "value": "Ms",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135913+00:00"
+            },
+            "last_name": {
+              "value": "Costa",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135915+00:00"
+            },
+            "first_name": {
+              "value": "Maria",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135916+00:00"
+            },
+            "customer_id": {
+              "value": "c_2d2762a1-f37",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135918+00:00"
+            },
+            "call.customer_phone_number": {
+              "value": "",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135919+00:00"
+            },
+            "call.phone_number": {
+              "value": "",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135921+00:00"
+            },
+            "call.call_id": {
+              "value": "6bf36202-69d3-47c2-809b-88a08bbec2a2",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135922+00:00"
+            },
+            "call.direction": {
+              "value": "web",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135924+00:00"
+            },
+            "system.iso_utc_now": {
+              "value": "2026-10-11T14:31:36.400778Z",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:36.400823+00:00"
+            },
+            "system.todays_date_en_cst": {
+              "value": "11 October 2026 Sunday 08:31",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:36.400824+00:00"
+            },
+            "system.todays_date_en_est": {
+              "value": "11 October 2026 Sunday 09:31",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:36.400825+00:00"
+            },
+            "system.todays_date_tr": {
+              "value": "11 Ekim 2026 Pazar 17:31",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:36.400826+00:00"
+            },
+            "system.todays_date_tr.iso_8601": {
+              "value": "2026-10-11",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:36.400827+00:00"
+            },
+            "system.uuid4()": {
+              "value": "dfda2d7b01a745cab0c3304a2242d5c9",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135935+00:00"
+            }
+          },
+          "identity": {
+            "agentId": "58b2c2b3-0668-4e83-9f17-cdaf0dcabc9b",
+            "entityVersionId": "2883a3aa-15f2-440e-bfe5-7d4dc1b33722"
+          },
+          "controlFlags": {
+            "terminalActionFired": false
+          }
+        },
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:36.467Z",
+        "wasBlocked": false
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"route_evaluated\",\"matched\":false,\"from_node\":\"opening\",\"confidence\":0.0,\"reason\":\"No transition matched\",\"branches\":[{\"target\":\"get_account\",\"description\":\"(id_state == 'verified' OR verify_identity_response.data.id_state == 'verified')\",\"result\":false,\"condition_results\":{\"logic\":\"or\",\"result\":false,\"conditions\":[{\"operator\":\"equals\",\"variable\":\"id_state\",\"operand\":\"verified\",\"result\":false},{\"operator\":\"equals\",\"variable\":\"verify_identity_response.data.id_state\",\"operand\":\"verified\",\"result\":false}]}},{\"target\":\"goodbye\",\"description\":\"(id_state == 'failed' OR verify_identity_response.data.id_state == 'failed')\",\"result\":false,\"condition_results\":{\"logic\":\"or\",\"result\":false,\"conditions\":[{\"operator\":\"equals\",\"variable\":\"id_state\",\"operand\":\"failed\",\"result\":false},{\"operator\":\"equals\",\"variable\":\"verify_identity_response.data.id_state\",\"operand\":\"failed\",\"result\":false}]}},{\"target\":\"goodbye\",\"description\":\"(auto_state == 'go' OR schedule_callback_response.data.auto_state == 'go' OR transfer_to_agent_response.data.auto_state == 'go')\",\"result\":false,\"condition_results\":{\"logic\":\"or\",\"result\":false,\"conditions\":[{\"operator\":\"equals\",\"variable\":\"auto_state\",\"operand\":\"go\",\"result\":false},{\"operator\":\"equals\",\"variable\":\"schedule_callback_response.data.auto_state\",\"operand\":\"go\",\"result\":false},{\"operator\":\"equals\",\"variable\":\"transfer_to_agent_response.data.auto_state\",\"operand\":\"go\",\"result\":false}]}},{\"target\":\"note_next\",\"description\":\"fin_state == 'go'\",\"result\":false,\"condition_results\":{\"operator\":\"equals\",\"variable\":\"fin_state\",\"operand\":\"go\",\"result\":false}}],\"total_duration_ms\":7.0,\"variable_table\":{\"end.current_turns\":0,\"end.total_turns\":0,\"sync.current_turns\":0,\"sync.total_turns\":0,\"setup.current_turns\":0,\"setup.total_turns\":0,\"stall.current_turns\":0,\"stall.total_turns\":0,\"goodbye.current_turns\":0,\"goodbye.total_turns\":0,\"opening.current_turns\":1,\"opening.total_turns\":1,\"prepare.current_turns\":0,\"prepare.total_turns\":0,\"add_note.current_turns\":0,\"add_note.total_turns\":0,\"rec_next.current_turns\":0,\"rec_next.total_turns\":0,\"negotiate.current_turns\":0,\"negotiate.total_turns\":0,\"note_next.current_turns\":0,\"note_next.total_turns\":0,\"close_call.current_turns\":0,\"close_call.total_turns\":0,\"get_account.current_turns\":0,\"get_account.total_turns\":0,\"create_promise.current_turns\":0,\"create_promise.total_turns\":0,\"now\":\"2026-10-14T11:00\",\"title\":\"Ms\",\"last_name\":\"Costa\",\"first_name\":\"Maria\",\"customer_id\":\"c_2d2762a1-f37\",\"call.customer_phone_number\":\"\",\"call.phone_number\":\"\",\"call.call_id\":\"6bf36202-69d3-47c2-809b-88a08bbec2a2\",\"call.direction\":\"web\",\"system.iso_utc_now\":\"2026-10-11T14:31:36.400778Z\",\"system.todays_date_en_cst\":\"11 October 2026 Sunday 08:31\",\"system.todays_date_en_est\":\"11 October 2026 Sunday 09:31\",\"system.todays_date_tr\":\"11 Ekim 2026 Pazar 17:31\",\"system.todays_date_tr.iso_8601\":\"2026-10-11\",\"system.uuid4()\":\"dfda2d7b01a745cab0c3304a2242d5c9\"}}",
+        "messageId": "msg_3_1791729096449",
+        "secondsFromStart": 1.3086163997650146,
+        "nodeId": "opening",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:36.502Z"
+      },
+      {
+        "role": "assistant",
+        "message": "I can only discuss that with Maria Costa personally. Would you like me to call Maria Costa back at another time?",
+        "messageId": "msg_4_1791729097236",
+        "secondsFromStart": 1.345797061920166,
+        "nodeId": "opening",
+        "workflowSnapshot": {
+          "currentNode": "opening",
+          "previousNode": "setup",
+          "nodeTurnCount": 1,
+          "totalTurnCount": 1,
+          "nodeTotalTurnCounts": {
+            "opening": 1
+          },
+          "transitionHistory": [
+            {
+              "from": "setup",
+              "to": "opening",
+              "reason": "always always"
+            }
+          ],
+          "enteredNodes": [
+            "opening"
+          ],
+          "variableTable": {
+            "end.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135831+00:00"
+            },
+            "end.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135886+00:00"
+            },
+            "sync.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135836+00:00"
+            },
+            "sync.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135888+00:00"
+            },
+            "setup.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.179362+00:00"
+            },
+            "setup.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135890+00:00"
+            },
+            "stall.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135844+00:00"
+            },
+            "stall.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135892+00:00"
+            },
+            "goodbye.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135848+00:00"
+            },
+            "goodbye.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135893+00:00"
+            },
+            "opening.current_turns": {
+              "value": 1,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:36.442147+00:00"
+            },
+            "opening.total_turns": {
+              "value": 1,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:36.442152+00:00"
+            },
+            "prepare.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135855+00:00"
+            },
+            "prepare.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135897+00:00"
+            },
+            "add_note.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135858+00:00"
+            },
+            "add_note.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135899+00:00"
+            },
+            "rec_next.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135862+00:00"
+            },
+            "rec_next.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135900+00:00"
+            },
+            "negotiate.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135865+00:00"
+            },
+            "negotiate.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135902+00:00"
+            },
+            "note_next.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135869+00:00"
+            },
+            "note_next.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135904+00:00"
+            },
+            "close_call.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135872+00:00"
+            },
+            "close_call.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135906+00:00"
+            },
+            "get_account.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135876+00:00"
+            },
+            "get_account.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135907+00:00"
+            },
+            "create_promise.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135880+00:00"
+            },
+            "create_promise.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135909+00:00"
+            },
+            "now": {
+              "value": "2026-10-14T11:00",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135912+00:00"
+            },
+            "title": {
+              "value": "Ms",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135913+00:00"
+            },
+            "last_name": {
+              "value": "Costa",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135915+00:00"
+            },
+            "first_name": {
+              "value": "Maria",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135916+00:00"
+            },
+            "customer_id": {
+              "value": "c_2d2762a1-f37",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135918+00:00"
+            },
+            "call.customer_phone_number": {
+              "value": "",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135919+00:00"
+            },
+            "call.phone_number": {
+              "value": "",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135921+00:00"
+            },
+            "call.call_id": {
+              "value": "6bf36202-69d3-47c2-809b-88a08bbec2a2",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135922+00:00"
+            },
+            "call.direction": {
+              "value": "web",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135924+00:00"
+            },
+            "system.iso_utc_now": {
+              "value": "2026-10-11T14:31:36.400778Z",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:36.400823+00:00"
+            },
+            "system.todays_date_en_cst": {
+              "value": "11 October 2026 Sunday 08:31",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:36.400824+00:00"
+            },
+            "system.todays_date_en_est": {
+              "value": "11 October 2026 Sunday 09:31",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:36.400825+00:00"
+            },
+            "system.todays_date_tr": {
+              "value": "11 Ekim 2026 Pazar 17:31",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:36.400826+00:00"
+            },
+            "system.todays_date_tr.iso_8601": {
+              "value": "2026-10-11",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:36.400827+00:00"
+            },
+            "system.uuid4()": {
+              "value": "dfda2d7b01a745cab0c3304a2242d5c9",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135935+00:00"
+            }
+          },
+          "identity": {
+            "agentId": "58b2c2b3-0668-4e83-9f17-cdaf0dcabc9b",
+            "entityVersionId": "2883a3aa-15f2-440e-bfe5-7d4dc1b33722"
+          },
+          "controlFlags": {
+            "terminalActionFired": false
+          }
+        },
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:37.274Z",
+        "wasBlocked": false
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"turn_completed\",\"turnIndex\":2,\"userMessageId\":\"msg_2_1791729096426\",\"finalAssistantMessageId\":\"msg_4_1791729097236\",\"responseText\":\"I can only discuss that with Maria Costa personally. Would you like me to call Maria Costa back at another time?\"}",
+        "messageId": "msg_5_1791729097247",
+        "secondsFromStart": 2.105811357498169,
+        "nodeId": "opening",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:37.533Z"
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"conversation_resumed\",\"fromMessageId\":\"msg_4_1791729097236\",\"isBranch\":false}",
+        "messageId": "msg_1_1791729098881",
+        "secondsFromStart": 3.74021053314209,
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:38.939Z"
+      },
+      {
+        "role": "user",
+        "message": "Please call her on Friday 16 October 2026 at 11:30 in the morning.",
+        "messageId": "msg_2_1791729098898",
+        "secondsFromStart": 3.7497971057891846,
+        "nodeId": "opening",
+        "workflowSnapshot": {
+          "currentNode": "opening",
+          "previousNode": "setup",
+          "nodeTurnCount": 1,
+          "totalTurnCount": 1,
+          "nodeTotalTurnCounts": {
+            "opening": 1
+          },
+          "transitionHistory": [
+            {
+              "from": "setup",
+              "to": "opening",
+              "reason": "always always"
+            }
+          ],
+          "enteredNodes": [
+            "opening"
+          ],
+          "variableTable": {
+            "end.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135831+00:00"
+            },
+            "end.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135886+00:00"
+            },
+            "sync.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135836+00:00"
+            },
+            "sync.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135888+00:00"
+            },
+            "setup.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.179362+00:00"
+            },
+            "setup.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135890+00:00"
+            },
+            "stall.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135844+00:00"
+            },
+            "stall.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135892+00:00"
+            },
+            "goodbye.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135848+00:00"
+            },
+            "goodbye.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135893+00:00"
+            },
+            "opening.current_turns": {
+              "value": 1,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:36.442147+00:00"
+            },
+            "opening.total_turns": {
+              "value": 1,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:36.442152+00:00"
+            },
+            "prepare.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135855+00:00"
+            },
+            "prepare.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135897+00:00"
+            },
+            "add_note.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135858+00:00"
+            },
+            "add_note.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135899+00:00"
+            },
+            "rec_next.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135862+00:00"
+            },
+            "rec_next.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135900+00:00"
+            },
+            "negotiate.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135865+00:00"
+            },
+            "negotiate.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135902+00:00"
+            },
+            "note_next.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135869+00:00"
+            },
+            "note_next.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135904+00:00"
+            },
+            "close_call.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135872+00:00"
+            },
+            "close_call.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135906+00:00"
+            },
+            "get_account.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135876+00:00"
+            },
+            "get_account.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135907+00:00"
+            },
+            "create_promise.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135880+00:00"
+            },
+            "create_promise.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135909+00:00"
+            },
+            "now": {
+              "value": "2026-10-14T11:00",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135912+00:00"
+            },
+            "title": {
+              "value": "Ms",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135913+00:00"
+            },
+            "last_name": {
+              "value": "Costa",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135915+00:00"
+            },
+            "first_name": {
+              "value": "Maria",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135916+00:00"
+            },
+            "customer_id": {
+              "value": "c_2d2762a1-f37",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135918+00:00"
+            },
+            "call.customer_phone_number": {
+              "value": "",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135919+00:00"
+            },
+            "call.phone_number": {
+              "value": "",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135921+00:00"
+            },
+            "call.call_id": {
+              "value": "6bf36202-69d3-47c2-809b-88a08bbec2a2",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135922+00:00"
+            },
+            "call.direction": {
+              "value": "web",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135924+00:00"
+            },
+            "system.iso_utc_now": {
+              "value": "2026-10-11T14:31:38.876434Z",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:38.876487+00:00"
+            },
+            "system.todays_date_en_cst": {
+              "value": "11 October 2026 Sunday 08:31",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:38.876489+00:00"
+            },
+            "system.todays_date_en_est": {
+              "value": "11 October 2026 Sunday 09:31",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:38.876491+00:00"
+            },
+            "system.todays_date_tr": {
+              "value": "11 Ekim 2026 Pazar 17:31",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:38.876492+00:00"
+            },
+            "system.todays_date_tr.iso_8601": {
+              "value": "2026-10-11",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:38.876494+00:00"
+            },
+            "system.uuid4()": {
+              "value": "dfda2d7b01a745cab0c3304a2242d5c9",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135935+00:00"
+            }
+          },
+          "identity": {
+            "agentId": "58b2c2b3-0668-4e83-9f17-cdaf0dcabc9b",
+            "entityVersionId": "2883a3aa-15f2-440e-bfe5-7d4dc1b33722"
+          },
+          "controlFlags": {
+            "terminalActionFired": false
+          }
+        },
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:38.989Z",
+        "wasBlocked": false
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"route_evaluated\",\"matched\":false,\"from_node\":\"opening\",\"confidence\":0.0,\"reason\":\"No transition matched\",\"branches\":[{\"target\":\"get_account\",\"description\":\"(id_state == 'verified' OR verify_identity_response.data.id_state == 'verified')\",\"result\":false,\"condition_results\":{\"logic\":\"or\",\"result\":false,\"conditions\":[{\"operator\":\"equals\",\"variable\":\"id_state\",\"operand\":\"verified\",\"result\":false},{\"operator\":\"equals\",\"variable\":\"verify_identity_response.data.id_state\",\"operand\":\"verified\",\"result\":false}]}},{\"target\":\"goodbye\",\"description\":\"(id_state == 'failed' OR verify_identity_response.data.id_state == 'failed')\",\"result\":false,\"condition_results\":{\"logic\":\"or\",\"result\":false,\"conditions\":[{\"operator\":\"equals\",\"variable\":\"id_state\",\"operand\":\"failed\",\"result\":false},{\"operator\":\"equals\",\"variable\":\"verify_identity_response.data.id_state\",\"operand\":\"failed\",\"result\":false}]}},{\"target\":\"goodbye\",\"description\":\"(auto_state == 'go' OR schedule_callback_response.data.auto_state == 'go' OR transfer_to_agent_response.data.auto_state == 'go')\",\"result\":false,\"condition_results\":{\"logic\":\"or\",\"result\":false,\"conditions\":[{\"operator\":\"equals\",\"variable\":\"auto_state\",\"operand\":\"go\",\"result\":false},{\"operator\":\"equals\",\"variable\":\"schedule_callback_response.data.auto_state\",\"operand\":\"go\",\"result\":false},{\"operator\":\"equals\",\"variable\":\"transfer_to_agent_response.data.auto_state\",\"operand\":\"go\",\"result\":false}]}},{\"target\":\"note_next\",\"description\":\"fin_state == 'go'\",\"result\":false,\"condition_results\":{\"operator\":\"equals\",\"variable\":\"fin_state\",\"operand\":\"go\",\"result\":false}}],\"total_duration_ms\":5.9,\"variable_table\":{\"end.current_turns\":0,\"end.total_turns\":0,\"sync.current_turns\":0,\"sync.total_turns\":0,\"setup.current_turns\":0,\"setup.total_turns\":0,\"stall.current_turns\":0,\"stall.total_turns\":0,\"goodbye.current_turns\":0,\"goodbye.total_turns\":0,\"opening.current_turns\":2,\"opening.total_turns\":2,\"prepare.current_turns\":0,\"prepare.total_turns\":0,\"add_note.current_turns\":0,\"add_note.total_turns\":0,\"rec_next.current_turns\":0,\"rec_next.total_turns\":0,\"negotiate.current_turns\":0,\"negotiate.total_turns\":0,\"note_next.current_turns\":0,\"note_next.total_turns\":0,\"close_call.current_turns\":0,\"close_call.total_turns\":0,\"get_account.current_turns\":0,\"get_account.total_turns\":0,\"create_promise.current_turns\":0,\"create_promise.total_turns\":0,\"now\":\"2026-10-14T11:00\",\"title\":\"Ms\",\"last_name\":\"Costa\",\"first_name\":\"Maria\",\"customer_id\":\"c_2d2762a1-f37\",\"call.customer_phone_number\":\"\",\"call.phone_number\":\"\",\"call.call_id\":\"6bf36202-69d3-47c2-809b-88a08bbec2a2\",\"call.direction\":\"web\",\"system.iso_utc_now\":\"2026-10-11T14:31:38.876434Z\",\"system.todays_date_en_cst\":\"11 October 2026 Sunday 08:31\",\"system.todays_date_en_est\":\"11 October 2026 Sunday 09:31\",\"system.todays_date_tr\":\"11 Ekim 2026 Pazar 17:31\",\"system.todays_date_tr.iso_8601\":\"2026-10-11\",\"system.uuid4()\":\"dfda2d7b01a745cab0c3304a2242d5c9\"}}",
+        "messageId": "msg_3_1791729098926",
+        "secondsFromStart": 3.785754919052124,
+        "nodeId": "opening",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:39.058Z"
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"function_call_start\",\"function\":\"schedule_callback\",\"args\":{\"date\":\"2026-10-16\",\"time\":\"11:30\"}}",
+        "messageId": "msg_4_1791729104969",
+        "secondsFromStart": 9.828492641448975,
+        "nodeId": "opening",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:44.981Z"
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"function_call_error\",\"function\":\"schedule_callback\",\"error\":\"Traceback (most recent call last):\\n  File \\\"<string>\\\", line 286, in <module>\\n    raise Exception('RULE: ' + what + ' is OUTSIDE the callback window. Nothing was booked. Allowed: ' + allowed_text() + '. ' + G.get('callback_outside_first', 'Ask once for another time.'))\\nException: RULE: Friday 16 October 2026 at 11:30 is OUTSIDE the callback window. Nothing was booked. Allowed: Thursday 15 October 2026 from 09:15 to 12:45; Saturday 17 October 2026 from 09:15 to 12:45. Ask once for a replacement: a time from 09:15 to 12:45 on one of the next two working days, not today.\\n\"}",
+        "messageId": "msg_5_1791729104970",
+        "secondsFromStart": 9.829163074493408,
+        "nodeId": "opening",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:45.012Z"
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"route_evaluated\",\"matched\":false,\"from_node\":\"opening\",\"confidence\":0.0,\"reason\":\"No transition matched\",\"branches\":[{\"target\":\"get_account\",\"description\":\"(id_state == 'verified' OR verify_identity_response.data.id_state == 'verified')\",\"result\":false,\"condition_results\":{\"logic\":\"or\",\"result\":false,\"conditions\":[{\"operator\":\"equals\",\"variable\":\"id_state\",\"operand\":\"verified\",\"result\":false},{\"operator\":\"equals\",\"variable\":\"verify_identity_response.data.id_state\",\"operand\":\"verified\",\"result\":false}]}},{\"target\":\"goodbye\",\"description\":\"(id_state == 'failed' OR verify_identity_response.data.id_state == 'failed')\",\"result\":false,\"condition_results\":{\"logic\":\"or\",\"result\":false,\"conditions\":[{\"operator\":\"equals\",\"variable\":\"id_state\",\"operand\":\"failed\",\"result\":false},{\"operator\":\"equals\",\"variable\":\"verify_identity_response.data.id_state\",\"operand\":\"failed\",\"result\":false}]}},{\"target\":\"goodbye\",\"description\":\"(auto_state == 'go' OR schedule_callback_response.data.auto_state == 'go' OR transfer_to_agent_response.data.auto_state == 'go')\",\"result\":false,\"condition_results\":{\"logic\":\"or\",\"result\":false,\"conditions\":[{\"operator\":\"equals\",\"variable\":\"auto_state\",\"operand\":\"go\",\"result\":false},{\"operator\":\"equals\",\"variable\":\"schedule_callback_response.data.auto_state\",\"operand\":\"go\",\"result\":false},{\"operator\":\"equals\",\"variable\":\"transfer_to_agent_response.data.auto_state\",\"operand\":\"go\",\"result\":false}]}},{\"target\":\"note_next\",\"description\":\"fin_state == 'go'\",\"result\":false,\"condition_results\":{\"operator\":\"equals\",\"variable\":\"fin_state\",\"operand\":\"go\",\"result\":false}}],\"total_duration_ms\":2.8,\"variable_table\":{\"end.current_turns\":0,\"end.total_turns\":0,\"sync.current_turns\":0,\"sync.total_turns\":0,\"setup.current_turns\":0,\"setup.total_turns\":0,\"stall.current_turns\":0,\"stall.total_turns\":0,\"goodbye.current_turns\":0,\"goodbye.total_turns\":0,\"opening.current_turns\":2,\"opening.total_turns\":2,\"prepare.current_turns\":0,\"prepare.total_turns\":0,\"add_note.current_turns\":0,\"add_note.total_turns\":0,\"rec_next.current_turns\":0,\"rec_next.total_turns\":0,\"negotiate.current_turns\":0,\"negotiate.total_turns\":0,\"note_next.current_turns\":0,\"note_next.total_turns\":0,\"close_call.current_turns\":0,\"close_call.total_turns\":0,\"get_account.current_turns\":0,\"get_account.total_turns\":0,\"create_promise.current_turns\":0,\"create_promise.total_turns\":0,\"now\":\"2026-10-14T11:00\",\"title\":\"Ms\",\"last_name\":\"Costa\",\"first_name\":\"Maria\",\"customer_id\":\"c_2d2762a1-f37\",\"call.customer_phone_number\":\"\",\"call.phone_number\":\"\",\"call.call_id\":\"6bf36202-69d3-47c2-809b-88a08bbec2a2\",\"call.direction\":\"web\",\"system.iso_utc_now\":\"2026-10-11T14:31:38.876434Z\",\"system.todays_date_en_cst\":\"11 October 2026 Sunday 08:31\",\"system.todays_date_en_est\":\"11 October 2026 Sunday 09:31\",\"system.todays_date_tr\":\"11 Ekim 2026 Pazar 17:31\",\"system.todays_date_tr.iso_8601\":\"2026-10-11\",\"system.uuid4()\":\"dfda2d7b01a745cab0c3304a2242d5c9\",\"st_json\":\"{\\\"stage\\\": \\\"opening\\\", \\\"id\\\": \\\"open\\\", \\\"idv\\\": [], \\\"products\\\": [], \\\"plan\\\": {}, \\\"pnotes\\\": {}, \\\"promises\\\": {}, \\\"tries\\\": {}, \\\"perr\\\": [], \\\"notes\\\": {}, \\\"ntries\\\": {}, \\\"transfer\\\": \\\"\\\", \\\"callback\\\": \\\"\\\", \\\"closed\\\": \\\"\\\", \\\"pend\\\": \\\"\\\", \\\"npend\\\": \\\"\\\", \\\"prop\\\": {}, \\\"toomuch\\\": [], \\\"floored\\\": [], \\\"given\\\": [], \\\"said\\\": [], \\\"mo\\\": \\\"\\\", \\\"mr\\\": \\\"\\\", \\\"fin\\\": \\\"\\\", \\\"cb_bad\\\": 1}\",\"schedule_callback_args.date\":\"2026-10-16\",\"schedule_callback_args.time\":\"11:30\",\"schedule_callback_response.status\":\"error\",\"schedule_callback_response.error\":\"pre_process_code raised an exception\",\"schedule_callback_response.message\":\"Traceback (most recent call last):\\n  File \\\"<string>\\\", line 286, in <module>\\n    raise Exception('RULE: ' + what + ' is OUTSIDE the callback window. Nothing was booked. Allowed: ' + allowed_text() + '. ' + G.get('callback_outside_first', 'Ask once for another time.'))\\nException: RULE: Friday 16 October 2026 at 11:30 is OUTSIDE the callback window. Nothing was booked. Allowed: Thursday 15 October 2026 from 09:15 to 12:45; Saturday 17 October 2026 from 09:15 to 12:45. Ask once for a replacement: a time from 09:15 to 12:45 on one of the next two working days, not today.\\n\",\"schedule_callback_response.status_code\":500,\"schedule_callback_status_code\":500,\"schedule_callback_failure_count\":1}}",
+        "messageId": "msg_6_1791729104979",
+        "secondsFromStart": 9.838459014892578,
+        "nodeId": "opening",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:45.071Z"
+      },
+      {
+        "role": "assistant",
+        "message": "That time is not available. Could you please choose a time from 09:15 to 12:45 on either Thursday, October 15th or Saturday, October 17th?",
+        "messageId": "msg_7_1791729106688",
+        "secondsFromStart": 9.855797052383423,
+        "nodeId": "opening",
+        "workflowSnapshot": {
+          "currentNode": "opening",
+          "previousNode": "setup",
+          "nodeTurnCount": 2,
+          "totalTurnCount": 2,
+          "nodeTotalTurnCounts": {
+            "opening": 2
+          },
+          "transitionHistory": [
+            {
+              "from": "setup",
+              "to": "opening",
+              "reason": "always always"
+            }
+          ],
+          "enteredNodes": [
+            "opening"
+          ],
+          "variableTable": {
+            "end.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135831+00:00"
+            },
+            "end.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135886+00:00"
+            },
+            "sync.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135836+00:00"
+            },
+            "sync.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135888+00:00"
+            },
+            "setup.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.179362+00:00"
+            },
+            "setup.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135890+00:00"
+            },
+            "stall.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135844+00:00"
+            },
+            "stall.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135892+00:00"
+            },
+            "goodbye.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135848+00:00"
+            },
+            "goodbye.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135893+00:00"
+            },
+            "opening.current_turns": {
+              "value": 2,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:38.920306+00:00"
+            },
+            "opening.total_turns": {
+              "value": 2,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:38.920311+00:00"
+            },
+            "prepare.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135855+00:00"
+            },
+            "prepare.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135897+00:00"
+            },
+            "add_note.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135858+00:00"
+            },
+            "add_note.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135899+00:00"
+            },
+            "rec_next.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135862+00:00"
+            },
+            "rec_next.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135900+00:00"
+            },
+            "negotiate.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135865+00:00"
+            },
+            "negotiate.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135902+00:00"
+            },
+            "note_next.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135869+00:00"
+            },
+            "note_next.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135904+00:00"
+            },
+            "close_call.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135872+00:00"
+            },
+            "close_call.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135906+00:00"
+            },
+            "get_account.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135876+00:00"
+            },
+            "get_account.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135907+00:00"
+            },
+            "create_promise.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135880+00:00"
+            },
+            "create_promise.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135909+00:00"
+            },
+            "now": {
+              "value": "2026-10-14T11:00",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135912+00:00"
+            },
+            "title": {
+              "value": "Ms",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135913+00:00"
+            },
+            "last_name": {
+              "value": "Costa",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135915+00:00"
+            },
+            "first_name": {
+              "value": "Maria",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135916+00:00"
+            },
+            "customer_id": {
+              "value": "c_2d2762a1-f37",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135918+00:00"
+            },
+            "call.customer_phone_number": {
+              "value": "",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135919+00:00"
+            },
+            "call.phone_number": {
+              "value": "",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135921+00:00"
+            },
+            "call.call_id": {
+              "value": "6bf36202-69d3-47c2-809b-88a08bbec2a2",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135922+00:00"
+            },
+            "call.direction": {
+              "value": "web",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135924+00:00"
+            },
+            "system.iso_utc_now": {
+              "value": "2026-10-11T14:31:38.876434Z",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:38.876487+00:00"
+            },
+            "system.todays_date_en_cst": {
+              "value": "11 October 2026 Sunday 08:31",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:38.876489+00:00"
+            },
+            "system.todays_date_en_est": {
+              "value": "11 October 2026 Sunday 09:31",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:38.876491+00:00"
+            },
+            "system.todays_date_tr": {
+              "value": "11 Ekim 2026 Pazar 17:31",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:38.876492+00:00"
+            },
+            "system.todays_date_tr.iso_8601": {
+              "value": "2026-10-11",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:38.876494+00:00"
+            },
+            "system.uuid4()": {
+              "value": "dfda2d7b01a745cab0c3304a2242d5c9",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135935+00:00"
+            },
+            "st_json": {
+              "value": "{\"stage\": \"opening\", \"id\": \"open\", \"idv\": [], \"products\": [], \"plan\": {}, \"pnotes\": {}, \"promises\": {}, \"tries\": {}, \"perr\": [], \"notes\": {}, \"ntries\": {}, \"transfer\": \"\", \"callback\": \"\", \"closed\": \"\", \"pend\": \"\", \"npend\": \"\", \"prop\": {}, \"toomuch\": [], \"floored\": [], \"given\": [], \"said\": [], \"mo\": \"\", \"mr\": \"\", \"fin\": \"\", \"cb_bad\": 1}",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:44.969233+00:00"
+            },
+            "schedule_callback_args.date": {
+              "value": "2026-10-16",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:44.975645+00:00"
+            },
+            "schedule_callback_args.time": {
+              "value": "11:30",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:44.975648+00:00"
+            },
+            "schedule_callback_response.status": {
+              "value": "error",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:44.975656+00:00"
+            },
+            "schedule_callback_response.error": {
+              "value": "pre_process_code raised an exception",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:44.975657+00:00"
+            },
+            "schedule_callback_response.message": {
+              "value": "Traceback (most recent call last):\n  File \"<string>\", line 286, in <module>\n    raise Exception('RULE: ' + what + ' is OUTSIDE the callback window. Nothing was booked. Allowed: ' + allowed_text() + '. ' + G.get('callback_outside_first', 'Ask once for another time.'))\nException: RULE: Friday 16 October 2026 at 11:30 is OUTSIDE the callback window. Nothing was booked. Allowed: Thursday 15 October 2026 from 09:15 to 12:45; Saturday 17 October 2026 from 09:15 to 12:45. Ask once for a replacement: a time from 09:15 to 12:45 on one of the next two working days, not today.\n",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:44.975659+00:00"
+            },
+            "schedule_callback_response.status_code": {
+              "value": 500,
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:44.975663+00:00"
+            },
+            "schedule_callback_status_code": {
+              "value": 500,
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:44.975666+00:00"
+            },
+            "schedule_callback_failure_count": {
+              "value": 1,
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:44.975671+00:00"
+            }
+          },
+          "identity": {
+            "agentId": "58b2c2b3-0668-4e83-9f17-cdaf0dcabc9b",
+            "entityVersionId": "2883a3aa-15f2-440e-bfe5-7d4dc1b33722"
+          },
+          "controlFlags": {
+            "terminalActionFired": false
+          }
+        },
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:46.696Z",
+        "wasBlocked": false
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"turn_completed\",\"turnIndex\":3,\"userMessageId\":\"msg_2_1791729098898\",\"finalAssistantMessageId\":\"msg_7_1791729106688\",\"responseText\":\"That time is not available. Could you please choose a time from 09:15 to 12:45 on either Thursday, October 15th or Saturday, October 17th?\"}",
+        "messageId": "msg_8_1791729106700",
+        "secondsFromStart": 11.559182405471802,
+        "nodeId": "opening",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:46.940Z"
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"conversation_resumed\",\"fromMessageId\":\"msg_7_1791729106688\",\"isBranch\":false}",
+        "messageId": "msg_1_1791729108364",
+        "secondsFromStart": 13.223678827285767,
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:48.371Z"
+      },
+      {
+        "role": "user",
+        "message": "Saturday 17 October 2026 at 11:30 in the morning is fine.",
+        "messageId": "msg_2_1791729108377",
+        "secondsFromStart": 13.229797124862671,
+        "nodeId": "opening",
+        "workflowSnapshot": {
+          "currentNode": "opening",
+          "previousNode": "setup",
+          "nodeTurnCount": 2,
+          "totalTurnCount": 2,
+          "nodeTotalTurnCounts": {
+            "opening": 2
+          },
+          "transitionHistory": [
+            {
+              "from": "setup",
+              "to": "opening",
+              "reason": "always always"
+            }
+          ],
+          "enteredNodes": [
+            "opening"
+          ],
+          "variableTable": {
+            "end.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135831+00:00"
+            },
+            "end.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135886+00:00"
+            },
+            "sync.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135836+00:00"
+            },
+            "sync.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135888+00:00"
+            },
+            "setup.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.179362+00:00"
+            },
+            "setup.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135890+00:00"
+            },
+            "stall.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135844+00:00"
+            },
+            "stall.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135892+00:00"
+            },
+            "goodbye.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135848+00:00"
+            },
+            "goodbye.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135893+00:00"
+            },
+            "opening.current_turns": {
+              "value": 2,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:38.920306+00:00"
+            },
+            "opening.total_turns": {
+              "value": 2,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:38.920311+00:00"
+            },
+            "prepare.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135855+00:00"
+            },
+            "prepare.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135897+00:00"
+            },
+            "add_note.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135858+00:00"
+            },
+            "add_note.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135899+00:00"
+            },
+            "rec_next.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135862+00:00"
+            },
+            "rec_next.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135900+00:00"
+            },
+            "negotiate.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135865+00:00"
+            },
+            "negotiate.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135902+00:00"
+            },
+            "note_next.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135869+00:00"
+            },
+            "note_next.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135904+00:00"
+            },
+            "close_call.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135872+00:00"
+            },
+            "close_call.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135906+00:00"
+            },
+            "get_account.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135876+00:00"
+            },
+            "get_account.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135907+00:00"
+            },
+            "create_promise.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135880+00:00"
+            },
+            "create_promise.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135909+00:00"
+            },
+            "now": {
+              "value": "2026-10-14T11:00",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135912+00:00"
+            },
+            "title": {
+              "value": "Ms",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135913+00:00"
+            },
+            "last_name": {
+              "value": "Costa",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135915+00:00"
+            },
+            "first_name": {
+              "value": "Maria",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135916+00:00"
+            },
+            "customer_id": {
+              "value": "c_2d2762a1-f37",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135918+00:00"
+            },
+            "call.customer_phone_number": {
+              "value": "",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135919+00:00"
+            },
+            "call.phone_number": {
+              "value": "",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135921+00:00"
+            },
+            "call.call_id": {
+              "value": "6bf36202-69d3-47c2-809b-88a08bbec2a2",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135922+00:00"
+            },
+            "call.direction": {
+              "value": "web",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135924+00:00"
+            },
+            "system.iso_utc_now": {
+              "value": "2026-10-11T14:31:48.361165Z",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:48.361209+00:00"
+            },
+            "system.todays_date_en_cst": {
+              "value": "11 October 2026 Sunday 08:31",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:48.361211+00:00"
+            },
+            "system.todays_date_en_est": {
+              "value": "11 October 2026 Sunday 09:31",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:48.361212+00:00"
+            },
+            "system.todays_date_tr": {
+              "value": "11 Ekim 2026 Pazar 17:31",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:48.361213+00:00"
+            },
+            "system.todays_date_tr.iso_8601": {
+              "value": "2026-10-11",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:48.361214+00:00"
+            },
+            "system.uuid4()": {
+              "value": "dfda2d7b01a745cab0c3304a2242d5c9",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135935+00:00"
+            },
+            "st_json": {
+              "value": "{\"stage\": \"opening\", \"id\": \"open\", \"idv\": [], \"products\": [], \"plan\": {}, \"pnotes\": {}, \"promises\": {}, \"tries\": {}, \"perr\": [], \"notes\": {}, \"ntries\": {}, \"transfer\": \"\", \"callback\": \"\", \"closed\": \"\", \"pend\": \"\", \"npend\": \"\", \"prop\": {}, \"toomuch\": [], \"floored\": [], \"given\": [], \"said\": [], \"mo\": \"\", \"mr\": \"\", \"fin\": \"\", \"cb_bad\": 1}",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:44.969233+00:00"
+            },
+            "schedule_callback_args.date": {
+              "value": "2026-10-16",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:44.975645+00:00"
+            },
+            "schedule_callback_args.time": {
+              "value": "11:30",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:44.975648+00:00"
+            },
+            "schedule_callback_response.status": {
+              "value": "error",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:44.975656+00:00"
+            },
+            "schedule_callback_response.error": {
+              "value": "pre_process_code raised an exception",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:44.975657+00:00"
+            },
+            "schedule_callback_response.message": {
+              "value": "Traceback (most recent call last):\n  File \"<string>\", line 286, in <module>\n    raise Exception('RULE: ' + what + ' is OUTSIDE the callback window. Nothing was booked. Allowed: ' + allowed_text() + '. ' + G.get('callback_outside_first', 'Ask once for another time.'))\nException: RULE: Friday 16 October 2026 at 11:30 is OUTSIDE the callback window. Nothing was booked. Allowed: Thursday 15 October 2026 from 09:15 to 12:45; Saturday 17 October 2026 from 09:15 to 12:45. Ask once for a replacement: a time from 09:15 to 12:45 on one of the next two working days, not today.\n",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:44.975659+00:00"
+            },
+            "schedule_callback_response.status_code": {
+              "value": 500,
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:44.975663+00:00"
+            },
+            "schedule_callback_status_code": {
+              "value": 500,
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:44.975666+00:00"
+            },
+            "schedule_callback_failure_count": {
+              "value": 1,
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:44.975671+00:00"
+            }
+          },
+          "identity": {
+            "agentId": "58b2c2b3-0668-4e83-9f17-cdaf0dcabc9b",
+            "entityVersionId": "2883a3aa-15f2-440e-bfe5-7d4dc1b33722"
+          },
+          "controlFlags": {
+            "terminalActionFired": false
+          }
+        },
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:48.433Z"
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"route_evaluated\",\"matched\":false,\"from_node\":\"opening\",\"confidence\":0.0,\"reason\":\"No transition matched\",\"branches\":[{\"target\":\"get_account\",\"description\":\"(id_state == 'verified' OR verify_identity_response.data.id_state == 'verified')\",\"result\":false,\"condition_results\":{\"logic\":\"or\",\"result\":false,\"conditions\":[{\"operator\":\"equals\",\"variable\":\"id_state\",\"operand\":\"verified\",\"result\":false},{\"operator\":\"equals\",\"variable\":\"verify_identity_response.data.id_state\",\"operand\":\"verified\",\"result\":false}]}},{\"target\":\"goodbye\",\"description\":\"(id_state == 'failed' OR verify_identity_response.data.id_state == 'failed')\",\"result\":false,\"condition_results\":{\"logic\":\"or\",\"result\":false,\"conditions\":[{\"operator\":\"equals\",\"variable\":\"id_state\",\"operand\":\"failed\",\"result\":false},{\"operator\":\"equals\",\"variable\":\"verify_identity_response.data.id_state\",\"operand\":\"failed\",\"result\":false}]}},{\"target\":\"goodbye\",\"description\":\"(auto_state == 'go' OR schedule_callback_response.data.auto_state == 'go' OR transfer_to_agent_response.data.auto_state == 'go')\",\"result\":false,\"condition_results\":{\"logic\":\"or\",\"result\":false,\"conditions\":[{\"operator\":\"equals\",\"variable\":\"auto_state\",\"operand\":\"go\",\"result\":false},{\"operator\":\"equals\",\"variable\":\"schedule_callback_response.data.auto_state\",\"operand\":\"go\",\"result\":false},{\"operator\":\"equals\",\"variable\":\"transfer_to_agent_response.data.auto_state\",\"operand\":\"go\",\"result\":false}]}},{\"target\":\"note_next\",\"description\":\"fin_state == 'go'\",\"result\":false,\"condition_results\":{\"operator\":\"equals\",\"variable\":\"fin_state\",\"operand\":\"go\",\"result\":false}}],\"total_duration_ms\":5.0,\"variable_table\":{\"end.current_turns\":0,\"end.total_turns\":0,\"sync.current_turns\":0,\"sync.total_turns\":0,\"setup.current_turns\":0,\"setup.total_turns\":0,\"stall.current_turns\":0,\"stall.total_turns\":0,\"goodbye.current_turns\":0,\"goodbye.total_turns\":0,\"opening.current_turns\":3,\"opening.total_turns\":3,\"prepare.current_turns\":0,\"prepare.total_turns\":0,\"add_note.current_turns\":0,\"add_note.total_turns\":0,\"rec_next.current_turns\":0,\"rec_next.total_turns\":0,\"negotiate.current_turns\":0,\"negotiate.total_turns\":0,\"note_next.current_turns\":0,\"note_next.total_turns\":0,\"close_call.current_turns\":0,\"close_call.total_turns\":0,\"get_account.current_turns\":0,\"get_account.total_turns\":0,\"create_promise.current_turns\":0,\"create_promise.total_turns\":0,\"now\":\"2026-10-14T11:00\",\"title\":\"Ms\",\"last_name\":\"Costa\",\"first_name\":\"Maria\",\"customer_id\":\"c_2d2762a1-f37\",\"call.customer_phone_number\":\"\",\"call.phone_number\":\"\",\"call.call_id\":\"6bf36202-69d3-47c2-809b-88a08bbec2a2\",\"call.direction\":\"web\",\"system.iso_utc_now\":\"2026-10-11T14:31:48.361165Z\",\"system.todays_date_en_cst\":\"11 October 2026 Sunday 08:31\",\"system.todays_date_en_est\":\"11 October 2026 Sunday 09:31\",\"system.todays_date_tr\":\"11 Ekim 2026 Pazar 17:31\",\"system.todays_date_tr.iso_8601\":\"2026-10-11\",\"system.uuid4()\":\"dfda2d7b01a745cab0c3304a2242d5c9\",\"st_json\":\"{\\\"stage\\\": \\\"opening\\\", \\\"id\\\": \\\"open\\\", \\\"idv\\\": [], \\\"products\\\": [], \\\"plan\\\": {}, \\\"pnotes\\\": {}, \\\"promises\\\": {}, \\\"tries\\\": {}, \\\"perr\\\": [], \\\"notes\\\": {}, \\\"ntries\\\": {}, \\\"transfer\\\": \\\"\\\", \\\"callback\\\": \\\"\\\", \\\"closed\\\": \\\"\\\", \\\"pend\\\": \\\"\\\", \\\"npend\\\": \\\"\\\", \\\"prop\\\": {}, \\\"toomuch\\\": [], \\\"floored\\\": [], \\\"given\\\": [], \\\"said\\\": [], \\\"mo\\\": \\\"\\\", \\\"mr\\\": \\\"\\\", \\\"fin\\\": \\\"\\\", \\\"cb_bad\\\": 1}\",\"schedule_callback_args.date\":\"2026-10-16\",\"schedule_callback_args.time\":\"11:30\",\"schedule_callback_response.status\":\"error\",\"schedule_callback_response.error\":\"pre_process_code raised an exception\",\"schedule_callback_response.message\":\"Traceback (most recent call last):\\n  File \\\"<string>\\\", line 286, in <module>\\n    raise Exception('RULE: ' + what + ' is OUTSIDE the callback window. Nothing was booked. Allowed: ' + allowed_text() + '. ' + G.get('callback_outside_first', 'Ask once for another time.'))\\nException: RULE: Friday 16 October 2026 at 11:30 is OUTSIDE the callback window. Nothing was booked. Allowed: Thursday 15 October 2026 from 09:15 to 12:45; Saturday 17 October 2026 from 09:15 to 12:45. Ask once for a replacement: a time from 09:15 to 12:45 on one of the next two working days, not today.\\n\",\"schedule_callback_response.status_code\":500,\"schedule_callback_status_code\":500,\"schedule_callback_failure_count\":1}}",
+        "messageId": "msg_3_1791729108400",
+        "secondsFromStart": 13.258802652359009,
+        "nodeId": "opening",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:48.474Z"
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"function_call_start\",\"function\":\"schedule_callback\",\"args\":{\"url\":\"https://freya-bank-mock.freyavoice.workers.dev/v1/schedule_callback\",\"method\":\"POST\",\"headers\":{\"Content-Type\":\"application/json\"},\"body\":{\"date\":\"2026-10-17\",\"time\":\"11:30\",\"customer_id\":\"c_2d2762a1-f37\"}}}",
+        "messageId": "msg_4_1791729112389",
+        "secondsFromStart": 17.24877905845642,
+        "nodeId": "opening",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:52.453Z"
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"function_call_complete\",\"function\":\"schedule_callback\",\"result\":{\"status\":\"success\",\"data\":{\"ok\":true,\"auto_state\":\"go\",\"final_outcome\":\"not_reached\",\"final_reason\":\"callback\",\"final_line\":\"The callback is booked. Thank you for your time. Goodbye.\",\"what_to_do_next\":\"The callback is booked. Say nothing more.\"},\"message\":\"Successfully executed POST request\",\"status_code\":200}}",
+        "messageId": "msg_5_1791729114004",
+        "secondsFromStart": 18.863024711608887,
+        "nodeId": "opening",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:54.027Z"
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"route_evaluated\",\"matched\":true,\"from_node\":\"opening\",\"target\":\"goodbye\",\"confidence\":1.0,\"reason\":\"a tool ended the conversation (auto_state == 'go' OR schedule_callback_response.data.auto_state == 'go' OR transfer_to_agent_response.data.auto_state == 'go')\",\"branches\":[{\"target\":\"get_account\",\"description\":\"(id_state == 'verified' OR verify_identity_response.data.id_state == 'verified')\",\"result\":false,\"condition_results\":{\"logic\":\"or\",\"result\":false,\"conditions\":[{\"operator\":\"equals\",\"variable\":\"id_state\",\"operand\":\"verified\",\"result\":false},{\"operator\":\"equals\",\"variable\":\"verify_identity_response.data.id_state\",\"operand\":\"verified\",\"result\":false}]}},{\"target\":\"goodbye\",\"description\":\"(id_state == 'failed' OR verify_identity_response.data.id_state == 'failed')\",\"result\":false,\"condition_results\":{\"logic\":\"or\",\"result\":false,\"conditions\":[{\"operator\":\"equals\",\"variable\":\"id_state\",\"operand\":\"failed\",\"result\":false},{\"operator\":\"equals\",\"variable\":\"verify_identity_response.data.id_state\",\"operand\":\"failed\",\"result\":false}]}},{\"target\":\"goodbye\",\"description\":\"(auto_state == 'go' OR schedule_callback_response.data.auto_state == 'go' OR transfer_to_agent_response.data.auto_state == 'go')\",\"result\":true,\"condition_results\":{\"logic\":\"or\",\"result\":true,\"conditions\":[{\"operator\":\"equals\",\"variable\":\"auto_state\",\"operand\":\"go\",\"result\":true},{\"operator\":\"equals\",\"variable\":\"schedule_callback_response.data.auto_state\",\"operand\":\"go\",\"result\":true},{\"operator\":\"equals\",\"variable\":\"transfer_to_agent_response.data.auto_state\",\"operand\":\"go\",\"result\":false}]}},{\"target\":\"note_next\",\"description\":\"fin_state == 'go'\",\"result\":null,\"condition_results\":null}],\"total_duration_ms\":1.3,\"variable_table\":{\"end.current_turns\":0,\"end.total_turns\":0,\"sync.current_turns\":0,\"sync.total_turns\":0,\"setup.current_turns\":0,\"setup.total_turns\":0,\"stall.current_turns\":0,\"stall.total_turns\":0,\"goodbye.current_turns\":0,\"goodbye.total_turns\":0,\"opening.current_turns\":3,\"opening.total_turns\":3,\"prepare.current_turns\":0,\"prepare.total_turns\":0,\"add_note.current_turns\":0,\"add_note.total_turns\":0,\"rec_next.current_turns\":0,\"rec_next.total_turns\":0,\"negotiate.current_turns\":0,\"negotiate.total_turns\":0,\"note_next.current_turns\":0,\"note_next.total_turns\":0,\"close_call.current_turns\":0,\"close_call.total_turns\":0,\"get_account.current_turns\":0,\"get_account.total_turns\":0,\"create_promise.current_turns\":0,\"create_promise.total_turns\":0,\"now\":\"2026-10-14T11:00\",\"title\":\"Ms\",\"last_name\":\"Costa\",\"first_name\":\"Maria\",\"customer_id\":\"c_2d2762a1-f37\",\"call.customer_phone_number\":\"\",\"call.phone_number\":\"\",\"call.call_id\":\"6bf36202-69d3-47c2-809b-88a08bbec2a2\",\"call.direction\":\"web\",\"system.iso_utc_now\":\"2026-10-11T14:31:48.361165Z\",\"system.todays_date_en_cst\":\"11 October 2026 Sunday 08:31\",\"system.todays_date_en_est\":\"11 October 2026 Sunday 09:31\",\"system.todays_date_tr\":\"11 Ekim 2026 Pazar 17:31\",\"system.todays_date_tr.iso_8601\":\"2026-10-11\",\"system.uuid4()\":\"dfda2d7b01a745cab0c3304a2242d5c9\",\"st_json\":\"{\\\"stage\\\": \\\"opening\\\", \\\"id\\\": \\\"open\\\", \\\"idv\\\": [], \\\"products\\\": [], \\\"plan\\\": {}, \\\"pnotes\\\": {}, \\\"promises\\\": {}, \\\"tries\\\": {}, \\\"perr\\\": [], \\\"notes\\\": {}, \\\"ntries\\\": {}, \\\"transfer\\\": \\\"\\\", \\\"callback\\\": \\\"booked\\\", \\\"closed\\\": \\\"\\\", \\\"pend\\\": \\\"\\\", \\\"npend\\\": \\\"\\\", \\\"prop\\\": {}, \\\"toomuch\\\": [], \\\"floored\\\": [], \\\"given\\\": [], \\\"said\\\": [], \\\"mo\\\": \\\"\\\", \\\"mr\\\": \\\"\\\", \\\"fin\\\": \\\"\\\", \\\"cb_bad\\\": 1}\",\"schedule_callback_args.date\":\"2026-10-17\",\"schedule_callback_args.time\":\"11:30\",\"schedule_callback_response.status\":\"success\",\"schedule_callback_response.error\":\"pre_process_code raised an exception\",\"schedule_callback_response.message\":\"Successfully executed POST request\",\"schedule_callback_response.status_code\":200,\"schedule_callback_status_code\":200,\"schedule_callback_failure_count\":1,\"final_outcome\":\"not_reached\",\"final_reason\":\"callback\",\"final_line\":\"The callback is booked. Thank you for your time. Goodbye.\",\"auto_state\":\"go\",\"schedule_callback_response.data.ok\":\"true\",\"schedule_callback_response.data.auto_state\":\"go\",\"schedule_callback_response.data.final_outcome\":\"not_reached\",\"schedule_callback_response.data.final_reason\":\"callback\",\"schedule_callback_response.data.final_line\":\"The callback is booked. Thank you for your time. Goodbye.\",\"schedule_callback_response.data.what_to_do_next\":\"The callback is booked. Say nothing more.\",\"schedule_callback_success_count\":1}}",
+        "messageId": "msg_6_1791729114009",
+        "secondsFromStart": 18.86863350868225,
+        "nodeId": "opening",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:54.099Z"
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"node_enter\",\"node\":\"goodbye\",\"from_node\":\"opening\",\"reason\":\"a tool ended the conversation (auto_state == 'go' OR schedule_callback_response.data.auto_state == 'go' OR transfer_to_agent_response.data.auto_state == 'go')\"}",
+        "messageId": "msg_7_1791729114010",
+        "secondsFromStart": 18.869646787643433,
+        "nodeId": "goodbye",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:54.147Z"
+      },
+      {
+        "role": "assistant",
+        "message": "The callback is booked. Thank you for your time. Goodbye.",
+        "messageId": "msg_8_1791729114033",
+        "secondsFromStart": 18.88979697227478,
+        "nodeId": "goodbye",
+        "workflowSnapshot": {
+          "currentNode": "goodbye",
+          "previousNode": "opening",
+          "nodeTurnCount": 0,
+          "totalTurnCount": 3,
+          "nodeTotalTurnCounts": {
+            "opening": 3
+          },
+          "transitionHistory": [
+            {
+              "from": "setup",
+              "to": "opening",
+              "reason": "always always"
+            },
+            {
+              "from": "opening",
+              "to": "goodbye",
+              "reason": "a tool ended the conversation (auto_state == 'go' OR schedule_callback_response.data.auto_state == 'go' OR transfer_to_agent_response.data.auto_state == 'go')"
+            }
+          ],
+          "enteredNodes": [
+            "goodbye",
+            "opening"
+          ],
+          "variableTable": {
+            "end.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135831+00:00"
+            },
+            "end.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135886+00:00"
+            },
+            "sync.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135836+00:00"
+            },
+            "sync.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135888+00:00"
+            },
+            "setup.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.179362+00:00"
+            },
+            "setup.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135890+00:00"
+            },
+            "stall.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135844+00:00"
+            },
+            "stall.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135892+00:00"
+            },
+            "goodbye.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:54.010184+00:00"
+            },
+            "goodbye.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:54.010187+00:00"
+            },
+            "opening.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:54.010181+00:00"
+            },
+            "opening.total_turns": {
+              "value": 3,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:48.394483+00:00"
+            },
+            "prepare.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135855+00:00"
+            },
+            "prepare.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135897+00:00"
+            },
+            "add_note.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135858+00:00"
+            },
+            "add_note.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135899+00:00"
+            },
+            "rec_next.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135862+00:00"
+            },
+            "rec_next.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135900+00:00"
+            },
+            "negotiate.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135865+00:00"
+            },
+            "negotiate.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135902+00:00"
+            },
+            "note_next.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135869+00:00"
+            },
+            "note_next.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135904+00:00"
+            },
+            "close_call.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135872+00:00"
+            },
+            "close_call.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135906+00:00"
+            },
+            "get_account.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135876+00:00"
+            },
+            "get_account.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135907+00:00"
+            },
+            "create_promise.current_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135880+00:00"
+            },
+            "create_promise.total_turns": {
+              "value": 0,
+              "confidence": 1,
+              "source": "system",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135909+00:00"
+            },
+            "now": {
+              "value": "2026-10-14T11:00",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135912+00:00"
+            },
+            "title": {
+              "value": "Ms",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135913+00:00"
+            },
+            "last_name": {
+              "value": "Costa",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135915+00:00"
+            },
+            "first_name": {
+              "value": "Maria",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135916+00:00"
+            },
+            "customer_id": {
+              "value": "c_2d2762a1-f37",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135918+00:00"
+            },
+            "call.customer_phone_number": {
+              "value": "",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135919+00:00"
+            },
+            "call.phone_number": {
+              "value": "",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135921+00:00"
+            },
+            "call.call_id": {
+              "value": "6bf36202-69d3-47c2-809b-88a08bbec2a2",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135922+00:00"
+            },
+            "call.direction": {
+              "value": "web",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135924+00:00"
+            },
+            "system.iso_utc_now": {
+              "value": "2026-10-11T14:31:48.361165Z",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:48.361209+00:00"
+            },
+            "system.todays_date_en_cst": {
+              "value": "11 October 2026 Sunday 08:31",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:48.361211+00:00"
+            },
+            "system.todays_date_en_est": {
+              "value": "11 October 2026 Sunday 09:31",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:48.361212+00:00"
+            },
+            "system.todays_date_tr": {
+              "value": "11 Ekim 2026 Pazar 17:31",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:48.361213+00:00"
+            },
+            "system.todays_date_tr.iso_8601": {
+              "value": "2026-10-11",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:48.361214+00:00"
+            },
+            "system.uuid4()": {
+              "value": "dfda2d7b01a745cab0c3304a2242d5c9",
+              "confidence": 1,
+              "source": "customer",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:35.135935+00:00"
+            },
+            "st_json": {
+              "value": "{\"stage\": \"opening\", \"id\": \"open\", \"idv\": [], \"products\": [], \"plan\": {}, \"pnotes\": {}, \"promises\": {}, \"tries\": {}, \"perr\": [], \"notes\": {}, \"ntries\": {}, \"transfer\": \"\", \"callback\": \"booked\", \"closed\": \"\", \"pend\": \"\", \"npend\": \"\", \"prop\": {}, \"toomuch\": [], \"floored\": [], \"given\": [], \"said\": [], \"mo\": \"\", \"mr\": \"\", \"fin\": \"\", \"cb_bad\": 1}",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:54.003777+00:00"
+            },
+            "schedule_callback_args.date": {
+              "value": "2026-10-17",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:54.007550+00:00"
+            },
+            "schedule_callback_args.time": {
+              "value": "11:30",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:54.007552+00:00"
+            },
+            "schedule_callback_response.status": {
+              "value": "success",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:54.007567+00:00"
+            },
+            "schedule_callback_response.error": {
+              "value": "pre_process_code raised an exception",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:44.975657+00:00"
+            },
+            "schedule_callback_response.message": {
+              "value": "Successfully executed POST request",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:54.007612+00:00"
+            },
+            "schedule_callback_response.status_code": {
+              "value": 200,
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:54.007615+00:00"
+            },
+            "schedule_callback_status_code": {
+              "value": 200,
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:54.007618+00:00"
+            },
+            "schedule_callback_failure_count": {
+              "value": 1,
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:44.975671+00:00"
+            },
+            "final_outcome": {
+              "value": "not_reached",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:54.003791+00:00"
+            },
+            "final_reason": {
+              "value": "callback",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:54.003793+00:00"
+            },
+            "final_line": {
+              "value": "The callback is booked. Thank you for your time. Goodbye.",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:54.003794+00:00"
+            },
+            "auto_state": {
+              "value": "go",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:54.003795+00:00"
+            },
+            "schedule_callback_response.data.ok": {
+              "value": "true",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:54.007601+00:00"
+            },
+            "schedule_callback_response.data.auto_state": {
+              "value": "go",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:54.007603+00:00"
+            },
+            "schedule_callback_response.data.final_outcome": {
+              "value": "not_reached",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:54.007604+00:00"
+            },
+            "schedule_callback_response.data.final_reason": {
+              "value": "callback",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:54.007606+00:00"
+            },
+            "schedule_callback_response.data.final_line": {
+              "value": "The callback is booked. Thank you for your time. Goodbye.",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:54.007608+00:00"
+            },
+            "schedule_callback_response.data.what_to_do_next": {
+              "value": "The callback is booked. Say nothing more.",
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": "opening",
+              "extracted_at": "2026-10-11T14:31:54.007610+00:00"
+            },
+            "schedule_callback_success_count": {
+              "value": 1,
+              "confidence": 1,
+              "source": "tool_result",
+              "source_node": null,
+              "extracted_at": "2026-10-11T14:31:54.007622+00:00"
+            }
+          },
+          "identity": {
+            "agentId": "58b2c2b3-0668-4e83-9f17-cdaf0dcabc9b",
+            "entityVersionId": "2883a3aa-15f2-440e-bfe5-7d4dc1b33722"
+          },
+          "controlFlags": {
+            "terminalActionFired": false
+          }
+        },
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:54.191Z"
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"route_evaluated\",\"matched\":true,\"from_node\":\"goodbye\",\"target\":\"close_call\",\"confidence\":1.0,\"reason\":\"always always\",\"branches\":[{\"target\":\"close_call\",\"description\":\"always\",\"result\":true,\"condition_results\":{\"operator\":\"always\",\"result\":true}}],\"variable_table\":{\"end.current_turns\":0,\"end.total_turns\":0,\"sync.current_turns\":0,\"sync.total_turns\":0,\"setup.current_turns\":0,\"setup.total_turns\":0,\"stall.current_turns\":0,\"stall.total_turns\":0,\"goodbye.current_turns\":0,\"goodbye.total_turns\":0,\"opening.current_turns\":0,\"opening.total_turns\":3,\"prepare.current_turns\":0,\"prepare.total_turns\":0,\"add_note.current_turns\":0,\"add_note.total_turns\":0,\"rec_next.current_turns\":0,\"rec_next.total_turns\":0,\"negotiate.current_turns\":0,\"negotiate.total_turns\":0,\"note_next.current_turns\":0,\"note_next.total_turns\":0,\"close_call.current_turns\":0,\"close_call.total_turns\":0,\"get_account.current_turns\":0,\"get_account.total_turns\":0,\"create_promise.current_turns\":0,\"create_promise.total_turns\":0,\"now\":\"2026-10-14T11:00\",\"title\":\"Ms\",\"last_name\":\"Costa\",\"first_name\":\"Maria\",\"customer_id\":\"c_2d2762a1-f37\",\"call.customer_phone_number\":\"\",\"call.phone_number\":\"\",\"call.call_id\":\"6bf36202-69d3-47c2-809b-88a08bbec2a2\",\"call.direction\":\"web\",\"system.iso_utc_now\":\"2026-10-11T14:31:48.361165Z\",\"system.todays_date_en_cst\":\"11 October 2026 Sunday 08:31\",\"system.todays_date_en_est\":\"11 October 2026 Sunday 09:31\",\"system.todays_date_tr\":\"11 Ekim 2026 Pazar 17:31\",\"system.todays_date_tr.iso_8601\":\"2026-10-11\",\"system.uuid4()\":\"dfda2d7b01a745cab0c3304a2242d5c9\",\"st_json\":\"{\\\"stage\\\": \\\"opening\\\", \\\"id\\\": \\\"open\\\", \\\"idv\\\": [], \\\"products\\\": [], \\\"plan\\\": {}, \\\"pnotes\\\": {}, \\\"promises\\\": {}, \\\"tries\\\": {}, \\\"perr\\\": [], \\\"notes\\\": {}, \\\"ntries\\\": {}, \\\"transfer\\\": \\\"\\\", \\\"callback\\\": \\\"booked\\\", \\\"closed\\\": \\\"\\\", \\\"pend\\\": \\\"\\\", \\\"npend\\\": \\\"\\\", \\\"prop\\\": {}, \\\"toomuch\\\": [], \\\"floored\\\": [], \\\"given\\\": [], \\\"said\\\": [], \\\"mo\\\": \\\"\\\", \\\"mr\\\": \\\"\\\", \\\"fin\\\": \\\"\\\", \\\"cb_bad\\\": 1}\",\"schedule_callback_args.date\":\"2026-10-17\",\"schedule_callback_args.time\":\"11:30\",\"schedule_callback_response.status\":\"success\",\"schedule_callback_response.error\":\"pre_process_code raised an exception\",\"schedule_callback_response.message\":\"Successfully executed POST request\",\"schedule_callback_response.status_code\":200,\"schedule_callback_status_code\":200,\"schedule_callback_failure_count\":1,\"final_outcome\":\"not_reached\",\"final_reason\":\"callback\",\"final_line\":\"The callback is booked. Thank you for your time. Goodbye.\",\"auto_state\":\"go\",\"schedule_callback_response.data.ok\":\"true\",\"schedule_callback_response.data.auto_state\":\"go\",\"schedule_callback_response.data.final_outcome\":\"not_reached\",\"schedule_callback_response.data.final_reason\":\"callback\",\"schedule_callback_response.data.final_line\":\"The callback is booked. Thank you for your time. Goodbye.\",\"schedule_callback_response.data.what_to_do_next\":\"The callback is booked. Say nothing more.\",\"schedule_callback_success_count\":1}}",
+        "messageId": "msg_9_1791729114037",
+        "secondsFromStart": 18.89601159095764,
+        "nodeId": "goodbye",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:54.254Z"
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"node_enter\",\"node\":\"close_call\",\"from_node\":\"goodbye\",\"reason\":\"always always\"}",
+        "messageId": "msg_10_1791729114038",
+        "secondsFromStart": 18.896939992904663,
+        "nodeId": "close_call",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:54.305Z"
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"function_call_start\",\"function\":\"api_call\",\"args\":{\"url\":\"https://freya-bank-mock.freyavoice.workers.dev/v1/close_call\",\"method\":\"POST\",\"headers\":{\"Content-Type\":\"application/json\"},\"body\":{\"reason\":\"callback\",\"outcome\":\"not_reached\",\"customer_id\":\"c_2d2762a1-f37\"}}}",
+        "messageId": "msg_11_1791729115510",
+        "secondsFromStart": 20.369614124298096,
+        "nodeId": "close_call",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:55.517Z"
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"function_call_complete\",\"function\":\"api_call\",\"result\":{\"status\":\"success\",\"data\":{\"ok\":true},\"message\":\"Successfully executed POST request\",\"status_code\":200}}",
+        "messageId": "msg_12_1791729117284",
+        "secondsFromStart": 22.143254280090332,
+        "nodeId": "close_call",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:57.291Z"
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"route_evaluated\",\"matched\":true,\"from_node\":\"close_call\",\"target\":\"end\",\"confidence\":1.0,\"reason\":\"always always\",\"branches\":[{\"target\":\"end\",\"description\":\"always\",\"result\":true,\"condition_results\":{\"operator\":\"always\",\"result\":true}}],\"variable_table\":{\"end.current_turns\":0,\"end.total_turns\":0,\"sync.current_turns\":0,\"sync.total_turns\":0,\"setup.current_turns\":0,\"setup.total_turns\":0,\"stall.current_turns\":0,\"stall.total_turns\":0,\"goodbye.current_turns\":0,\"goodbye.total_turns\":0,\"opening.current_turns\":0,\"opening.total_turns\":3,\"prepare.current_turns\":0,\"prepare.total_turns\":0,\"add_note.current_turns\":0,\"add_note.total_turns\":0,\"rec_next.current_turns\":0,\"rec_next.total_turns\":0,\"negotiate.current_turns\":0,\"negotiate.total_turns\":0,\"note_next.current_turns\":0,\"note_next.total_turns\":0,\"close_call.current_turns\":0,\"close_call.total_turns\":0,\"get_account.current_turns\":0,\"get_account.total_turns\":0,\"create_promise.current_turns\":0,\"create_promise.total_turns\":0,\"now\":\"2026-10-14T11:00\",\"title\":\"Ms\",\"last_name\":\"Costa\",\"first_name\":\"Maria\",\"customer_id\":\"c_2d2762a1-f37\",\"call.customer_phone_number\":\"\",\"call.phone_number\":\"\",\"call.call_id\":\"6bf36202-69d3-47c2-809b-88a08bbec2a2\",\"call.direction\":\"web\",\"system.iso_utc_now\":\"2026-10-11T14:31:48.361165Z\",\"system.todays_date_en_cst\":\"11 October 2026 Sunday 08:31\",\"system.todays_date_en_est\":\"11 October 2026 Sunday 09:31\",\"system.todays_date_tr\":\"11 Ekim 2026 Pazar 17:31\",\"system.todays_date_tr.iso_8601\":\"2026-10-11\",\"system.uuid4()\":\"dfda2d7b01a745cab0c3304a2242d5c9\",\"st_json\":\"{\\\"stage\\\": \\\"opening\\\", \\\"id\\\": \\\"open\\\", \\\"idv\\\": [], \\\"products\\\": [], \\\"plan\\\": {}, \\\"pnotes\\\": {}, \\\"promises\\\": {}, \\\"tries\\\": {}, \\\"perr\\\": [], \\\"notes\\\": {}, \\\"ntries\\\": {}, \\\"transfer\\\": \\\"\\\", \\\"callback\\\": \\\"booked\\\", \\\"closed\\\": \\\"yes\\\", \\\"pend\\\": \\\"\\\", \\\"npend\\\": \\\"\\\", \\\"prop\\\": {}, \\\"toomuch\\\": [], \\\"floored\\\": [], \\\"given\\\": [], \\\"said\\\": [], \\\"mo\\\": \\\"\\\", \\\"mr\\\": \\\"\\\", \\\"fin\\\": \\\"\\\", \\\"cb_bad\\\": 1}\",\"schedule_callback_args.date\":\"2026-10-17\",\"schedule_callback_args.time\":\"11:30\",\"schedule_callback_response.status\":\"success\",\"schedule_callback_response.error\":\"pre_process_code raised an exception\",\"schedule_callback_response.message\":\"Successfully executed POST request\",\"schedule_callback_response.status_code\":200,\"schedule_callback_status_code\":200,\"schedule_callback_failure_count\":1,\"final_outcome\":\"not_reached\",\"final_reason\":\"callback\",\"final_line\":\"The callback is booked. Thank you for your time. Goodbye.\",\"auto_state\":\"go\",\"schedule_callback_response.data.ok\":\"true\",\"schedule_callback_response.data.auto_state\":\"go\",\"schedule_callback_response.data.final_outcome\":\"not_reached\",\"schedule_callback_response.data.final_reason\":\"callback\",\"schedule_callback_response.data.final_line\":\"The callback is booked. Thank you for your time. Goodbye.\",\"schedule_callback_response.data.what_to_do_next\":\"The callback is booked. Say nothing more.\",\"schedule_callback_success_count\":1,\"close_call_response.status\":\"success\",\"close_call_response.data.ok\":\"true\",\"close_call_response.message\":\"Successfully executed POST request\",\"close_call_response.status_code\":200,\"close_call_status_code\":200,\"close_call_success_count\":1}}",
+        "messageId": "msg_13_1791729117288",
+        "secondsFromStart": 22.146835327148438,
+        "nodeId": "close_call",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:57.328Z"
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"node_enter\",\"node\":\"end\",\"from_node\":\"close_call\",\"reason\":\"always always\"}",
+        "messageId": "msg_14_1791729117288",
+        "secondsFromStart": 22.147658586502075,
+        "nodeId": "end",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:57.360Z"
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"function_call_start\",\"function\":\"end_call\",\"args\":{\"message_mode\":\"none\"}}",
+        "messageId": "msg_15_1791729117289",
+        "secondsFromStart": 22.14831519126892,
+        "nodeId": "end",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:57.403Z"
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"function_call_complete_deferred\",\"function\":\"end_call\",\"result\":null,\"deferred\":true}",
+        "messageId": "msg_16_1791729117290",
+        "secondsFromStart": 22.148839235305786,
+        "nodeId": "end",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:57.651Z"
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"call_ended\",\"reason\":\"assistant-ended-call\"}",
+        "messageId": "msg_17_1791729117300",
+        "secondsFromStart": 22.159130334854126,
+        "nodeId": "end",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:57.688Z"
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"function_call_complete\",\"function\":\"end_call\",\"result\":{\"status\":\"success\",\"message\":\"Call ended\"}}",
+        "messageId": "msg_18_1791729117400",
+        "secondsFromStart": 22.25881552696228,
+        "nodeId": "end",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:31:57.720Z"
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"function_call_start\",\"function\":\"close_call_at_end\",\"args\":{\"outcome\":\"not_reached\",\"reason\":\"callback\"}}",
+        "messageId": "msg_19_1791729133569",
+        "secondsFromStart": 38.42780876159668,
+        "nodeId": "end",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:32:13.602Z"
+      },
+      {
+        "role": "system",
+        "message": "{\"event\":\"function_call_error\",\"function\":\"close_call_at_end\",\"error\":\"Traceback (most recent call last):\\n  File \\\"<string>\\\", line 266, in <module>\\n    raise Exception('already closed')\\nException: already closed\\n\"}",
+        "messageId": "msg_20_1791729133569",
+        "secondsFromStart": 38.42828321456909,
+        "nodeId": "end",
+        "duration": 0,
+        "timestamp": "2026-10-11T14:32:13.697Z"
+      }
+    ],
+    "summary": "The user, identifying as Maria Costa's husband, answered the call. Due to policy, the automated assistant could not discuss the matter with him. A callback was requested for Maria Costa. The initial time proposed by the user was unavailable, so the assistant offered alternatives, and a new callback was successfully scheduled for Saturday, October 17th, 2026, at 11:30 AM.",
+    "cost": 0.020832,
+    "recordingUrl": "https://staging-app.freyavoice.ai/api/v2/call/6bf36202-69d3-47c2-809b-88a08bbec2a2/recording",
+    "analysis": {
+      "summary": "The user, identifying as Maria Costa's husband, answered the call. Due to policy, the automated assistant could not discuss the matter with him. A callback was requested for Maria Costa. The initial time proposed by the user was unavailable, so the assistant offered alternatives, and a new callback was successfully scheduled for Saturday, October 17th, 2026, at 11:30 AM.",
+      "structuredData": null
+    },
+    "tags": [
+      {
+        "tag": "sentiment",
+        "source": "system",
+        "value": 0,
+        "confidence": 1,
+        "metadata": null
+      },
+      {
+        "tag": "theme:Callback",
+        "source": "system",
+        "metadata": null
+      },
+      {
+        "tag": "theme:Scheduling",
+        "source": "system",
+        "metadata": null
+      },
+      {
+        "tag": "theme:Verification",
+        "source": "system",
+        "metadata": null
+      },
+      {
+        "tag": "tool_calls_count",
+        "source": "tool_call",
+        "value": 4,
+        "metadata": null
+      },
+      {
+        "tag": "tool_failures_count",
+        "source": "tool_call",
+        "value": 1,
+        "metadata": null
+      },
+      {
+        "tag": "end_cause",
+        "source": "system",
+        "metadata": {
+          "cause": "assistant-ended-call"
+        }
+      }
+    ],
+    "createdAt": "2026-10-11T14:31:34.982Z",
+    "updatedAt": "2026-10-11T14:32:17.076Z",
+    "campaign": null,
+    "problems": [],
+    "piiRedactions": []
+  },
+  "ledger": {
+    "ok": true,
+    "case": "PUB-02",
+    "team": "c354dcc1e41b4a34e576740f",
+    "now": "2026-10-14T11:00",
+    "verified": {},
+    "wrong": 0,
+    "hinted": false,
+    "promises": [],
+    "notes": [],
+    "callbacks": [
+      {
+        "date": "2026-10-17",
+        "time": "11:30"
+      }
+    ],
+    "transfers": [],
+    "outcome": "not_reached",
+    "reason": "callback",
+    "failures": {
+      "schedule_callback": 0,
+      "close_call": 0
+    },
+    "calls": [
+      {
+        "n": 1,
+        "tool": "schedule_callback",
+        "args": {
+          "date": "2026-10-17",
+          "time": "11:30"
+        },
+        "status": 200,
+        "result": {
+          "ok": true
+        }
+      },
+      {
+        "n": 2,
+        "tool": "close_call",
+        "args": {
+          "reason": "callback",
+          "outcome": "not_reached"
+        },
+        "status": 200,
+        "result": {
+          "ok": true
+        }
+      }
+    ],
+    "last_at": 1791729115528
+  },
+  "ledger_score": {
+    "pass": true,
+    "failed": []
+  }
+}

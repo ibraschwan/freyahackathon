@@ -1,0 +1,4186 @@
+{
+  "readings": [
+    {
+      "session": "aa179e67-ec02-4398-95eb-3ea69701004e",
+      "timestamp": "2026-10-11T13:44:09.012Z",
+      "bank": "Alder Mutual",
+      "spec": {
+        "bank_name": "Alder Mutual",
+        "language": "English",
+        "address": "{{first_name}} {{last_name}}",
+        "call_variables": [
+          "customer_id",
+          "first_name",
+          "last_name",
+          "title",
+          "now"
+        ],
+        "now_variable": "now",
+        "test_variables": {
+          "customer_id": "TEST-0001",
+          "first_name": "Jane",
+          "last_name": "Doe",
+          "title": "Ms",
+          "now": "2026-10-13T10:00:00"
+        },
+        "calendar": {
+          "weekend_days": [
+            6,
+            0
+          ],
+          "holidays": [
+            "2026-10-16",
+            "2026-10-24",
+            "2026-11-03"
+          ]
+        },
+        "callback": {
+          "include_today": false,
+          "business_days_ahead": 2,
+          "from": "09:15",
+          "to": "12:45",
+          "after_now": true
+        },
+        "identity": {
+          "questions": [
+            {
+              "field": "phone_last4",
+              "kind": "digits",
+              "ask": "What are the last four digits of your phone number?"
+            },
+            {
+              "field": "date_of_birth",
+              "kind": "date",
+              "ask": "What is your date of birth?"
+            }
+          ],
+          "numeric_date_order": "DMY",
+          "response": {
+            "verified": "verified",
+            "all_verified": "all_verified",
+            "left": "wrong_answers_left",
+            "hint": "hint"
+          },
+          "hints": {
+            "day_month_swapped": "This does not count as a wrong answer. Say exactly: \"Could you tell me your date of birth again, with the month in words?\" Then send the new answer as YYYY-MM-DD."
+          },
+          "wrong_sentence": "That does not match our records."
+        },
+        "opening_limits": {
+          "who_is_speaking": {
+            "times": 1,
+            "say": "Ask exactly once more: \"Am I speaking with {{first_name}} {{last_name}}?\"",
+            "close": [
+              "not_reached",
+              "unclear"
+            ]
+          },
+          "security_question": {
+            "times": 0,
+            "say": "Not used: a first refusal to answer a security question closes the call at once, with no explanation and no second ask.",
+            "close": [
+              "not_verified",
+              "declined"
+            ]
+          }
+        },
+        "product": {
+          "list_field": "products",
+          "id_field": "product_id",
+          "type_field": "type",
+          "full_field": "past_due",
+          "days_late_field": "days_late",
+          "types": {
+            "credit_card": {
+              "words": "credit card ending <card_last4>",
+              "floor": {
+                "percent_of_full": 50
+              },
+              "floor_name": "minimum amount"
+            },
+            "personal_loan": {
+              "words": "personal loan",
+              "floor": {
+                "percent_of_full": 50
+              },
+              "floor_name": "minimum amount"
+            },
+            "car_loan": {
+              "words": "car loan",
+              "floor": {
+                "percent_of_full": 50
+              },
+              "floor_name": "minimum amount"
+            }
+          }
+        },
+        "bands": [
+          {
+            "name": "1-5",
+            "min": 1,
+            "max": 5,
+            "deadline": {
+              "unit": "business_days",
+              "n": 6
+            },
+            "attempts": 2
+          },
+          {
+            "name": "6-15",
+            "min": 6,
+            "max": 15,
+            "deadline": {
+              "unit": "business_days",
+              "n": 4
+            },
+            "attempts": 1
+          },
+          {
+            "name": "16+",
+            "min": 16,
+            "max": null,
+            "deadline": {
+              "unit": "business_days",
+              "n": 2
+            },
+            "attempts": 0
+          }
+        ],
+        "attempt_offers": [
+          {
+            "amount": "full_or_floor",
+            "date": "deadline",
+            "text": "Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+          },
+          {
+            "amount": "floor",
+            "date": "deadline",
+            "text": "Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+          }
+        ],
+        "dates": {
+          "next_weekday": "following_week"
+        },
+        "guidance": {
+          "below_floor": "Reject the amount and offer the <floor_name> of <floor> once, explaining that any remainder stays overdue. Never offer a waiver, a discount or a new instalment plan.",
+          "after_deadline": "That day is after the latest permitted date. Counteroffer <deadline> and record it only with the customer's consent.",
+          "not_business_day": "That day is not a working day. Explain this and propose the preceding working day if it is not earlier than the earliest permitted date, otherwise <next>; never move the date without the customer's consent.",
+          "too_much": "You could pay the <floor_name> of <floor> instead. Any remainder stays overdue.",
+          "callback_outside_first": "Ask once for a replacement: a time from 09:15 to 12:45 on one of the next two working days, not today.",
+          "callback_outside_second": "Do not book a callback. Call wrap_up(\"not_reached\", \"no_callback\")."
+        },
+        "tools": {
+          "verify_identity": {
+            "question": "field",
+            "answer": "answer"
+          },
+          "create_promise": {
+            "product": "product_id",
+            "amount": "amount",
+            "date": "date"
+          },
+          "add_note": {
+            "product": "product_id",
+            "reason": "reason"
+          },
+          "schedule_callback": {
+            "date": "date",
+            "time": "time"
+          },
+          "transfer_to_agent": {
+            "queue": "queue"
+          },
+          "close_call": {
+            "outcome": "outcome",
+            "reason": "reason"
+          }
+        },
+        "response": {
+          "ok": "ok"
+        },
+        "transfer": {
+          "before_verification": []
+        },
+        "outcomes": {
+          "table": {
+            "promise": [],
+            "paid": [],
+            "transferred": [
+              "human",
+              "restructuring",
+              "support"
+            ],
+            "no_promise": [
+              "refused",
+              "hardship",
+              "dispute",
+              "service_error"
+            ],
+            "not_verified": [
+              "declined",
+              "failed"
+            ],
+            "not_reached": [
+              "unclear",
+              "wrong_number",
+              "deceased",
+              "no_callback",
+              "callback"
+            ]
+          },
+          "meaning": {
+            "promise": "at least one promise recorded",
+            "paid": "every product noted as already paid",
+            "transferred": "call handed to a person",
+            "no_promise": "verified, no promise recorded",
+            "not_verified": "security check declined or failed",
+            "not_reached": "customer not on the line"
+          },
+          "promise_recorded": [
+            "promise",
+            null
+          ],
+          "identity_failed": [
+            "not_verified",
+            "failed"
+          ],
+          "callback_booked": [
+            "not_reached",
+            "callback"
+          ],
+          "promise_service_error": [
+            "no_promise",
+            "service_error"
+          ],
+          "refused": [
+            "no_promise",
+            "refused"
+          ],
+          "account_error": [
+            "no_promise",
+            "service_error"
+          ],
+          "transfer": {
+            "general": [
+              "transferred",
+              "human"
+            ],
+            "restructuring": [
+              "transferred",
+              "restructuring"
+            ],
+            "support": [
+              "transferred",
+              "support"
+            ]
+          },
+          "before_verification": [
+            [
+              "not_reached",
+              "unclear"
+            ],
+            [
+              "not_reached",
+              "wrong_number"
+            ],
+            [
+              "not_reached",
+              "deceased"
+            ],
+            [
+              "not_reached",
+              "no_callback"
+            ],
+            [
+              "not_verified",
+              "declined"
+            ],
+            [
+              "not_verified",
+              "failed"
+            ],
+            [
+              "no_promise",
+              "service_error"
+            ]
+          ],
+          "after_verification": [
+            [
+              "paid",
+              null
+            ],
+            [
+              "no_promise",
+              "refused"
+            ],
+            [
+              "no_promise",
+              "hardship"
+            ],
+            [
+              "no_promise",
+              "dispute"
+            ]
+          ],
+          "fallback_before_verification": [
+            "not_reached",
+            "unclear"
+          ],
+          "fallback_after_verification": [
+            "no_promise",
+            "refused"
+          ]
+        },
+        "notes": {
+          "enabled": true,
+          "reasons": [
+            "refused",
+            "hardship",
+            "dispute",
+            "paid",
+            "service_error"
+          ],
+          "service_error_reason": "service_error",
+          "refused_reason": "refused",
+          "reason_for_outcome": {
+            "no_promise": "refused",
+            "transferred": "refused"
+          },
+          "close_from_notes": {
+            "all": {
+              "paid": [
+                "paid",
+                null
+              ]
+            },
+            "else_outcome": "no_promise",
+            "else_reason_from_first_note_not_in": [
+              "paid"
+            ]
+          }
+        },
+        "sentences": {
+          "opening": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with {{first_name}} {{last_name}}?",
+          "identity_failed": "I could not verify your identity. Please visit a branch. Thank you for your time. Goodbye.",
+          "after_callback": "Your callback is booked. Thank you for your time. Goodbye.",
+          "after_transfer": "I am transferring you to a colleague now. Thank you for your time. Goodbye.",
+          "verified_ack": "Thank you, your identity is verified.",
+          "debt_intro": "I am calling from Alder Mutual about arrears on your account.",
+          "product_statement": "Your <product> has arrears of <amount> and is <days_late> <days> late.",
+          "first_ask_single": "Can you pay the full arrears today, or on the next working day if today is no longer possible?",
+          "first_ask_multi": "We will take them one at a time, starting with the first one I mentioned. Can you pay its full arrears today, or on the next working day if today is no longer possible?",
+          "confirm_question": "May I record that commitment?",
+          "promise_recorded": "Your commitment is available in the online portal.",
+          "promise_failed": "I am sorry, I could not record your commitment.",
+          "change_later": "A recorded commitment cannot be changed on this call. Please visit a branch to change it.",
+          "account_error": "I am sorry, I cannot access your account right now.",
+          "rest_overdue": "Any remainder stays overdue.",
+          "next_product": "Now your <product>.",
+          "anything_else": "Is there anything else?",
+          "goodbye": "Thank you for your time. Goodbye."
+        },
+        "note_lines": {
+          "paid": "Payments may take two working days to appear."
+        },
+        "closing_lines": {
+          "not_reached/deceased": "I am sorry for your loss."
+        }
+      },
+      "limitations": "Rules of the brief that this configuration cannot express, or only approximately:\n\n- **O3, two wrong answers:** the engine only ends the check when the bank reports no wrong answers left, and the bank allows three. The limit of two total is not enforceable here.\n- **O3/O1, refusal versus question:** `security_question.times` is 0 so a first refusal closes `not_verified/declined`. The engine counts a question asked instead of an answer the same way, so \"are you a robot?\" at that point would also close the call.\n- **O8, floor:** the floor is max(50% of `past_due` rounded up to the cent, `minimum_payment` or `instalment_amount`), capped at `past_due`. Only one floor source per type is possible; I used 50% of full, so the max with the field and the rounding-up are lost.\n- **O6, order and recording:** sorting by `days_late` descending (ties by `product_id`) is not configurable, so account order applies. That also affects the \"first non-paid reason in sorted order\" at closing (O15). The engine reads back and records once at the end, not product by product.\n- **O4, O8 and O9, dates:**\n  - The 15:00 cut-off for paying today has no key.\n  - The first ask cannot name the amount or the earliest date, and later products open with attempt 1 (full amount on the deadline) rather than on the earliest date.\n  - The engine names the next working day for a non-working date; the \"preceding working day\" rule is only in the guidance text.\n  - \"End of week = Saturday, adjusted backwards\" and \"ask once to clarify a vague date\" have no key.\n- **O9, what counts as a refusal:** only an explicit refusal should use up an attempt, but the engine also counts a non-answer as `flat_refusal`.\n- **O10, O12 and O15, notes on transfer:** the engine never writes notes on a transferred call. Notes before a transfer (`refused`, `hardship`, `dispute`) are therefore not written.\n- **O11 and O14:** the sympathy sentence, the single offer of support, and \"retry a failed transfer or callback once, then close `no_promise/service_error`\" are not configurable beyond the outcome pairs.\n- **Test values:** the brief gives no example call variables, so `test_variables` are placeholders I made up.\n\n"
+    },
+    {
+      "session": "18149152-cfbd-40eb-acf1-42caf9cc17a7",
+      "timestamp": "2026-10-11T13:44:17.898Z",
+      "bank": "Alder Mutual",
+      "spec": {
+        "bank_name": "Alder Mutual",
+        "language": "English",
+        "address": "{{first_name}} {{last_name}}",
+        "call_variables": [
+          "customer_id",
+          "first_name",
+          "last_name",
+          "title",
+          "now"
+        ],
+        "now_variable": "now",
+        "test_variables": {
+          "customer_id": "C-1001",
+          "first_name": "Jane",
+          "last_name": "Miller",
+          "title": "Ms",
+          "now": "2026-10-13T10:30:00"
+        },
+        "calendar": {
+          "weekend_days": [
+            0,
+            6
+          ],
+          "holidays": [
+            "2026-10-16",
+            "2026-10-24",
+            "2026-11-03"
+          ]
+        },
+        "callback": {
+          "include_today": false,
+          "business_days_ahead": 2,
+          "from": "09:15",
+          "to": "12:45",
+          "after_now": true
+        },
+        "identity": {
+          "questions": [
+            {
+              "field": "phone_last4",
+              "kind": "digits",
+              "ask": "What are the last four digits of your phone number?"
+            },
+            {
+              "field": "date_of_birth",
+              "kind": "date",
+              "ask": "What is your date of birth?"
+            }
+          ],
+          "numeric_date_order": "DMY",
+          "response": {
+            "verified": "verified",
+            "all_verified": "all_verified",
+            "left": "wrong_answers_left",
+            "hint": "hint"
+          },
+          "hints": {
+            "day_month_swapped": "This does not count as a wrong answer. Say exactly: \"Could you tell me your date of birth again, saying the month in words?\" and then send the new answer."
+          },
+          "wrong_sentence": "That does not match our records."
+        },
+        "opening_limits": {
+          "who_is_speaking": {
+            "times": 1,
+            "say": "Ask exactly once more: \"Am I speaking with {{first_name}} {{last_name}}?\"",
+            "close": [
+              "not_reached",
+              "unclear"
+            ]
+          },
+          "security_question": {
+            "times": 0,
+            "say": "Do not explain or persuade and do not ask again: a first refusal to answer a security question ends the call.",
+            "close": [
+              "not_verified",
+              "declined"
+            ]
+          }
+        },
+        "product": {
+          "list_field": "products",
+          "id_field": "product_id",
+          "type_field": "type",
+          "full_field": "past_due",
+          "days_late_field": "days_late",
+          "types": {
+            "credit_card": {
+              "words": "credit card ending <card_last4>",
+              "floor": {
+                "percent_of_full": 50
+              },
+              "floor_name": "minimum acceptable amount"
+            },
+            "personal_loan": {
+              "words": "personal loan",
+              "floor": {
+                "field": "instalment_amount"
+              },
+              "floor_name": "minimum acceptable amount"
+            },
+            "car_loan": {
+              "words": "car loan",
+              "floor": {
+                "field": "instalment_amount"
+              },
+              "floor_name": "minimum acceptable amount"
+            }
+          }
+        },
+        "bands": [
+          {
+            "name": "1-5",
+            "min": 1,
+            "max": 5,
+            "deadline": {
+              "unit": "business_days",
+              "n": 6
+            },
+            "attempts": 2
+          },
+          {
+            "name": "6-15",
+            "min": 6,
+            "max": 15,
+            "deadline": {
+              "unit": "business_days",
+              "n": 4
+            },
+            "attempts": 1
+          },
+          {
+            "name": "16+",
+            "min": 16,
+            "max": null,
+            "deadline": {
+              "unit": "business_days",
+              "n": 2
+            },
+            "attempts": 0
+          }
+        ],
+        "attempt_offers": [
+          {
+            "amount": "full_or_floor",
+            "date": "deadline"
+          },
+          {
+            "amount": "floor",
+            "date": "deadline"
+          }
+        ],
+        "dates": {
+          "next_weekday": "following_week"
+        },
+        "guidance": {
+          "below_floor": "Reject that amount and offer the <floor_name> of <floor> once, explaining that any remainder stays overdue. Never offer a waiver, discount or new instalment plan.",
+          "after_deadline": "That day is after the latest allowed date. Counteroffer <deadline> and get the customer's consent before reporting it.",
+          "not_business_day": "That day is not a working day. Explain this and propose the preceding working day, unless it is earlier than the earliest permitted date (today only on a working day before 15:00, otherwise the next working day), in which case propose the earliest permitted date; get consent and never move a date silently.",
+          "too_much": "Say exactly: \"You could pay the <floor_name> of <floor> instead. Any remainder stays overdue. Could you pay that?\"",
+          "callback_outside_first": "Ask once for a replacement: a callback must be on one of the next two working days (Tuesday to Saturday, not today), between 09:15 and 12:45.",
+          "callback_outside_second": "Do not ask again. Call wrap_up(\"not_reached\", \"no_callback\")."
+        },
+        "tools": {
+          "verify_identity": {
+            "question": "field",
+            "answer": "answer"
+          },
+          "create_promise": {
+            "product": "product_id",
+            "amount": "amount",
+            "date": "date"
+          },
+          "add_note": {
+            "product": "product_id",
+            "reason": "reason"
+          },
+          "schedule_callback": {
+            "date": "date",
+            "time": "time"
+          },
+          "transfer_to_agent": {
+            "queue": "queue"
+          },
+          "close_call": {
+            "outcome": "outcome",
+            "reason": "reason"
+          }
+        },
+        "response": {
+          "ok": "ok"
+        },
+        "transfer": {
+          "before_verification": []
+        },
+        "outcomes": {
+          "table": {
+            "promise": [],
+            "paid": [],
+            "transferred": [
+              "human",
+              "restructuring",
+              "support"
+            ],
+            "no_promise": [
+              "refused",
+              "hardship",
+              "dispute",
+              "service_error"
+            ],
+            "not_verified": [
+              "declined",
+              "failed"
+            ],
+            "not_reached": [
+              "unclear",
+              "wrong_number",
+              "deceased",
+              "no_callback",
+              "callback"
+            ]
+          },
+          "meaning": {
+            "promise": "at least one promise recorded",
+            "paid": "every product noted as already paid",
+            "transferred": "call handed to a person",
+            "no_promise": "verified customer, no promise recorded",
+            "not_verified": "security check declined or failed",
+            "not_reached": "customer not on the line"
+          },
+          "promise_recorded": [
+            "promise",
+            null
+          ],
+          "identity_failed": [
+            "not_verified",
+            "failed"
+          ],
+          "callback_booked": [
+            "not_reached",
+            "callback"
+          ],
+          "promise_service_error": [
+            "no_promise",
+            "service_error"
+          ],
+          "refused": [
+            "no_promise",
+            "refused"
+          ],
+          "account_error": [
+            "no_promise",
+            "service_error"
+          ],
+          "transfer": {
+            "general": [
+              "transferred",
+              "human"
+            ],
+            "restructuring": [
+              "transferred",
+              "restructuring"
+            ],
+            "support": [
+              "transferred",
+              "support"
+            ]
+          },
+          "before_verification": [
+            [
+              "not_reached",
+              "unclear"
+            ],
+            [
+              "not_reached",
+              "wrong_number"
+            ],
+            [
+              "not_reached",
+              "deceased"
+            ],
+            [
+              "not_reached",
+              "no_callback"
+            ],
+            [
+              "not_verified",
+              "declined"
+            ],
+            [
+              "not_verified",
+              "failed"
+            ],
+            [
+              "no_promise",
+              "service_error"
+            ]
+          ],
+          "after_verification": [
+            [
+              "no_promise",
+              "refused"
+            ],
+            [
+              "no_promise",
+              "hardship"
+            ],
+            [
+              "no_promise",
+              "dispute"
+            ],
+            [
+              "paid",
+              null
+            ]
+          ],
+          "fallback_before_verification": [
+            "not_reached",
+            "unclear"
+          ],
+          "fallback_after_verification": [
+            "no_promise",
+            "refused"
+          ]
+        },
+        "notes": {
+          "enabled": true,
+          "reasons": [
+            "refused",
+            "hardship",
+            "dispute",
+            "paid",
+            "service_error"
+          ],
+          "service_error_reason": "service_error",
+          "refused_reason": "refused",
+          "reason_for_outcome": {
+            "no_promise": "refused"
+          },
+          "close_from_notes": {
+            "all": {
+              "paid": [
+                "paid",
+                null
+              ]
+            },
+            "else_outcome": "no_promise",
+            "else_reason_from_first_note_not_in": [
+              "paid"
+            ]
+          }
+        },
+        "sentences": {
+          "opening": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with {{first_name}} {{last_name}}?",
+          "identity_failed": "I could not verify your identity, so I cannot continue this call. Please visit a branch. Thank you, goodbye.",
+          "after_callback": "The callback is booked. Thank you, goodbye.",
+          "after_transfer": "I am transferring you to a colleague now. Thank you, goodbye.",
+          "verified_ack": "Thank you, your identity is verified.",
+          "debt_intro": "I am calling from Alder Mutual about arrears on your account.",
+          "product_statement": "Your <product> has arrears of <amount> and is <days_late> <days> late.",
+          "first_ask_single": "Can you pay the full amount today, or on the next working day?",
+          "first_ask_multi": "We will take them one at a time, starting with the first. Can you pay its full amount today, or on the next working day?",
+          "confirm_question": "May I record that commitment?",
+          "promise_recorded": "Your commitment is available in the online portal.",
+          "promise_failed": "I am sorry, I could not record that commitment.",
+          "change_later": "A recorded commitment cannot be changed on this call. Please visit a branch to change it.",
+          "account_error": "I am sorry, I cannot access your account right now.",
+          "rest_overdue": "Any remainder stays overdue.",
+          "next_product": "Now your <product>.",
+          "anything_else": "Is there anything else?",
+          "goodbye": "Thank you, goodbye."
+        },
+        "note_lines": {
+          "paid": "Payments may take two working days to appear."
+        },
+        "closing_lines": {
+          "not_reached/deceased": "I am sorry for your loss."
+        }
+      },
+      "limitations": "Rules of the brief this configuration cannot fully express:\n\n- **Two wrong answers end verification (O3).** The engine only stops when the bank reports no wrong answers left, and the bank allows three. A third attempt is possible.\n- **Floor (O8).** The floor is max(50% of arrears rounded up, minimum_payment or instalment_amount), capped at arrears, but only one floor form is allowed per type. I chose 50% for cards and `instalment_amount` for loans as a best guess; either can be too low when the other term is larger.\n- **Persuasion budget (O7/O9).** I mapped \"extra offers after the initial ask\" to `attempts` 2/1/0. For the second and third product the engine opens with attempt 1 (full amount on the deadline) instead of an initial ask on the earliest date. What it does there for a 0-attempt band is undefined.\n- **Earliest payment date (O4).** The 15:00 cutoff for paying today has no field; it is only carried in `guidance.not_business_day`, and the first ask says \"today or the next working day\".\n- **Non-working day moves to the preceding working day (O4).** The engine only names the next business day; the preceding-day rule is carried in `guidance.not_business_day` only.\n- **\"End of week\" (O9).** Saturday of the current week, rolled back for holidays, has no field.\n- **Product order (O6, O15).** Sorting by days late descending, then product id, has no field. The engine uses account order, including for the first non-paid close reason.\n- **Per-product read-back and recording (O6).** The engine reads back and records only once every product is settled, not one product at a time.\n- **Notes with transfers (O10\u2013O12, O15).** The engine never writes notes on a transferred call, but the brief requires them (refused, hardship, dispute) before the transfer.\n- **Failed transfer or callback (O14).** \"Retry once, then close no_promise/service_error\" has no field of its own; I only listed the pair as allowed before verification.\n- **Callbacks for relatives only (O5), the sympathy sentence and single support offer (O11), and the scam advice (O1).** These are left to the dialogue model.\n- **Test variables.** The brief gives no example values, so the ones below are placeholders I made up.\n\n"
+    },
+    {
+      "session": "be960fa1-3359-4a58-a4eb-d9b73621c118",
+      "timestamp": "2026-10-11T13:46:35.393Z",
+      "bank": "Alder Mutual",
+      "spec": {
+        "bank_name": "Alder Mutual",
+        "language": "English",
+        "address": "{{first_name}} {{last_name}}",
+        "call_variables": [
+          "customer_id",
+          "first_name",
+          "last_name",
+          "title",
+          "now"
+        ],
+        "now_variable": "now",
+        "test_variables": {
+          "customer_id": "C-1001",
+          "first_name": "Jane",
+          "last_name": "Doe",
+          "title": "Ms",
+          "now": "2026-10-13T10:00:00"
+        },
+        "calendar": {
+          "weekend_days": [
+            0,
+            6
+          ],
+          "holidays": [
+            "2026-10-16",
+            "2026-10-24",
+            "2026-11-03"
+          ]
+        },
+        "callback": {
+          "include_today": false,
+          "business_days_ahead": 2,
+          "from": "09:15",
+          "to": "12:45",
+          "after_now": true
+        },
+        "identity": {
+          "questions": [
+            {
+              "field": "phone_last4",
+              "kind": "digits",
+              "ask": "What are the last four digits of your phone number?"
+            },
+            {
+              "field": "date_of_birth",
+              "kind": "date",
+              "ask": "What is your date of birth?"
+            }
+          ],
+          "numeric_date_order": "DMY",
+          "response": {
+            "verified": "verified",
+            "all_verified": "all_verified",
+            "left": "wrong_answers_left",
+            "hint": "hint"
+          },
+          "hints": {
+            "day_month_swapped": "This does not count as a wrong answer. Say exactly: \"Could you tell me your date of birth again, saying the month in words?\" Then send the new answer as YYYY-MM-DD."
+          },
+          "wrong_sentence": "That does not match our records."
+        },
+        "opening_limits": {
+          "who_is_speaking": {
+            "times": 1,
+            "say": "Ask exactly once more: \"Am I speaking with {{first_name}} {{last_name}}?\"",
+            "close": [
+              "not_reached",
+              "unclear"
+            ]
+          },
+          "security_question": {
+            "times": 0,
+            "say": "Do not explain or persuade and do not ask the security question again: a first refusal to answer closes the call. Say: \"I cannot continue without the security check.\"",
+            "close": [
+              "not_verified",
+              "declined"
+            ]
+          }
+        },
+        "product": {
+          "list_field": "products",
+          "id_field": "product_id",
+          "type_field": "type",
+          "full_field": "past_due",
+          "days_late_field": "days_late",
+          "types": {
+            "credit_card": {
+              "words": "credit card ending <card_last4>",
+              "floor": {
+                "percent_of_full": 50
+              },
+              "floor_name": "minimum acceptable amount"
+            },
+            "personal_loan": {
+              "words": "personal loan",
+              "floor": {
+                "field": "instalment_amount"
+              },
+              "floor_name": "minimum acceptable amount"
+            },
+            "car_loan": {
+              "words": "car loan",
+              "floor": {
+                "field": "instalment_amount"
+              },
+              "floor_name": "minimum acceptable amount"
+            }
+          }
+        },
+        "bands": [
+          {
+            "name": "1-5",
+            "min": 1,
+            "max": 5,
+            "deadline": {
+              "unit": "business_days",
+              "n": 6
+            },
+            "attempts": 2
+          },
+          {
+            "name": "6-15",
+            "min": 6,
+            "max": 15,
+            "deadline": {
+              "unit": "business_days",
+              "n": 4
+            },
+            "attempts": 1
+          },
+          {
+            "name": "16+",
+            "min": 16,
+            "max": null,
+            "deadline": {
+              "unit": "business_days",
+              "n": 2
+            },
+            "attempts": 0
+          }
+        ],
+        "attempt_offers": [
+          {
+            "amount": "full_or_floor",
+            "date": "deadline",
+            "text": "Only an explicit refusal to pay uses up an offer. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+          },
+          {
+            "amount": "floor",
+            "date": "deadline",
+            "text": "This is the last offer for this product. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+          }
+        ],
+        "dates": {
+          "next_weekday": "following_week"
+        },
+        "guidance": {
+          "below_floor": "Reject that amount and offer the <floor_name> of <floor> once. Explain that any remainder stays overdue.",
+          "after_deadline": "That day is after the latest permitted date. Counteroffer <deadline>, explain the change and get the customer's consent before reporting it.",
+          "not_business_day": "That day is not a working day. Do not move it forward to <next>: propose the working day before it, or the earliest permitted date if that would be earlier, explain the change and get the customer's consent.",
+          "too_much": "Could you pay the <floor_name> of <floor>? Any remainder stays overdue.",
+          "callback_outside_first": "Ask once for a replacement: a time from 09:15 to 12:45 on one of the next two working days, not today.",
+          "callback_outside_second": "Do not book a callback. Call wrap_up(\"not_reached\", \"no_callback\")."
+        },
+        "tools": {
+          "verify_identity": {
+            "question": "field",
+            "answer": "answer"
+          },
+          "create_promise": {
+            "product": "product_id",
+            "amount": "amount",
+            "date": "date"
+          },
+          "add_note": {
+            "product": "product_id",
+            "reason": "reason"
+          },
+          "schedule_callback": {
+            "date": "date",
+            "time": "time"
+          },
+          "transfer_to_agent": {
+            "queue": "queue"
+          },
+          "close_call": {
+            "outcome": "outcome",
+            "reason": "reason"
+          }
+        },
+        "response": {
+          "ok": "ok"
+        },
+        "transfer": {
+          "before_verification": []
+        },
+        "outcomes": {
+          "table": {
+            "promise": [],
+            "paid": [],
+            "transferred": [
+              "human",
+              "restructuring",
+              "support"
+            ],
+            "no_promise": [
+              "refused",
+              "hardship",
+              "dispute",
+              "service_error"
+            ],
+            "not_verified": [
+              "declined",
+              "failed"
+            ],
+            "not_reached": [
+              "unclear",
+              "wrong_number",
+              "deceased",
+              "no_callback",
+              "callback"
+            ]
+          },
+          "meaning": {
+            "promise": "at least one promise recorded",
+            "paid": "every product noted as already paid",
+            "transferred": "call handed to a person",
+            "no_promise": "verified customer, no promise recorded",
+            "not_verified": "security check declined or failed",
+            "not_reached": "customer not on the line"
+          },
+          "promise_recorded": [
+            "promise",
+            null
+          ],
+          "identity_failed": [
+            "not_verified",
+            "failed"
+          ],
+          "callback_booked": [
+            "not_reached",
+            "callback"
+          ],
+          "promise_service_error": [
+            "no_promise",
+            "service_error"
+          ],
+          "refused": [
+            "no_promise",
+            "refused"
+          ],
+          "account_error": [
+            "no_promise",
+            "service_error"
+          ],
+          "transfer": {
+            "general": [
+              "transferred",
+              "human"
+            ],
+            "restructuring": [
+              "transferred",
+              "restructuring"
+            ],
+            "support": [
+              "transferred",
+              "support"
+            ]
+          },
+          "before_verification": [
+            [
+              "not_reached",
+              "unclear"
+            ],
+            [
+              "not_reached",
+              "wrong_number"
+            ],
+            [
+              "not_reached",
+              "deceased"
+            ],
+            [
+              "not_reached",
+              "no_callback"
+            ],
+            [
+              "not_verified",
+              "declined"
+            ],
+            [
+              "not_verified",
+              "failed"
+            ],
+            [
+              "no_promise",
+              "service_error"
+            ]
+          ],
+          "after_verification": [
+            [
+              "paid",
+              null
+            ],
+            [
+              "no_promise",
+              "refused"
+            ],
+            [
+              "no_promise",
+              "hardship"
+            ],
+            [
+              "no_promise",
+              "dispute"
+            ]
+          ],
+          "fallback_before_verification": [
+            "not_reached",
+            "unclear"
+          ],
+          "fallback_after_verification": [
+            "no_promise",
+            "refused"
+          ]
+        },
+        "notes": {
+          "enabled": true,
+          "reasons": [
+            "refused",
+            "hardship",
+            "dispute",
+            "paid",
+            "service_error"
+          ],
+          "service_error_reason": "service_error",
+          "refused_reason": "refused",
+          "reason_for_outcome": {
+            "no_promise": "refused",
+            "transferred": "refused"
+          },
+          "close_from_notes": {
+            "all": {
+              "paid": [
+                "paid",
+                null
+              ]
+            },
+            "else_outcome": "no_promise",
+            "else_reason_from_first_note_not_in": [
+              "paid"
+            ]
+          }
+        },
+        "sentences": {
+          "opening": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with {{first_name}} {{last_name}}?",
+          "identity_failed": "I could not verify your identity. Please visit a branch. Thank you for your time. Goodbye.",
+          "after_callback": "The callback is booked. Thank you for your time. Goodbye.",
+          "after_transfer": "I am transferring you to a colleague now. Thank you for your time. Goodbye.",
+          "verified_ack": "Thank you, your identity is verified.",
+          "debt_intro": "I am calling from Alder Mutual about arrears on your account.",
+          "product_statement": "Your <product> has arrears of <amount> and is <days_late> <days> late.",
+          "first_ask_single": "Can you pay the full arrears today, or on the next working day if payment today is no longer possible?",
+          "first_ask_multi": "Let us take these one at a time, starting with the first one I mentioned. Can you pay its full arrears today, or on the next working day if payment today is no longer possible?",
+          "confirm_question": "May I record that commitment?",
+          "promise_recorded": "Your commitment is available in the online portal.",
+          "promise_failed": "I am sorry, I could not record that commitment.",
+          "change_later": "A recorded commitment cannot be changed on this call. Please visit a branch to change it.",
+          "account_error": "I am sorry, I cannot access your account right now.",
+          "rest_overdue": "Any remainder stays overdue.",
+          "next_product": "Now your <product>.",
+          "anything_else": "Is there anything else?",
+          "goodbye": "Thank you for your time. Goodbye."
+        },
+        "note_lines": {
+          "paid": "Payments may take two working days to appear."
+        },
+        "closing_lines": {
+          "not_reached/deceased": "I am sorry for your loss."
+        }
+      },
+      "limitations": "Rules of the brief this configuration cannot express, or only approximates:\n\n- **O3, two wrong answers end verification:** the engine only closes when the bank reports none left, and the bank allows three. A third attempt is therefore possible.\n- **O3, first refusal closes at once:** I set `security_question.times` to 0. This also closes the call when the customer merely asks a question instead of answering (for example \"are you a robot?\"), which O1 wants answered.\n- **O8, floor:** the brief wants the higher of 50% (rounded up to the cent) and `minimum_payment` / `instalment_amount`, capped at arrears. The config takes only one source per type, so I chose 50% for cards and `instalment_amount` for loans. This choice is a guess; whenever the other term is the higher one, the engine's floor is too low.\n- **O4/O8, first ask on the earliest permitted date:** there is no date token for the first ask and no 15:00 cutoff, so the first-ask sentences are worded generically. The engine may accept \"today\" at 15:00 or later, or on a closed day.\n- **O4, non-working day moves to the preceding working day:** the engine only names the next business day, so the backward move is left to the dialogue model through `guidance.not_business_day`. \"End of week = Saturday, adjusted backwards for holidays\" is likewise not configurable.\n- **O6, product order:** sorting by `days_late` descending then `product_id` is not configurable, so the engine uses account order. That order also decides the \"first non-paid reason\" in O15.\n- **O6/O13/O14, one product at a time:** the engine reads back and records only after every product is settled. The portal sentence is therefore spoken once per confirmation, not after each promise.\n- **O7/O9, persuasion budget:** I mapped \"extra offers\" 2/1/0 to `attempts`. The engine also uses attempt 1 (deadline date) as the opening ask for later products, where the brief wants the earliest permitted date.\n- **O10/O11/O12/O15, notes with transfers:** the engine never writes notes on a transferred call, so the required refused, hardship and dispute notes before a transfer are lost.\n- **O14, failed transfer or callback:** \"retry once, then close no_promise/service_error\" has no key. I made that pair allowed before verification so the model can close with it.\n- **O5, callbacks for relatives only, and O11, the sympathy sentence and single support offer:** these are left to the dialogue model.\n- **`test_variables`:** the brief gives no examples, so the values are placeholders I made up.\n- **`address`:** the brief gives no form of address, so I used first and last name, as in its opening question.\n\n"
+    },
+    {
+      "session": "21ae3538-61bc-47d0-b326-cc73cf0baa98",
+      "timestamp": "2026-10-11T13:46:43.476Z",
+      "bank": "Alder Mutual",
+      "spec": {
+        "bank_name": "Alder Mutual",
+        "language": "English",
+        "address": "{{first_name}} {{last_name}}",
+        "call_variables": [
+          "customer_id",
+          "first_name",
+          "last_name",
+          "title",
+          "now"
+        ],
+        "now_variable": "now",
+        "test_variables": {
+          "customer_id": "C-0001",
+          "first_name": "Jane",
+          "last_name": "Doe",
+          "title": "Ms",
+          "now": "2026-10-13T10:00:00"
+        },
+        "calendar": {
+          "weekend_days": [
+            6,
+            0
+          ],
+          "holidays": [
+            "2026-10-16",
+            "2026-10-24",
+            "2026-11-03"
+          ]
+        },
+        "callback": {
+          "include_today": false,
+          "business_days_ahead": 2,
+          "from": "09:15",
+          "to": "12:45",
+          "after_now": true
+        },
+        "identity": {
+          "questions": [
+            {
+              "field": "phone_last4",
+              "kind": "digits",
+              "ask": "What are the last four digits of your phone number?"
+            },
+            {
+              "field": "date_of_birth",
+              "kind": "date",
+              "ask": "What is your date of birth?"
+            }
+          ],
+          "numeric_date_order": "DMY",
+          "response": {
+            "verified": "verified",
+            "all_verified": "all_verified",
+            "left": "wrong_answers_left",
+            "hint": "hint"
+          },
+          "hints": {
+            "day_month_swapped": "This does not count as a wrong answer. Say exactly: \"Could you tell me your date of birth again, saying the month in words?\" Then send the new answer as YYYY-MM-DD."
+          },
+          "wrong_sentence": "That does not match our records."
+        },
+        "opening_limits": {
+          "who_is_speaking": {
+            "times": 1,
+            "say": "Only a clear self-confirmation counts. Ask exactly once more: \"Am I speaking with {{first_name}} {{last_name}}?\"",
+            "close": [
+              "not_reached",
+              "unclear"
+            ]
+          },
+          "security_question": {
+            "times": 0,
+            "say": "Do not explain or persuade and do not ask again: a first refusal to answer a security question closes the call.",
+            "close": [
+              "not_verified",
+              "declined"
+            ]
+          }
+        },
+        "product": {
+          "list_field": "products",
+          "id_field": "product_id",
+          "type_field": "type",
+          "full_field": "past_due",
+          "days_late_field": "days_late",
+          "types": {
+            "credit_card": {
+              "words": "credit card ending <card_last4>",
+              "floor": {
+                "percent_of_full": 50
+              },
+              "floor_name": "lowest amount that can be recorded"
+            },
+            "personal_loan": {
+              "words": "personal loan",
+              "floor": {
+                "field": "instalment_amount"
+              },
+              "floor_name": "lowest amount that can be recorded"
+            },
+            "car_loan": {
+              "words": "car loan",
+              "floor": {
+                "field": "instalment_amount"
+              },
+              "floor_name": "lowest amount that can be recorded"
+            }
+          }
+        },
+        "bands": [
+          {
+            "name": "1-5",
+            "min": 1,
+            "max": 5,
+            "deadline": {
+              "unit": "business_days",
+              "n": 6
+            },
+            "attempts": 2
+          },
+          {
+            "name": "6-15",
+            "min": 6,
+            "max": 15,
+            "deadline": {
+              "unit": "business_days",
+              "n": 4
+            },
+            "attempts": 1
+          },
+          {
+            "name": "16+",
+            "min": 16,
+            "max": null,
+            "deadline": {
+              "unit": "business_days",
+              "n": 2
+            },
+            "attempts": 0
+          }
+        ],
+        "attempt_offers": [
+          {
+            "amount": "full_or_floor",
+            "date": "deadline",
+            "text": "Only an explicit refusal to pay counts as a refusal. A question, silence, a proposed date, a proposed amount or \"not today\" is not a refusal: answer the question or ask for clarification. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+          },
+          {
+            "amount": "floor",
+            "date": "deadline",
+            "text": "This is the last offer for this product. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+          }
+        ],
+        "dates": {
+          "next_weekday": "following_week"
+        },
+        "guidance": {
+          "below_floor": "Reject that amount and offer the floor once: say the <floor_name> for this product is <floor> and that any remainder stays overdue. Accept any amount from <floor> up to the full arrears.",
+          "after_deadline": "That day is after the latest possible date. Counteroffer <deadline>, explain the change and report it only after the customer agrees to it.",
+          "not_business_day": "That day is not a working day. Offer the preceding working day if it is not earlier than the earliest permitted date, otherwise the earliest permitted date (the next working day is <next>); explain the change and get the customer's consent, never move a date silently.",
+          "too_much": "Could you pay <floor>, the <floor_name>? Any remainder stays overdue.",
+          "callback_outside_first": "Say that a callback is possible only on one of the next two working days, not today, between 09:15 and 12:45, and ask once for another day or time.",
+          "callback_outside_second": "Do not ask again. Call wrap_up(\"not_reached\", \"no_callback\")."
+        },
+        "tools": {
+          "verify_identity": {
+            "question": "field",
+            "answer": "answer"
+          },
+          "create_promise": {
+            "product": "product_id",
+            "amount": "amount",
+            "date": "date"
+          },
+          "add_note": {
+            "product": "product_id",
+            "reason": "reason"
+          },
+          "schedule_callback": {
+            "date": "date",
+            "time": "time"
+          },
+          "transfer_to_agent": {
+            "queue": "queue"
+          },
+          "close_call": {
+            "outcome": "outcome",
+            "reason": "reason"
+          }
+        },
+        "response": {
+          "ok": "ok"
+        },
+        "transfer": {
+          "before_verification": []
+        },
+        "outcomes": {
+          "table": {
+            "promise": [],
+            "paid": [],
+            "transferred": [
+              "human",
+              "restructuring",
+              "support"
+            ],
+            "no_promise": [
+              "refused",
+              "hardship",
+              "dispute",
+              "service_error"
+            ],
+            "not_verified": [
+              "declined",
+              "failed"
+            ],
+            "not_reached": [
+              "unclear",
+              "wrong_number",
+              "deceased",
+              "no_callback",
+              "callback"
+            ]
+          },
+          "meaning": {
+            "promise": "at least one promise recorded",
+            "paid": "every product noted as already paid",
+            "transferred": "call handed to a person",
+            "no_promise": "verified, no promise recorded",
+            "not_verified": "security check declined or failed",
+            "not_reached": "customer not reached or callback booked"
+          },
+          "promise_recorded": [
+            "promise",
+            null
+          ],
+          "identity_failed": [
+            "not_verified",
+            "failed"
+          ],
+          "callback_booked": [
+            "not_reached",
+            "callback"
+          ],
+          "promise_service_error": [
+            "no_promise",
+            "service_error"
+          ],
+          "refused": [
+            "no_promise",
+            "refused"
+          ],
+          "account_error": [
+            "no_promise",
+            "service_error"
+          ],
+          "transfer": {
+            "general": [
+              "transferred",
+              "human"
+            ],
+            "restructuring": [
+              "transferred",
+              "restructuring"
+            ],
+            "support": [
+              "transferred",
+              "support"
+            ]
+          },
+          "before_verification": [
+            [
+              "not_reached",
+              "unclear"
+            ],
+            [
+              "not_reached",
+              "wrong_number"
+            ],
+            [
+              "not_reached",
+              "deceased"
+            ],
+            [
+              "not_reached",
+              "no_callback"
+            ],
+            [
+              "not_verified",
+              "declined"
+            ],
+            [
+              "not_verified",
+              "failed"
+            ],
+            [
+              "no_promise",
+              "service_error"
+            ]
+          ],
+          "after_verification": [
+            [
+              "no_promise",
+              "refused"
+            ],
+            [
+              "no_promise",
+              "hardship"
+            ],
+            [
+              "no_promise",
+              "dispute"
+            ],
+            [
+              "paid",
+              null
+            ]
+          ],
+          "fallback_before_verification": [
+            "not_reached",
+            "unclear"
+          ],
+          "fallback_after_verification": [
+            "no_promise",
+            "refused"
+          ]
+        },
+        "notes": {
+          "enabled": true,
+          "reasons": [
+            "refused",
+            "hardship",
+            "dispute",
+            "paid",
+            "service_error"
+          ],
+          "service_error_reason": "service_error",
+          "refused_reason": "refused",
+          "reason_for_outcome": {
+            "no_promise": "refused",
+            "transferred": "refused"
+          },
+          "close_from_notes": {
+            "all": {
+              "paid": [
+                "paid",
+                null
+              ]
+            },
+            "else_outcome": "no_promise",
+            "else_reason_from_first_note_not_in": [
+              "paid"
+            ]
+          }
+        },
+        "sentences": {
+          "opening": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with {{first_name}} {{last_name}}?",
+          "identity_failed": "I could not verify your identity. Please visit a branch. Thank you, goodbye.",
+          "after_callback": "The callback is booked. Thank you, goodbye.",
+          "after_transfer": "I am transferring you to a colleague now. Thank you, goodbye.",
+          "verified_ack": "Thank you, your identity is verified.",
+          "debt_intro": "I am calling from Alder Mutual about arrears on your account.",
+          "product_statement": "Your <product> has arrears of <amount> and is <days_late> <days> late.",
+          "first_ask_single": "Can you pay the full arrears today or on the next working day?",
+          "first_ask_multi": "Let us take them one at a time, starting with the first. Can you pay its full arrears today or on the next working day?",
+          "confirm_question": "May I record that commitment?",
+          "promise_recorded": "Your commitment is available in the online portal.",
+          "promise_failed": "I am sorry, I could not record that commitment.",
+          "change_later": "A recorded commitment cannot be changed on this call. Please visit a branch to change it.",
+          "account_error": "I am sorry, I cannot access your account details right now.",
+          "rest_overdue": "Any remainder stays overdue.",
+          "next_product": "Now your <product>.",
+          "anything_else": "Is there anything else?",
+          "goodbye": "Thank you, goodbye."
+        },
+        "note_lines": {
+          "paid": "Payments may take two working days to appear."
+        },
+        "closing_lines": {
+          "not_reached/deceased": "I am sorry for your loss."
+        }
+      },
+      "limitations": "Rules of the brief that this configuration cannot express, or only approximates:\n\n- **O3, two wrong answers end verification:** the engine closes only when the bank reports none left, and the bank allows three. A third attempt can therefore happen.\n- **O3, first refusal closes at once:** I set `security_question.times` to 0. The engine will then also close when the customer merely asks something instead of answering, although O1 wants such questions answered.\n- **O8, floor:** the floor is max(50% of past_due rounded up, minimum_payment or instalment_amount), capped at past_due, and the schema takes only one rule per type. I used 50% for cards and `instalment_amount` for loans; this is a guess and will be wrong whenever the other term is larger.\n- **O4/O8, earliest permitted date:** the 15:00 cut-off for paying today has no setting, and the first ask has no date token. The first ask is worded \"today or on the next working day\", and `check_terms` will not refuse \"today\" after 15:00.\n- **O4, non-working day moves to the preceding working day:** the engine only names the next working day. The preceding-day rule is carried in the `not_business_day` guidance text only. \"End of week\" (Saturday, moved back for holidays) is likewise left to the dialogue model, since no offer uses that date.\n- **O6, sorting:** products are worked in account order, not by days_late descending with product_id ties. The \"first non-paid reason\" for no_promise also follows account order.\n- **O6/O13/O14, per-product recording:** the engine reads back and records once all products are settled, not one product at a time. The portal sentence is spoken once, not after each promise.\n- **O7/O9, persuasion budget:** `attempts` is set to the extra offers (2/1/0). For the second and third product the engine opens directly with attempt 1 (full on the deadline) instead of the initial ask on the earliest date.\n- **O10/O12/O15, notes before a transfer:** the engine never writes notes on a transferred call, so the required refused, hardship and dispute notes are lost.\n- **O14, failed transfer or callback:** \"retry once then close no_promise/service_error\" has no dedicated key. The pair is only listed in `before_verification` for the model to use.\n- **O11, hardship:** the sympathy sentence and the single support offer are left to the dialogue model; the brief gives no fixed wording.\n- **Test values:** the brief gives no example call variables, so `test_variables` are placeholders. `address` is also my choice, taken from the name form in O1.\n\n"
+    },
+    {
+      "session": "219cdc03-73e1-41ac-87f1-273651ddf463",
+      "timestamp": "2026-10-11T13:47:21.249Z",
+      "bank": "Alder Mutual",
+      "spec": {
+        "bank_name": "Alder Mutual",
+        "language": "English",
+        "address": "{{first_name}} {{last_name}}",
+        "call_variables": [
+          "customer_id",
+          "first_name",
+          "last_name",
+          "title",
+          "now"
+        ],
+        "now_variable": "now",
+        "test_variables": {
+          "customer_id": "C-1001",
+          "first_name": "Jane",
+          "last_name": "Doe",
+          "title": "Ms",
+          "now": "2026-10-13T10:00:00"
+        },
+        "calendar": {
+          "weekend_days": [
+            0,
+            6
+          ],
+          "holidays": [
+            "2026-10-16",
+            "2026-10-24",
+            "2026-11-03"
+          ]
+        },
+        "callback": {
+          "include_today": false,
+          "business_days_ahead": 2,
+          "from": "09:15",
+          "to": "12:45",
+          "after_now": true
+        },
+        "identity": {
+          "questions": [
+            {
+              "field": "phone_last4",
+              "kind": "digits",
+              "ask": "What are the last four digits of your phone number?"
+            },
+            {
+              "field": "date_of_birth",
+              "kind": "date",
+              "ask": "What is your date of birth?"
+            }
+          ],
+          "numeric_date_order": "DMY",
+          "response": {
+            "verified": "verified",
+            "all_verified": "all_verified",
+            "left": "wrong_answers_left",
+            "hint": "hint"
+          },
+          "hints": {
+            "day_month_swapped": "This does not count as a wrong answer. Say exactly: \"Could you tell me your date of birth again, saying the month in words?\" Then send the new answer as YYYY-MM-DD."
+          },
+          "wrong_sentence": "That does not match our records."
+        },
+        "opening_limits": {
+          "who_is_speaking": {
+            "times": 1,
+            "say": "Only a clear self-confirmation counts. Ask exactly once more: \"Am I speaking with {{first_name}} {{last_name}}?\"",
+            "close": [
+              "not_reached",
+              "unclear"
+            ]
+          },
+          "security_question": {
+            "times": 0,
+            "say": "Do not explain or persuade and do not ask again: a first refusal to answer a security question closes the call.",
+            "close": [
+              "not_verified",
+              "declined"
+            ]
+          }
+        },
+        "product": {
+          "list_field": "products",
+          "id_field": "product_id",
+          "type_field": "type",
+          "full_field": "past_due",
+          "days_late_field": "days_late",
+          "types": {
+            "credit_card": {
+              "words": "credit card ending <card_last4>",
+              "floor": {
+                "percent_of_full": 50
+              },
+              "floor_name": "minimum acceptable amount"
+            },
+            "personal_loan": {
+              "words": "personal loan",
+              "floor": {
+                "field": "instalment_amount"
+              },
+              "floor_name": "minimum acceptable amount"
+            },
+            "car_loan": {
+              "words": "car loan",
+              "floor": {
+                "field": "instalment_amount"
+              },
+              "floor_name": "minimum acceptable amount"
+            }
+          }
+        },
+        "bands": [
+          {
+            "name": "1-5",
+            "min": 1,
+            "max": 5,
+            "deadline": {
+              "unit": "business_days",
+              "n": 6
+            },
+            "attempts": 2
+          },
+          {
+            "name": "6-15",
+            "min": 6,
+            "max": 15,
+            "deadline": {
+              "unit": "business_days",
+              "n": 4
+            },
+            "attempts": 1
+          },
+          {
+            "name": "16+",
+            "min": 16,
+            "max": null,
+            "deadline": {
+              "unit": "business_days",
+              "n": 2
+            },
+            "attempts": 0
+          }
+        ],
+        "attempt_offers": [
+          {
+            "amount": "full_or_floor",
+            "date": "deadline",
+            "text": "Only an explicit refusal to pay uses up an offer. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+          },
+          {
+            "amount": "floor",
+            "date": "deadline",
+            "text": "This is the last offer for this product. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+          }
+        ],
+        "dates": {
+          "next_weekday": "following_week"
+        },
+        "guidance": {
+          "below_floor": "Reject that amount and offer the <floor_name> of <floor> once. Explain that any remainder stays overdue.",
+          "after_deadline": "That day is after the latest permitted date. Counteroffer <deadline>, explain the change and get the customer's consent before reporting it.",
+          "not_business_day": "That day is not a working day. Do not move it forward to <next>: propose the working day before it, or the earliest permitted date if that would be earlier, explain the change and get the customer's consent.",
+          "too_much": "Could you pay the <floor_name> of <floor>? Any remainder stays overdue.",
+          "callback_outside_first": "Ask once for a replacement: a time from 09:15 to 12:45 on one of the next two working days, not today.",
+          "callback_outside_second": "Do not book a callback. Call wrap_up(\"not_reached\", \"no_callback\")."
+        },
+        "tools": {
+          "verify_identity": {
+            "question": "field",
+            "answer": "answer"
+          },
+          "create_promise": {
+            "product": "product_id",
+            "amount": "amount",
+            "date": "date"
+          },
+          "add_note": {
+            "product": "product_id",
+            "reason": "reason"
+          },
+          "schedule_callback": {
+            "date": "date",
+            "time": "time"
+          },
+          "transfer_to_agent": {
+            "queue": "queue"
+          },
+          "close_call": {
+            "outcome": "outcome",
+            "reason": "reason"
+          }
+        },
+        "response": {
+          "ok": "ok"
+        },
+        "transfer": {
+          "before_verification": []
+        },
+        "outcomes": {
+          "table": {
+            "promise": [],
+            "paid": [],
+            "transferred": [
+              "human",
+              "restructuring",
+              "support"
+            ],
+            "no_promise": [
+              "refused",
+              "hardship",
+              "dispute",
+              "service_error"
+            ],
+            "not_verified": [
+              "declined",
+              "failed"
+            ],
+            "not_reached": [
+              "unclear",
+              "wrong_number",
+              "deceased",
+              "no_callback",
+              "callback"
+            ]
+          },
+          "meaning": {
+            "promise": "at least one promise recorded",
+            "paid": "every product noted as already paid",
+            "transferred": "call handed to a person",
+            "no_promise": "verified customer, no promise recorded",
+            "not_verified": "security check declined or failed",
+            "not_reached": "customer not on the line"
+          },
+          "promise_recorded": [
+            "promise",
+            null
+          ],
+          "identity_failed": [
+            "not_verified",
+            "failed"
+          ],
+          "callback_booked": [
+            "not_reached",
+            "callback"
+          ],
+          "promise_service_error": [
+            "no_promise",
+            "service_error"
+          ],
+          "refused": [
+            "no_promise",
+            "refused"
+          ],
+          "account_error": [
+            "no_promise",
+            "service_error"
+          ],
+          "transfer": {
+            "general": [
+              "transferred",
+              "human"
+            ],
+            "restructuring": [
+              "transferred",
+              "restructuring"
+            ],
+            "support": [
+              "transferred",
+              "support"
+            ]
+          },
+          "before_verification": [
+            [
+              "not_reached",
+              "unclear"
+            ],
+            [
+              "not_reached",
+              "wrong_number"
+            ],
+            [
+              "not_reached",
+              "deceased"
+            ],
+            [
+              "not_reached",
+              "no_callback"
+            ],
+            [
+              "not_verified",
+              "declined"
+            ],
+            [
+              "not_verified",
+              "failed"
+            ],
+            [
+              "no_promise",
+              "service_error"
+            ]
+          ],
+          "after_verification": [
+            [
+              "no_promise",
+              "refused"
+            ],
+            [
+              "no_promise",
+              "hardship"
+            ],
+            [
+              "no_promise",
+              "dispute"
+            ],
+            [
+              "paid",
+              null
+            ]
+          ],
+          "fallback_before_verification": [
+            "not_reached",
+            "unclear"
+          ],
+          "fallback_after_verification": [
+            "no_promise",
+            "refused"
+          ]
+        },
+        "notes": {
+          "enabled": true,
+          "reasons": [
+            "refused",
+            "hardship",
+            "dispute",
+            "paid",
+            "service_error"
+          ],
+          "service_error_reason": "service_error",
+          "refused_reason": "refused",
+          "reason_for_outcome": {
+            "no_promise": "refused",
+            "transferred": "refused"
+          },
+          "close_from_notes": {
+            "all": {
+              "paid": [
+                "paid",
+                null
+              ]
+            },
+            "else_outcome": "no_promise",
+            "else_reason_from_first_note_not_in": [
+              "paid"
+            ]
+          }
+        },
+        "sentences": {
+          "opening": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with {{first_name}} {{last_name}}?",
+          "identity_failed": "I could not verify your identity. Please visit a branch. Thank you for your time. Goodbye.",
+          "after_callback": "The callback is booked. Thank you for your time. Goodbye.",
+          "after_transfer": "I am transferring you to a colleague now. Thank you for your time. Goodbye.",
+          "verified_ack": "Thank you, your identity is verified.",
+          "debt_intro": "I am calling from Alder Mutual about arrears on your account.",
+          "product_statement": "Your <product> has arrears of <amount> and is <days_late> <days> late.",
+          "first_ask_single": "Can you pay the full arrears today, or on the next working day if payment today is no longer possible?",
+          "first_ask_multi": "Let us take these one at a time, starting with the first one I mentioned. Can you pay its full arrears today, or on the next working day if payment today is no longer possible?",
+          "confirm_question": "May I record that commitment?",
+          "promise_recorded": "Your commitment is available in the online portal.",
+          "promise_failed": "I am sorry, I could not record that commitment.",
+          "change_later": "A recorded commitment cannot be changed on this call. Please visit a branch to change it.",
+          "account_error": "I am sorry, I cannot access your account right now.",
+          "rest_overdue": "Any remainder stays overdue.",
+          "next_product": "Now your <product>.",
+          "anything_else": "Is there anything else?",
+          "goodbye": "Thank you for your time. Goodbye."
+        },
+        "note_lines": {
+          "paid": "Payments may take two working days to appear."
+        },
+        "closing_lines": {
+          "not_reached/deceased": "I am sorry for your loss."
+        }
+      },
+      "limitations": ""
+    },
+    {
+      "session": "7cbcfa2d-10b8-4b2a-b853-145498c934b3",
+      "timestamp": "2026-10-11T14:19:29.566Z",
+      "bank": "Cedar Cooperative",
+      "spec": {
+        "bank_name": "Cedar Cooperative",
+        "language": "English",
+        "address": "{{first_name}} {{last_name}}",
+        "call_variables": [
+          "customer_id",
+          "first_name",
+          "last_name",
+          "title",
+          "now"
+        ],
+        "now_variable": "now",
+        "test_variables": {
+          "customer_id": "CUST-0001",
+          "first_name": "Alex",
+          "last_name": "Morgan",
+          "title": "Ms",
+          "now": "2026-10-12T10:00:00"
+        },
+        "calendar": {
+          "weekend_days": [
+            5,
+            6
+          ],
+          "holidays": [
+            "2026-10-19",
+            "2026-11-02"
+          ]
+        },
+        "callback": {
+          "include_today": false,
+          "business_days_ahead": 1,
+          "from": "10:20",
+          "to": "14:40",
+          "after_now": false
+        },
+        "identity": {
+          "questions": [
+            {
+              "field": "membership_word",
+              "kind": "text",
+              "ask": "What is your membership word?"
+            },
+            {
+              "field": "postal_code",
+              "kind": "text",
+              "ask": "What is your postal code?"
+            },
+            {
+              "field": "birth_year",
+              "kind": "digits",
+              "ask": "What is your year of birth?"
+            }
+          ],
+          "numeric_date_order": "DMY",
+          "response": {
+            "verified": "payload.challenge_passed",
+            "all_verified": "payload.fully_authenticated",
+            "left": "payload.remaining_for_challenge",
+            "hint": null
+          },
+          "hints": {},
+          "wrong_sentence": "That does not match our records."
+        },
+        "opening_limits": {
+          "who_is_speaking": {
+            "times": 1,
+            "say": "Ask exactly once more: \"Am I speaking with {{first_name}} {{last_name}}?\"",
+            "close": [
+              "unreachable",
+              "unknown_recipient"
+            ]
+          },
+          "security_question": {
+            "times": 0,
+            "say": "Say: \"I need this answer to confirm your identity before I can continue.\" Then ask the same security question again.",
+            "close": [
+              "unverified",
+              "withheld"
+            ]
+          }
+        },
+        "product": {
+          "list_field": "payload.facilities",
+          "id_field": "facility_key",
+          "type_field": "kind",
+          "full_field": "overdue_total",
+          "days_late_field": "late_days",
+          "types": {
+            "revolving": {
+              "words": "revolving credit",
+              "floor": {
+                "percent_of_full": 60
+              },
+              "floor_name": "minimum accepted amount"
+            },
+            "equipment": {
+              "words": "equipment finance",
+              "floor": {
+                "percent_of_full": 60
+              },
+              "floor_name": "minimum accepted amount"
+            }
+          }
+        },
+        "bands": [
+          {
+            "name": "1-9",
+            "min": 1,
+            "max": 9,
+            "deadline": {
+              "unit": "business_days",
+              "n": 4
+            },
+            "attempts": 1
+          },
+          {
+            "name": "10-29",
+            "min": 10,
+            "max": 29,
+            "deadline": {
+              "unit": "business_days",
+              "n": 2
+            },
+            "attempts": 1
+          },
+          {
+            "name": "30+",
+            "min": 30,
+            "max": null,
+            "deadline": {
+              "unit": "business_days",
+              "n": 1
+            },
+            "attempts": 1
+          }
+        ],
+        "attempt_offers": [
+          {
+            "amount": "full",
+            "date": "deadline"
+          }
+        ],
+        "dates": {
+          "next_weekday": "following_week"
+        },
+        "guidance": {
+          "below_floor": "That amount is below the <floor_name> of <floor>. Tell the customer the lowest amount that can be accepted is <floor> and ask for at least that; do not offer any plan or discount.",
+          "after_deadline": "That day is after the latest possible date, <deadline>. Ask for a business day from today through <deadline>.",
+          "not_business_day": "That day is not a business day. Propose <next> instead and continue only if the customer agrees.",
+          "too_much": "Say exactly: \"The minimum accepted amount is <floor>. Could you pay <floor>?\" Offer this once only, with no plan or discount.",
+          "callback_outside_first": "A callback is only possible tomorrow, or on the next business day if tomorrow is closed, between 10:20 and 14:40. Ask once for a corrected day and time.",
+          "callback_outside_second": "The corrected day or time is also outside the window, so no callback can be booked. Say so and call wrap_up(\"unreachable\", \"unknown_recipient\")."
+        },
+        "tools": {
+          "verify_identity": {
+            "question": "request.challenge",
+            "answer": "request.response_text"
+          },
+          "create_promise": {
+            "product": "request.facility_key",
+            "amount": "request.committed_sum",
+            "date": "request.due_on"
+          },
+          "add_note": {
+            "product": "request.facility_key",
+            "reason": "request.note_code"
+          },
+          "schedule_callback": {
+            "date": "request.return_day",
+            "time": "request.return_time"
+          },
+          "transfer_to_agent": {
+            "queue": "request.destination"
+          },
+          "close_call": {
+            "outcome": "request.resolution",
+            "reason": "request.explanation"
+          }
+        },
+        "response": {
+          "ok": "result.state"
+        },
+        "transfer": {
+          "before_verification": [
+            "desk"
+          ]
+        },
+        "outcomes": {
+          "table": {
+            "saved": [],
+            "settled": [],
+            "escalated": [
+              "person",
+              "plan",
+              "care"
+            ],
+            "unresolved": [
+              "decline",
+              "vulnerability",
+              "ownership_question",
+              "write_failure"
+            ],
+            "unverified": [
+              "mismatch",
+              "withheld"
+            ],
+            "unreachable": [
+              "bad_contact",
+              "bereaved",
+              "unknown_recipient",
+              "return_call"
+            ]
+          },
+          "meaning": {
+            "saved": "at least one promise recorded",
+            "settled": "every facility noted as already paid",
+            "escalated": "call transferred to a queue",
+            "unresolved": "verified, no promise recorded, not all settled",
+            "unverified": "security check failed or refused",
+            "unreachable": "customer not reached, or callback booked"
+          },
+          "promise_recorded": [
+            "saved",
+            null
+          ],
+          "identity_failed": [
+            "unverified",
+            "mismatch"
+          ],
+          "callback_booked": [
+            "unreachable",
+            "return_call"
+          ],
+          "promise_service_error": [
+            "unresolved",
+            "write_failure"
+          ],
+          "refused": [
+            "unresolved",
+            "decline"
+          ],
+          "account_error": [
+            "unresolved",
+            "write_failure"
+          ],
+          "transfer": {
+            "desk": [
+              "escalated",
+              "person"
+            ],
+            "arrangements": [
+              "escalated",
+              "plan"
+            ],
+            "care": [
+              "escalated",
+              "care"
+            ]
+          },
+          "before_verification": [
+            [
+              "unreachable",
+              "bad_contact"
+            ],
+            [
+              "unreachable",
+              "bereaved"
+            ],
+            [
+              "unreachable",
+              "unknown_recipient"
+            ],
+            [
+              "unverified",
+              "mismatch"
+            ],
+            [
+              "unverified",
+              "withheld"
+            ]
+          ],
+          "after_verification": [
+            [
+              "settled",
+              null
+            ],
+            [
+              "unresolved",
+              "decline"
+            ],
+            [
+              "unresolved",
+              "vulnerability"
+            ],
+            [
+              "unresolved",
+              "ownership_question"
+            ]
+          ],
+          "fallback_before_verification": [
+            "unreachable",
+            "unknown_recipient"
+          ],
+          "fallback_after_verification": [
+            "unresolved",
+            "decline"
+          ]
+        },
+        "notes": {
+          "enabled": true,
+          "reasons": [
+            "decline",
+            "vulnerability",
+            "ownership_question",
+            "settled_claim",
+            "write_failure"
+          ],
+          "service_error_reason": "write_failure",
+          "refused_reason": "decline",
+          "reason_for_outcome": {
+            "settled": "settled_claim",
+            "unresolved": "decline"
+          },
+          "close_from_notes": {
+            "all": {
+              "settled_claim": [
+                "settled",
+                null
+              ]
+            },
+            "else_outcome": "unresolved",
+            "else_reason_from_first_note_not_in": [
+              "settled_claim"
+            ]
+          }
+        },
+        "sentences": {
+          "opening": "Hello, this is Cedar Cooperative's automated assistant, and this call is recorded. Am I speaking with {{first_name}} {{last_name}}?",
+          "identity_failed": "Please contact your local office. Thank you for your time. Goodbye.",
+          "after_callback": "Your callback has been arranged. Thank you for your time. Goodbye.",
+          "after_transfer": "I am transferring you to a colleague now. Thank you for your time. Goodbye.",
+          "verified_ack": "Thank you, your identity is confirmed.",
+          "debt_intro": "I am calling from Cedar Cooperative about overdue payments on your account.",
+          "product_statement": "Your <product> has <amount> overdue and is <days_late> <days> late.",
+          "first_ask_single": "Can you pay the full amount today?",
+          "first_ask_multi": "We will take them one at a time, starting with the first. Can you pay its full amount today?",
+          "confirm_question": "Is that correct?",
+          "promise_recorded": "You can review this agreement at your local office.",
+          "promise_failed": "I am sorry, I could not save your agreement.",
+          "change_later": "A saved agreement cannot be changed on this call. Please contact your local office.",
+          "account_error": "I am sorry, I cannot access your account right now. Please contact your local office.",
+          "rest_overdue": "",
+          "next_product": "Now your <product>.",
+          "anything_else": "Is there anything else I can help you with?",
+          "goodbye": "Thank you for your time. Goodbye."
+        },
+        "note_lines": {
+          "settled_claim": "Payments take three working days to appear."
+        },
+        "closing_lines": {
+          "unverified/withheld": "Please contact your local office."
+        }
+      },
+      "limitations": "Rules I could not express, or had to approximate:\n\n- **Nested fields**: the API wraps everything in `request`, `payload` and `result`, so I wrote field names as dotted paths (`request.challenge`, `payload.facilities`, `result.state`). If the engine resolves bare names, strip the prefixes.\n- **Success flag**: success is `result.state` equal to `\"ACCEPTED\"`, not a boolean, so `response.ok` only points at that field.\n- **Customer id**: `member_token` must carry `customer_id`, but it has a different name and the configuration has no mapping for it.\n- **Sorting (C5)**: sorting by `urgency_rank`, then `facility_key`, has no key, and neither does the 1\u20133 facilities limit. Two facilities of the same kind get the same spoken name.\n- **Record each immediately (C5/C6)**: the engine reads back and records only after all products are settled.\n- **Notes on transfer (C7)**: the brief wants existing notes kept and decline notes added for the other unresolved facilities, but the engine writes no notes on a transferred call.\n- **Hardship (C7)**: sympathy, no persuasion, one care-queue offer and then a vulnerability note have no guidance key. So do the ownership-dispute flow, the relative-may-only-book-a-callback rule and the bereavement sympathy.\n- **Dates (C4)**: \"end of week = Friday of the current week, moved back for a holiday\" and \"ask for an exact day on vague dates\" have no key. `dates.next_weekday` is my choice; the brief is silent.\n- **Persuasion count (C3)**: I mapped the initial full-amount offer today to the first ask and the one extra offer to a single attempt on the deadline. A later product therefore starts directly with its deadline offer.\n- **Second invalid callback**: the brief gives no outcome for this, so I used unreachable/unknown_recipient, which is also the fallback before verification.\n- **Account error**: the brief has no rule, so I used the service-error pair unresolved/write_failure.\n- **Transfers before verification**: the brief does not limit this explicitly; I allowed only `desk`, since only the human request is \"immediate\".\n- **Mixed notes at close (C8)**: I treated a settled_claim facility as resolved, so it is skipped when picking the unresolved reason.\n- **Test values**: the brief gives no example call variables, so `test_variables` are placeholders.\n- **Hints and dates**: the API has no hint field (`hint` is null) and there is no date question (`numeric_date_order` is a default).\n\n"
+    },
+    {
+      "session": "370b9498-6a0a-4694-a066-97540b0aea7b",
+      "timestamp": "2026-10-11T14:19:30.661Z",
+      "bank": "Cedar Cooperative",
+      "spec": {
+        "bank_name": "Cedar Cooperative",
+        "language": "English",
+        "address": "{{first_name}} {{last_name}}",
+        "call_variables": [
+          "customer_id",
+          "first_name",
+          "last_name",
+          "title",
+          "now"
+        ],
+        "now_variable": "now",
+        "test_variables": {
+          "customer_id": "CED-0001",
+          "first_name": "Alex",
+          "last_name": "Morgan",
+          "title": "Ms",
+          "now": "2026-10-12T11:00:00"
+        },
+        "calendar": {
+          "weekend_days": [
+            5,
+            6
+          ],
+          "holidays": [
+            "2026-10-19",
+            "2026-11-02"
+          ]
+        },
+        "callback": {
+          "include_today": false,
+          "business_days_ahead": 1,
+          "from": "10:20",
+          "to": "14:40",
+          "after_now": false
+        },
+        "identity": {
+          "questions": [
+            {
+              "field": "membership_word",
+              "kind": "text",
+              "ask": "What is your membership word?"
+            },
+            {
+              "field": "postal_code",
+              "kind": "text",
+              "ask": "What is your postal code?"
+            },
+            {
+              "field": "birth_year",
+              "kind": "digits",
+              "ask": "What is your year of birth?"
+            }
+          ],
+          "numeric_date_order": "DMY",
+          "response": {
+            "verified": "payload.challenge_passed",
+            "all_verified": "payload.fully_authenticated",
+            "left": "payload.remaining_for_challenge",
+            "hint": null
+          },
+          "hints": {},
+          "wrong_sentence": "That does not match our records."
+        },
+        "opening_limits": {
+          "who_is_speaking": {
+            "times": 1,
+            "say": "Ask exactly once more: \"Am I speaking with {{first_name}} {{last_name}}?\"",
+            "close": [
+              "unreachable",
+              "unknown_recipient"
+            ]
+          },
+          "security_question": {
+            "times": 0,
+            "say": "Say exactly: \"I need this answer to confirm your identity before we can continue.\" Then ask the same security question again.",
+            "close": [
+              "unverified",
+              "withheld"
+            ]
+          }
+        },
+        "product": {
+          "list_field": "payload.facilities",
+          "id_field": "facility_key",
+          "type_field": "kind",
+          "full_field": "overdue_total",
+          "days_late_field": "late_days",
+          "types": {
+            "revolving": {
+              "words": "revolving credit",
+              "floor": {
+                "percent_of_full": 60
+              },
+              "floor_name": "minimum amount"
+            },
+            "equipment": {
+              "words": "equipment finance",
+              "floor": {
+                "percent_of_full": 60
+              },
+              "floor_name": "minimum amount"
+            }
+          }
+        },
+        "bands": [
+          {
+            "name": "1-9",
+            "min": 1,
+            "max": 9,
+            "deadline": {
+              "unit": "business_days",
+              "n": 4
+            },
+            "attempts": 2
+          },
+          {
+            "name": "10-29",
+            "min": 10,
+            "max": 29,
+            "deadline": {
+              "unit": "business_days",
+              "n": 2
+            },
+            "attempts": 2
+          },
+          {
+            "name": "30+",
+            "min": 30,
+            "max": null,
+            "deadline": {
+              "unit": "business_days",
+              "n": 1
+            },
+            "attempts": 2
+          }
+        ],
+        "attempt_offers": [
+          {
+            "amount": "full",
+            "date": "today",
+            "text": "Do not offer any plan or discount. If the customer names a vague date, ask for an exact day. \"End of week\" means Friday of the current week, moved back to the previous business day if that Friday is a holiday."
+          },
+          {
+            "amount": "full",
+            "date": "deadline",
+            "text": "This is the one extra offer. Do not offer any plan or discount."
+          }
+        ],
+        "dates": {
+          "next_weekday": "next_occurrence"
+        },
+        "guidance": {
+          "below_floor": "The lowest amount that can be accepted is the <floor_name> of <floor>. Ask whether the customer can pay at least <floor>; do not offer any plan or discount.",
+          "after_deadline": "The latest possible date is <deadline>. Ask the customer for a business day from today through <deadline>.",
+          "not_business_day": "That day is not a business day. Ask the customer whether <next> is acceptable instead, and report it only with their consent.",
+          "too_much": "Could you pay the <floor_name> of <floor>?",
+          "callback_outside_first": "A callback is only possible on the next business day between 10:20 and 14:40. Ask once for a corrected day or time.",
+          "callback_outside_second": "The corrected day or time is still outside the callback window. Do not ask again; call wrap_up(\"unreachable\", \"unknown_recipient\")."
+        },
+        "tools": {
+          "verify_identity": {
+            "question": "request.challenge",
+            "answer": "request.response_text"
+          },
+          "create_promise": {
+            "product": "request.facility_key",
+            "amount": "request.committed_sum",
+            "date": "request.due_on"
+          },
+          "add_note": {
+            "product": "request.facility_key",
+            "reason": "request.note_code"
+          },
+          "schedule_callback": {
+            "date": "request.return_day",
+            "time": "request.return_time"
+          },
+          "transfer_to_agent": {
+            "queue": "request.destination"
+          },
+          "close_call": {
+            "outcome": "request.resolution",
+            "reason": "request.explanation"
+          }
+        },
+        "response": {
+          "ok": "result.state"
+        },
+        "transfer": {
+          "before_verification": []
+        },
+        "outcomes": {
+          "table": {
+            "saved": [],
+            "settled": [],
+            "escalated": [
+              "person",
+              "plan",
+              "care"
+            ],
+            "unresolved": [
+              "decline",
+              "vulnerability",
+              "ownership_question",
+              "settled_claim",
+              "write_failure"
+            ],
+            "unverified": [
+              "mismatch",
+              "withheld"
+            ],
+            "unreachable": [
+              "bad_contact",
+              "bereaved",
+              "unknown_recipient",
+              "return_call"
+            ]
+          },
+          "meaning": {
+            "saved": "at least one promise was recorded",
+            "settled": "every facility was noted as already paid",
+            "escalated": "the call was transferred to a queue",
+            "unresolved": "verified customer, no promise recorded",
+            "unverified": "the security check failed or was refused",
+            "unreachable": "the customer was not reached, or a callback was booked"
+          },
+          "promise_recorded": [
+            "saved",
+            null
+          ],
+          "identity_failed": [
+            "unverified",
+            "mismatch"
+          ],
+          "callback_booked": [
+            "unreachable",
+            "return_call"
+          ],
+          "promise_service_error": [
+            "unresolved",
+            "write_failure"
+          ],
+          "refused": [
+            "unresolved",
+            "decline"
+          ],
+          "account_error": [
+            "unresolved",
+            "write_failure"
+          ],
+          "transfer": {
+            "desk": [
+              "escalated",
+              "person"
+            ],
+            "arrangements": [
+              "escalated",
+              "plan"
+            ],
+            "care": [
+              "escalated",
+              "care"
+            ]
+          },
+          "before_verification": [
+            [
+              "unreachable",
+              "bad_contact"
+            ],
+            [
+              "unreachable",
+              "bereaved"
+            ],
+            [
+              "unreachable",
+              "unknown_recipient"
+            ],
+            [
+              "unverified",
+              "withheld"
+            ],
+            [
+              "unverified",
+              "mismatch"
+            ]
+          ],
+          "after_verification": [
+            [
+              "settled",
+              null
+            ],
+            [
+              "unresolved",
+              "decline"
+            ],
+            [
+              "unresolved",
+              "vulnerability"
+            ],
+            [
+              "unresolved",
+              "ownership_question"
+            ],
+            [
+              "unresolved",
+              "settled_claim"
+            ]
+          ],
+          "fallback_before_verification": [
+            "unreachable",
+            "unknown_recipient"
+          ],
+          "fallback_after_verification": [
+            "unresolved",
+            "decline"
+          ]
+        },
+        "notes": {
+          "enabled": true,
+          "reasons": [
+            "decline",
+            "vulnerability",
+            "ownership_question",
+            "settled_claim",
+            "write_failure"
+          ],
+          "service_error_reason": "write_failure",
+          "refused_reason": "decline",
+          "reason_for_outcome": {
+            "settled": "settled_claim",
+            "unresolved": "decline"
+          },
+          "close_from_notes": {
+            "all": {
+              "settled_claim": [
+                "settled",
+                null
+              ]
+            },
+            "else_outcome": "unresolved",
+            "else_reason_from_first_note_not_in": []
+          }
+        },
+        "sentences": {
+          "opening": "Hello, this is Cedar Cooperative. I am an automated assistant and this call is recorded. Am I speaking with {{first_name}} {{last_name}}?",
+          "identity_failed": "Please contact your local office. Thank you, goodbye.",
+          "after_callback": "Your callback has been booked. Thank you, goodbye.",
+          "after_transfer": "I am transferring you to a colleague now. Thank you, goodbye.",
+          "verified_ack": "Thank you, your identity is confirmed.",
+          "debt_intro": "I am calling from Cedar Cooperative about overdue payments on your account.",
+          "product_statement": "Your <product> has <amount> overdue and is <days_late> <days> late.",
+          "first_ask_single": "Can we arrange payment of this amount now?",
+          "first_ask_multi": "We will take these one at a time, starting with the first. Can we arrange payment of that amount now?",
+          "confirm_question": "Is that correct?",
+          "promise_recorded": "You can review this agreement at your local office.",
+          "promise_failed": "I am sorry, your agreement could not be saved.",
+          "change_later": "A saved agreement cannot be changed on this call. Please contact your local office.",
+          "account_error": "I am sorry, I cannot access your account details right now.",
+          "rest_overdue": "",
+          "next_product": "Now your <product>.",
+          "anything_else": "Is there anything else I can help you with?",
+          "goodbye": "Thank you, goodbye."
+        },
+        "note_lines": {
+          "settled_claim": "Payments take three working days to show."
+        },
+        "closing_lines": {
+          "unverified/withheld": "Please contact your local office.",
+          "unreachable/bereaved": "I am very sorry for your loss."
+        }
+      },
+      "limitations": "Rules I could not express, or had to approximate, in this configuration:\n\n- **Request envelope:** every body field sits inside `request`, and `customer_id` travels as `member_token`. I wrote the tool fields as dotted paths (`request.challenge`); the config has no slot for the `member_token` mapping.\n- **Success flag:** success is `result.state` equal to `\"ACCEPTED\"`, not a boolean. `response.ok` can only name the field, so the engine must compare the value.\n- **No hint field:** `verify_identity` returns no hint, so `hint` is null and `hints` is empty.\n- **Sort order (C5):** sorting facilities by `urgency_rank` and then `facility_key` has no slot, and neither does the limit of 1\u20133 facilities.\n- **Record each immediately (C5/C6):** the engine reads back and records once all products are settled, not product by product.\n- **Offers (C3):** I set two attempts per band, full today and then full on the deadline, with a neutral first question. If the engine counts the first question as an offer, the first facility gets one offer too many.\n- **Notes on transfer (C7):** the engine writes no notes on a transferred call, so \"retain existing notes, add decline notes\" cannot be done.\n- **Transfer overrides saved (C8):** this is already the engine's order.\n- **Hardship and model-led cases (C7):** there is no slot for \"sympathy, no persuasion, offer care queue once\", nor for the ownership-dispute and already-paid handling beyond the note line.\n- **End of week (C4):** \"Friday of the current week, moved back for a holiday\" and \"ask for an exact day on vague dates\" have no slot; I put them in the first attempt's `text`.\n- **Invalid callback twice (C4):** the brief names no closing code, so I assumed `unreachable/unknown_recipient`.\n- **Security refusal (C2):** one refusal ends the call, so `times` is 0 and the `say` text is never used.\n- **Invented values:** the brief gives no example call variables, so `test_variables` are made up. It does not define \"next Friday\", so `next_occurrence` is my choice. `postal_code` is set to `text` in case codes are alphanumeric.\n- **Bereavement (C1):** the brief asks for sympathy but gives no wording; I added a closing line so it is always said.\n\n"
+    },
+    {
+      "session": "ca76048c-a148-4efb-aaff-b0ebc7b7ea18",
+      "timestamp": "2026-10-11T14:21:02.496Z",
+      "bank": "Cedar Cooperative",
+      "spec": {
+        "bank_name": "Cedar Cooperative",
+        "language": "English",
+        "address": "{{first_name}} {{last_name}}",
+        "call_variables": [
+          "customer_id",
+          "first_name",
+          "last_name",
+          "title",
+          "now"
+        ],
+        "now_variable": "now",
+        "test_variables": {
+          "customer_id": "CUST-0001",
+          "first_name": "Alex",
+          "last_name": "Morgan",
+          "title": "Ms",
+          "now": "2026-10-12T10:00:00"
+        },
+        "calendar": {
+          "weekend_days": [
+            5,
+            6
+          ],
+          "holidays": [
+            "2026-10-19",
+            "2026-11-02"
+          ]
+        },
+        "callback": {
+          "include_today": false,
+          "business_days_ahead": 1,
+          "from": "10:20",
+          "to": "14:40",
+          "after_now": false
+        },
+        "identity": {
+          "questions": [
+            {
+              "field": "membership_word",
+              "kind": "text",
+              "ask": "What is your membership word?"
+            },
+            {
+              "field": "postal_code",
+              "kind": "text",
+              "ask": "What is your postal code?"
+            },
+            {
+              "field": "birth_year",
+              "kind": "digits",
+              "ask": "What is your year of birth?"
+            }
+          ],
+          "numeric_date_order": "DMY",
+          "response": {
+            "verified": "payload.challenge_passed",
+            "all_verified": "payload.fully_authenticated",
+            "left": "payload.remaining_for_challenge",
+            "hint": null
+          },
+          "hints": {},
+          "wrong_sentence": "That does not match our records."
+        },
+        "opening_limits": {
+          "who_is_speaking": {
+            "times": 1,
+            "say": "Ask exactly once more: \"Am I speaking with {{first_name}} {{last_name}}?\"",
+            "close": [
+              "unreachable",
+              "unknown_recipient"
+            ]
+          },
+          "security_question": {
+            "times": 0,
+            "say": "Say: \"I need this answer to confirm your identity before I can continue.\" Then ask the same security question again.",
+            "close": [
+              "unverified",
+              "withheld"
+            ]
+          }
+        },
+        "product": {
+          "list_field": "payload.facilities",
+          "id_field": "facility_key",
+          "type_field": "kind",
+          "full_field": "overdue_total",
+          "days_late_field": "late_days",
+          "types": {
+            "revolving": {
+              "words": "revolving credit",
+              "floor": {
+                "percent_of_full": 60
+              },
+              "floor_name": "minimum accepted amount"
+            },
+            "equipment": {
+              "words": "equipment finance",
+              "floor": {
+                "percent_of_full": 60
+              },
+              "floor_name": "minimum accepted amount"
+            }
+          }
+        },
+        "bands": [
+          {
+            "name": "1-9",
+            "min": 1,
+            "max": 9,
+            "deadline": {
+              "unit": "business_days",
+              "n": 4
+            },
+            "attempts": 1
+          },
+          {
+            "name": "10-29",
+            "min": 10,
+            "max": 29,
+            "deadline": {
+              "unit": "business_days",
+              "n": 2
+            },
+            "attempts": 1
+          },
+          {
+            "name": "30+",
+            "min": 30,
+            "max": null,
+            "deadline": {
+              "unit": "business_days",
+              "n": 1
+            },
+            "attempts": 1
+          }
+        ],
+        "attempt_offers": [
+          {
+            "amount": "full",
+            "date": "deadline"
+          }
+        ],
+        "dates": {
+          "next_weekday": "following_week"
+        },
+        "guidance": {
+          "below_floor": "That amount is below the <floor_name> of <floor>. Tell the customer the lowest amount that can be accepted is <floor> and ask for at least that; do not offer any plan or discount.",
+          "after_deadline": "That day is after the latest possible date, <deadline>. Ask for a business day from today through <deadline>.",
+          "not_business_day": "That day is not a business day. Propose <next> instead and continue only if the customer agrees.",
+          "too_much": "Say exactly: \"The minimum accepted amount is <floor>. Could you pay <floor>?\" Offer this once only, with no plan or discount.",
+          "callback_outside_first": "A callback is only possible tomorrow, or on the next business day if tomorrow is closed, between 10:20 and 14:40. Ask once for a corrected day and time.",
+          "callback_outside_second": "The corrected day or time is also outside the window, so no callback can be booked. Say so and call wrap_up(\"unreachable\", \"unknown_recipient\")."
+        },
+        "tools": {
+          "verify_identity": {
+            "question": "request.challenge",
+            "answer": "request.response_text"
+          },
+          "create_promise": {
+            "product": "request.facility_key",
+            "amount": "request.committed_sum",
+            "date": "request.due_on"
+          },
+          "add_note": {
+            "product": "request.facility_key",
+            "reason": "request.note_code"
+          },
+          "schedule_callback": {
+            "date": "request.return_day",
+            "time": "request.return_time"
+          },
+          "transfer_to_agent": {
+            "queue": "request.destination"
+          },
+          "close_call": {
+            "outcome": "request.resolution",
+            "reason": "request.explanation"
+          }
+        },
+        "response": {
+          "ok": "result.state"
+        },
+        "transfer": {
+          "before_verification": []
+        },
+        "outcomes": {
+          "table": {
+            "saved": [],
+            "settled": [],
+            "escalated": [
+              "person",
+              "plan",
+              "care"
+            ],
+            "unresolved": [
+              "decline",
+              "vulnerability",
+              "ownership_question",
+              "write_failure"
+            ],
+            "unverified": [
+              "mismatch",
+              "withheld"
+            ],
+            "unreachable": [
+              "bad_contact",
+              "bereaved",
+              "unknown_recipient",
+              "return_call"
+            ]
+          },
+          "meaning": {
+            "saved": "at least one promise recorded",
+            "settled": "every facility noted as already paid",
+            "escalated": "call transferred to a queue",
+            "unresolved": "verified, no promise recorded, not all settled",
+            "unverified": "security check failed or refused",
+            "unreachable": "customer not reached, or callback booked"
+          },
+          "promise_recorded": [
+            "saved",
+            null
+          ],
+          "identity_failed": [
+            "unverified",
+            "mismatch"
+          ],
+          "callback_booked": [
+            "unreachable",
+            "return_call"
+          ],
+          "promise_service_error": [
+            "unresolved",
+            "write_failure"
+          ],
+          "refused": [
+            "unresolved",
+            "decline"
+          ],
+          "account_error": [
+            "unresolved",
+            "write_failure"
+          ],
+          "transfer": {
+            "desk": [
+              "escalated",
+              "person"
+            ],
+            "arrangements": [
+              "escalated",
+              "plan"
+            ],
+            "care": [
+              "escalated",
+              "care"
+            ]
+          },
+          "before_verification": [
+            [
+              "unreachable",
+              "bad_contact"
+            ],
+            [
+              "unreachable",
+              "bereaved"
+            ],
+            [
+              "unreachable",
+              "unknown_recipient"
+            ],
+            [
+              "unverified",
+              "mismatch"
+            ],
+            [
+              "unverified",
+              "withheld"
+            ]
+          ],
+          "after_verification": [
+            [
+              "settled",
+              null
+            ],
+            [
+              "unresolved",
+              "decline"
+            ],
+            [
+              "unresolved",
+              "vulnerability"
+            ],
+            [
+              "unresolved",
+              "ownership_question"
+            ]
+          ],
+          "fallback_before_verification": [
+            "unreachable",
+            "unknown_recipient"
+          ],
+          "fallback_after_verification": [
+            "unresolved",
+            "decline"
+          ]
+        },
+        "notes": {
+          "enabled": true,
+          "reasons": [
+            "decline",
+            "vulnerability",
+            "ownership_question",
+            "settled_claim",
+            "write_failure"
+          ],
+          "service_error_reason": "write_failure",
+          "refused_reason": "decline",
+          "reason_for_outcome": {
+            "settled": "settled_claim",
+            "unresolved": "decline"
+          },
+          "close_from_notes": {
+            "all": {
+              "settled_claim": [
+                "settled",
+                null
+              ]
+            },
+            "else_outcome": "unresolved",
+            "else_reason_from_first_note_not_in": [
+              "settled_claim"
+            ]
+          }
+        },
+        "sentences": {
+          "opening": "Hello, this is Cedar Cooperative's automated assistant, and this call is recorded. Am I speaking with {{first_name}} {{last_name}}?",
+          "identity_failed": "Please contact your local office. Thank you for your time. Goodbye.",
+          "after_callback": "Your callback has been arranged. Thank you for your time. Goodbye.",
+          "after_transfer": "I am transferring you to a colleague now. Thank you for your time. Goodbye.",
+          "verified_ack": "Thank you, your identity is confirmed.",
+          "debt_intro": "I am calling from Cedar Cooperative about overdue payments on your account.",
+          "product_statement": "Your <product> has <amount> overdue and is <days_late> <days> late.",
+          "first_ask_single": "Can you pay the full amount today?",
+          "first_ask_multi": "We will take them one at a time, starting with the first. Can you pay its full amount today?",
+          "confirm_question": "Is that correct?",
+          "promise_recorded": "You can review this agreement at your local office.",
+          "promise_failed": "I am sorry, I could not save your agreement.",
+          "change_later": "A saved agreement cannot be changed on this call. Please contact your local office.",
+          "account_error": "I am sorry, I cannot access your account right now. Please contact your local office.",
+          "rest_overdue": "",
+          "next_product": "Now your <product>.",
+          "anything_else": "Is there anything else I can help you with?",
+          "goodbye": "Thank you for your time. Goodbye."
+        },
+        "note_lines": {
+          "settled_claim": "Payments take three working days."
+        },
+        "closing_lines": {
+          "unverified/withheld": "Please contact your local office."
+        }
+      },
+      "limitations": ""
+    }
+  ],
+  "adjacent_differences": [
+    {
+      "from": "aa179e67-ec02-4398-95eb-3ea69701004e",
+      "to": "18149152-cfbd-40eb-acf1-42caf9cc17a7",
+      "differences": [
+        [
+          "/attempt_offers/0/text",
+          "Never offer a waiver, a discount, a new instalment plan or an amount above the arrears.",
+          null
+        ],
+        [
+          "/attempt_offers/1/text",
+          "Never offer a waiver, a discount, a new instalment plan or an amount above the arrears.",
+          null
+        ],
+        [
+          "/calendar/weekend_days/0",
+          6,
+          0
+        ],
+        [
+          "/calendar/weekend_days/1",
+          0,
+          6
+        ],
+        [
+          "/guidance/after_deadline",
+          "That day is after the latest permitted date. Counteroffer <deadline> and record it only with the customer's consent.",
+          "That day is after the latest allowed date. Counteroffer <deadline> and get the customer's consent before reporting it."
+        ],
+        [
+          "/guidance/below_floor",
+          "Reject the amount and offer the <floor_name> of <floor> once, explaining that any remainder stays overdue. Never offer a waiver, a discount or a new instalment plan.",
+          "Reject that amount and offer the <floor_name> of <floor> once, explaining that any remainder stays overdue. Never offer a waiver, discount or new instalment plan."
+        ],
+        [
+          "/guidance/callback_outside_first",
+          "Ask once for a replacement: a time from 09:15 to 12:45 on one of the next two working days, not today.",
+          "Ask once for a replacement: a callback must be on one of the next two working days (Tuesday to Saturday, not today), between 09:15 and 12:45."
+        ],
+        [
+          "/guidance/callback_outside_second",
+          "Do not book a callback. Call wrap_up(\"not_reached\", \"no_callback\").",
+          "Do not ask again. Call wrap_up(\"not_reached\", \"no_callback\")."
+        ],
+        [
+          "/guidance/not_business_day",
+          "That day is not a working day. Explain this and propose the preceding working day if it is not earlier than the earliest permitted date, otherwise <next>; never move the date without the customer's consent.",
+          "That day is not a working day. Explain this and propose the preceding working day, unless it is earlier than the earliest permitted date (today only on a working day before 15:00, otherwise the next working day), in which case propose the earliest permitted date; get consent and never move a date silently."
+        ],
+        [
+          "/guidance/too_much",
+          "You could pay the <floor_name> of <floor> instead. Any remainder stays overdue.",
+          "Say exactly: \"You could pay the <floor_name> of <floor> instead. Any remainder stays overdue. Could you pay that?\""
+        ],
+        [
+          "/identity/hints/day_month_swapped",
+          "This does not count as a wrong answer. Say exactly: \"Could you tell me your date of birth again, with the month in words?\" Then send the new answer as YYYY-MM-DD.",
+          "This does not count as a wrong answer. Say exactly: \"Could you tell me your date of birth again, saying the month in words?\" and then send the new answer."
+        ],
+        [
+          "/notes/reason_for_outcome/transferred",
+          "refused",
+          null
+        ],
+        [
+          "/opening_limits/security_question/say",
+          "Not used: a first refusal to answer a security question closes the call at once, with no explanation and no second ask.",
+          "Do not explain or persuade and do not ask again: a first refusal to answer a security question ends the call."
+        ],
+        [
+          "/outcomes/after_verification/0/0",
+          "paid",
+          "no_promise"
+        ],
+        [
+          "/outcomes/after_verification/0/1",
+          null,
+          "refused"
+        ],
+        [
+          "/outcomes/after_verification/1/1",
+          "refused",
+          "hardship"
+        ],
+        [
+          "/outcomes/after_verification/2/1",
+          "hardship",
+          "dispute"
+        ],
+        [
+          "/outcomes/after_verification/3/0",
+          "no_promise",
+          "paid"
+        ],
+        [
+          "/outcomes/after_verification/3/1",
+          "dispute",
+          null
+        ],
+        [
+          "/outcomes/meaning/no_promise",
+          "verified, no promise recorded",
+          "verified customer, no promise recorded"
+        ],
+        [
+          "/product/types/car_loan/floor/field",
+          null,
+          "instalment_amount"
+        ],
+        [
+          "/product/types/car_loan/floor/percent_of_full",
+          50,
+          null
+        ],
+        [
+          "/product/types/car_loan/floor_name",
+          "minimum amount",
+          "minimum acceptable amount"
+        ],
+        [
+          "/product/types/credit_card/floor_name",
+          "minimum amount",
+          "minimum acceptable amount"
+        ],
+        [
+          "/product/types/personal_loan/floor/field",
+          null,
+          "instalment_amount"
+        ],
+        [
+          "/product/types/personal_loan/floor/percent_of_full",
+          50,
+          null
+        ],
+        [
+          "/product/types/personal_loan/floor_name",
+          "minimum amount",
+          "minimum acceptable amount"
+        ],
+        [
+          "/sentences/after_callback",
+          "Your callback is booked. Thank you for your time. Goodbye.",
+          "The callback is booked. Thank you, goodbye."
+        ],
+        [
+          "/sentences/after_transfer",
+          "I am transferring you to a colleague now. Thank you for your time. Goodbye.",
+          "I am transferring you to a colleague now. Thank you, goodbye."
+        ],
+        [
+          "/sentences/first_ask_multi",
+          "We will take them one at a time, starting with the first one I mentioned. Can you pay its full arrears today, or on the next working day if today is no longer possible?",
+          "We will take them one at a time, starting with the first. Can you pay its full amount today, or on the next working day?"
+        ],
+        [
+          "/sentences/first_ask_single",
+          "Can you pay the full arrears today, or on the next working day if today is no longer possible?",
+          "Can you pay the full amount today, or on the next working day?"
+        ],
+        [
+          "/sentences/goodbye",
+          "Thank you for your time. Goodbye.",
+          "Thank you, goodbye."
+        ],
+        [
+          "/sentences/identity_failed",
+          "I could not verify your identity. Please visit a branch. Thank you for your time. Goodbye.",
+          "I could not verify your identity, so I cannot continue this call. Please visit a branch. Thank you, goodbye."
+        ],
+        [
+          "/sentences/promise_failed",
+          "I am sorry, I could not record your commitment.",
+          "I am sorry, I could not record that commitment."
+        ],
+        [
+          "/test_variables/customer_id",
+          "TEST-0001",
+          "C-1001"
+        ],
+        [
+          "/test_variables/last_name",
+          "Doe",
+          "Miller"
+        ],
+        [
+          "/test_variables/now",
+          "2026-10-13T10:00:00",
+          "2026-10-13T10:30:00"
+        ]
+      ]
+    },
+    {
+      "from": "18149152-cfbd-40eb-acf1-42caf9cc17a7",
+      "to": "be960fa1-3359-4a58-a4eb-d9b73621c118",
+      "differences": [
+        [
+          "/attempt_offers/0/text",
+          null,
+          "Only an explicit refusal to pay uses up an offer. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+        ],
+        [
+          "/attempt_offers/1/text",
+          null,
+          "This is the last offer for this product. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+        ],
+        [
+          "/guidance/after_deadline",
+          "That day is after the latest allowed date. Counteroffer <deadline> and get the customer's consent before reporting it.",
+          "That day is after the latest permitted date. Counteroffer <deadline>, explain the change and get the customer's consent before reporting it."
+        ],
+        [
+          "/guidance/below_floor",
+          "Reject that amount and offer the <floor_name> of <floor> once, explaining that any remainder stays overdue. Never offer a waiver, discount or new instalment plan.",
+          "Reject that amount and offer the <floor_name> of <floor> once. Explain that any remainder stays overdue."
+        ],
+        [
+          "/guidance/callback_outside_first",
+          "Ask once for a replacement: a callback must be on one of the next two working days (Tuesday to Saturday, not today), between 09:15 and 12:45.",
+          "Ask once for a replacement: a time from 09:15 to 12:45 on one of the next two working days, not today."
+        ],
+        [
+          "/guidance/callback_outside_second",
+          "Do not ask again. Call wrap_up(\"not_reached\", \"no_callback\").",
+          "Do not book a callback. Call wrap_up(\"not_reached\", \"no_callback\")."
+        ],
+        [
+          "/guidance/not_business_day",
+          "That day is not a working day. Explain this and propose the preceding working day, unless it is earlier than the earliest permitted date (today only on a working day before 15:00, otherwise the next working day), in which case propose the earliest permitted date; get consent and never move a date silently.",
+          "That day is not a working day. Do not move it forward to <next>: propose the working day before it, or the earliest permitted date if that would be earlier, explain the change and get the customer's consent."
+        ],
+        [
+          "/guidance/too_much",
+          "Say exactly: \"You could pay the <floor_name> of <floor> instead. Any remainder stays overdue. Could you pay that?\"",
+          "Could you pay the <floor_name> of <floor>? Any remainder stays overdue."
+        ],
+        [
+          "/identity/hints/day_month_swapped",
+          "This does not count as a wrong answer. Say exactly: \"Could you tell me your date of birth again, saying the month in words?\" and then send the new answer.",
+          "This does not count as a wrong answer. Say exactly: \"Could you tell me your date of birth again, saying the month in words?\" Then send the new answer as YYYY-MM-DD."
+        ],
+        [
+          "/notes/reason_for_outcome/transferred",
+          null,
+          "refused"
+        ],
+        [
+          "/opening_limits/security_question/say",
+          "Do not explain or persuade and do not ask again: a first refusal to answer a security question ends the call.",
+          "Do not explain or persuade and do not ask the security question again: a first refusal to answer closes the call. Say: \"I cannot continue without the security check.\""
+        ],
+        [
+          "/outcomes/after_verification/0/0",
+          "no_promise",
+          "paid"
+        ],
+        [
+          "/outcomes/after_verification/0/1",
+          "refused",
+          null
+        ],
+        [
+          "/outcomes/after_verification/1/1",
+          "hardship",
+          "refused"
+        ],
+        [
+          "/outcomes/after_verification/2/1",
+          "dispute",
+          "hardship"
+        ],
+        [
+          "/outcomes/after_verification/3/0",
+          "paid",
+          "no_promise"
+        ],
+        [
+          "/outcomes/after_verification/3/1",
+          null,
+          "dispute"
+        ],
+        [
+          "/sentences/after_callback",
+          "The callback is booked. Thank you, goodbye.",
+          "The callback is booked. Thank you for your time. Goodbye."
+        ],
+        [
+          "/sentences/after_transfer",
+          "I am transferring you to a colleague now. Thank you, goodbye.",
+          "I am transferring you to a colleague now. Thank you for your time. Goodbye."
+        ],
+        [
+          "/sentences/first_ask_multi",
+          "We will take them one at a time, starting with the first. Can you pay its full amount today, or on the next working day?",
+          "Let us take these one at a time, starting with the first one I mentioned. Can you pay its full arrears today, or on the next working day if payment today is no longer possible?"
+        ],
+        [
+          "/sentences/first_ask_single",
+          "Can you pay the full amount today, or on the next working day?",
+          "Can you pay the full arrears today, or on the next working day if payment today is no longer possible?"
+        ],
+        [
+          "/sentences/goodbye",
+          "Thank you, goodbye.",
+          "Thank you for your time. Goodbye."
+        ],
+        [
+          "/sentences/identity_failed",
+          "I could not verify your identity, so I cannot continue this call. Please visit a branch. Thank you, goodbye.",
+          "I could not verify your identity. Please visit a branch. Thank you for your time. Goodbye."
+        ],
+        [
+          "/test_variables/last_name",
+          "Miller",
+          "Doe"
+        ],
+        [
+          "/test_variables/now",
+          "2026-10-13T10:30:00",
+          "2026-10-13T10:00:00"
+        ]
+      ]
+    },
+    {
+      "from": "be960fa1-3359-4a58-a4eb-d9b73621c118",
+      "to": "21ae3538-61bc-47d0-b326-cc73cf0baa98",
+      "differences": [
+        [
+          "/attempt_offers/0/text",
+          "Only an explicit refusal to pay uses up an offer. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears.",
+          "Only an explicit refusal to pay counts as a refusal. A question, silence, a proposed date, a proposed amount or \"not today\" is not a refusal: answer the question or ask for clarification. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+        ],
+        [
+          "/calendar/weekend_days/0",
+          0,
+          6
+        ],
+        [
+          "/calendar/weekend_days/1",
+          6,
+          0
+        ],
+        [
+          "/guidance/after_deadline",
+          "That day is after the latest permitted date. Counteroffer <deadline>, explain the change and get the customer's consent before reporting it.",
+          "That day is after the latest possible date. Counteroffer <deadline>, explain the change and report it only after the customer agrees to it."
+        ],
+        [
+          "/guidance/below_floor",
+          "Reject that amount and offer the <floor_name> of <floor> once. Explain that any remainder stays overdue.",
+          "Reject that amount and offer the floor once: say the <floor_name> for this product is <floor> and that any remainder stays overdue. Accept any amount from <floor> up to the full arrears."
+        ],
+        [
+          "/guidance/callback_outside_first",
+          "Ask once for a replacement: a time from 09:15 to 12:45 on one of the next two working days, not today.",
+          "Say that a callback is possible only on one of the next two working days, not today, between 09:15 and 12:45, and ask once for another day or time."
+        ],
+        [
+          "/guidance/callback_outside_second",
+          "Do not book a callback. Call wrap_up(\"not_reached\", \"no_callback\").",
+          "Do not ask again. Call wrap_up(\"not_reached\", \"no_callback\")."
+        ],
+        [
+          "/guidance/not_business_day",
+          "That day is not a working day. Do not move it forward to <next>: propose the working day before it, or the earliest permitted date if that would be earlier, explain the change and get the customer's consent.",
+          "That day is not a working day. Offer the preceding working day if it is not earlier than the earliest permitted date, otherwise the earliest permitted date (the next working day is <next>); explain the change and get the customer's consent, never move a date silently."
+        ],
+        [
+          "/guidance/too_much",
+          "Could you pay the <floor_name> of <floor>? Any remainder stays overdue.",
+          "Could you pay <floor>, the <floor_name>? Any remainder stays overdue."
+        ],
+        [
+          "/opening_limits/security_question/say",
+          "Do not explain or persuade and do not ask the security question again: a first refusal to answer closes the call. Say: \"I cannot continue without the security check.\"",
+          "Do not explain or persuade and do not ask again: a first refusal to answer a security question closes the call."
+        ],
+        [
+          "/opening_limits/who_is_speaking/say",
+          "Ask exactly once more: \"Am I speaking with {{first_name}} {{last_name}}?\"",
+          "Only a clear self-confirmation counts. Ask exactly once more: \"Am I speaking with {{first_name}} {{last_name}}?\""
+        ],
+        [
+          "/outcomes/after_verification/0/0",
+          "paid",
+          "no_promise"
+        ],
+        [
+          "/outcomes/after_verification/0/1",
+          null,
+          "refused"
+        ],
+        [
+          "/outcomes/after_verification/1/1",
+          "refused",
+          "hardship"
+        ],
+        [
+          "/outcomes/after_verification/2/1",
+          "hardship",
+          "dispute"
+        ],
+        [
+          "/outcomes/after_verification/3/0",
+          "no_promise",
+          "paid"
+        ],
+        [
+          "/outcomes/after_verification/3/1",
+          "dispute",
+          null
+        ],
+        [
+          "/outcomes/meaning/no_promise",
+          "verified customer, no promise recorded",
+          "verified, no promise recorded"
+        ],
+        [
+          "/outcomes/meaning/not_reached",
+          "customer not on the line",
+          "customer not reached or callback booked"
+        ],
+        [
+          "/product/types/car_loan/floor_name",
+          "minimum acceptable amount",
+          "lowest amount that can be recorded"
+        ],
+        [
+          "/product/types/credit_card/floor_name",
+          "minimum acceptable amount",
+          "lowest amount that can be recorded"
+        ],
+        [
+          "/product/types/personal_loan/floor_name",
+          "minimum acceptable amount",
+          "lowest amount that can be recorded"
+        ],
+        [
+          "/sentences/account_error",
+          "I am sorry, I cannot access your account right now.",
+          "I am sorry, I cannot access your account details right now."
+        ],
+        [
+          "/sentences/after_callback",
+          "The callback is booked. Thank you for your time. Goodbye.",
+          "The callback is booked. Thank you, goodbye."
+        ],
+        [
+          "/sentences/after_transfer",
+          "I am transferring you to a colleague now. Thank you for your time. Goodbye.",
+          "I am transferring you to a colleague now. Thank you, goodbye."
+        ],
+        [
+          "/sentences/first_ask_multi",
+          "Let us take these one at a time, starting with the first one I mentioned. Can you pay its full arrears today, or on the next working day if payment today is no longer possible?",
+          "Let us take them one at a time, starting with the first. Can you pay its full arrears today or on the next working day?"
+        ],
+        [
+          "/sentences/first_ask_single",
+          "Can you pay the full arrears today, or on the next working day if payment today is no longer possible?",
+          "Can you pay the full arrears today or on the next working day?"
+        ],
+        [
+          "/sentences/goodbye",
+          "Thank you for your time. Goodbye.",
+          "Thank you, goodbye."
+        ],
+        [
+          "/sentences/identity_failed",
+          "I could not verify your identity. Please visit a branch. Thank you for your time. Goodbye.",
+          "I could not verify your identity. Please visit a branch. Thank you, goodbye."
+        ],
+        [
+          "/test_variables/customer_id",
+          "C-1001",
+          "C-0001"
+        ]
+      ]
+    },
+    {
+      "from": "21ae3538-61bc-47d0-b326-cc73cf0baa98",
+      "to": "219cdc03-73e1-41ac-87f1-273651ddf463",
+      "differences": [
+        [
+          "/attempt_offers/0/text",
+          "Only an explicit refusal to pay counts as a refusal. A question, silence, a proposed date, a proposed amount or \"not today\" is not a refusal: answer the question or ask for clarification. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears.",
+          "Only an explicit refusal to pay uses up an offer. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+        ],
+        [
+          "/calendar/weekend_days/0",
+          6,
+          0
+        ],
+        [
+          "/calendar/weekend_days/1",
+          0,
+          6
+        ],
+        [
+          "/guidance/after_deadline",
+          "That day is after the latest possible date. Counteroffer <deadline>, explain the change and report it only after the customer agrees to it.",
+          "That day is after the latest permitted date. Counteroffer <deadline>, explain the change and get the customer's consent before reporting it."
+        ],
+        [
+          "/guidance/below_floor",
+          "Reject that amount and offer the floor once: say the <floor_name> for this product is <floor> and that any remainder stays overdue. Accept any amount from <floor> up to the full arrears.",
+          "Reject that amount and offer the <floor_name> of <floor> once. Explain that any remainder stays overdue."
+        ],
+        [
+          "/guidance/callback_outside_first",
+          "Say that a callback is possible only on one of the next two working days, not today, between 09:15 and 12:45, and ask once for another day or time.",
+          "Ask once for a replacement: a time from 09:15 to 12:45 on one of the next two working days, not today."
+        ],
+        [
+          "/guidance/callback_outside_second",
+          "Do not ask again. Call wrap_up(\"not_reached\", \"no_callback\").",
+          "Do not book a callback. Call wrap_up(\"not_reached\", \"no_callback\")."
+        ],
+        [
+          "/guidance/not_business_day",
+          "That day is not a working day. Offer the preceding working day if it is not earlier than the earliest permitted date, otherwise the earliest permitted date (the next working day is <next>); explain the change and get the customer's consent, never move a date silently.",
+          "That day is not a working day. Do not move it forward to <next>: propose the working day before it, or the earliest permitted date if that would be earlier, explain the change and get the customer's consent."
+        ],
+        [
+          "/guidance/too_much",
+          "Could you pay <floor>, the <floor_name>? Any remainder stays overdue.",
+          "Could you pay the <floor_name> of <floor>? Any remainder stays overdue."
+        ],
+        [
+          "/outcomes/meaning/no_promise",
+          "verified, no promise recorded",
+          "verified customer, no promise recorded"
+        ],
+        [
+          "/outcomes/meaning/not_reached",
+          "customer not reached or callback booked",
+          "customer not on the line"
+        ],
+        [
+          "/product/types/car_loan/floor_name",
+          "lowest amount that can be recorded",
+          "minimum acceptable amount"
+        ],
+        [
+          "/product/types/credit_card/floor_name",
+          "lowest amount that can be recorded",
+          "minimum acceptable amount"
+        ],
+        [
+          "/product/types/personal_loan/floor_name",
+          "lowest amount that can be recorded",
+          "minimum acceptable amount"
+        ],
+        [
+          "/sentences/account_error",
+          "I am sorry, I cannot access your account details right now.",
+          "I am sorry, I cannot access your account right now."
+        ],
+        [
+          "/sentences/after_callback",
+          "The callback is booked. Thank you, goodbye.",
+          "The callback is booked. Thank you for your time. Goodbye."
+        ],
+        [
+          "/sentences/after_transfer",
+          "I am transferring you to a colleague now. Thank you, goodbye.",
+          "I am transferring you to a colleague now. Thank you for your time. Goodbye."
+        ],
+        [
+          "/sentences/first_ask_multi",
+          "Let us take them one at a time, starting with the first. Can you pay its full arrears today or on the next working day?",
+          "Let us take these one at a time, starting with the first one I mentioned. Can you pay its full arrears today, or on the next working day if payment today is no longer possible?"
+        ],
+        [
+          "/sentences/first_ask_single",
+          "Can you pay the full arrears today or on the next working day?",
+          "Can you pay the full arrears today, or on the next working day if payment today is no longer possible?"
+        ],
+        [
+          "/sentences/goodbye",
+          "Thank you, goodbye.",
+          "Thank you for your time. Goodbye."
+        ],
+        [
+          "/sentences/identity_failed",
+          "I could not verify your identity. Please visit a branch. Thank you, goodbye.",
+          "I could not verify your identity. Please visit a branch. Thank you for your time. Goodbye."
+        ],
+        [
+          "/test_variables/customer_id",
+          "C-0001",
+          "C-1001"
+        ]
+      ]
+    },
+    {
+      "from": "7cbcfa2d-10b8-4b2a-b853-145498c934b3",
+      "to": "370b9498-6a0a-4694-a066-97540b0aea7b",
+      "differences": [
+        [
+          "/attempt_offers",
+          [
+            {
+              "amount": "full",
+              "date": "deadline"
+            }
+          ],
+          [
+            {
+              "amount": "full",
+              "date": "today",
+              "text": "Do not offer any plan or discount. If the customer names a vague date, ask for an exact day. \"End of week\" means Friday of the current week, moved back to the previous business day if that Friday is a holiday."
+            },
+            {
+              "amount": "full",
+              "date": "deadline",
+              "text": "This is the one extra offer. Do not offer any plan or discount."
+            }
+          ]
+        ],
+        [
+          "/bands/0/attempts",
+          1,
+          2
+        ],
+        [
+          "/bands/1/attempts",
+          1,
+          2
+        ],
+        [
+          "/bands/2/attempts",
+          1,
+          2
+        ],
+        [
+          "/closing_lines/unreachable/bereaved",
+          null,
+          "I am very sorry for your loss."
+        ],
+        [
+          "/dates/next_weekday",
+          "following_week",
+          "next_occurrence"
+        ],
+        [
+          "/guidance/after_deadline",
+          "That day is after the latest possible date, <deadline>. Ask for a business day from today through <deadline>.",
+          "The latest possible date is <deadline>. Ask the customer for a business day from today through <deadline>."
+        ],
+        [
+          "/guidance/below_floor",
+          "That amount is below the <floor_name> of <floor>. Tell the customer the lowest amount that can be accepted is <floor> and ask for at least that; do not offer any plan or discount.",
+          "The lowest amount that can be accepted is the <floor_name> of <floor>. Ask whether the customer can pay at least <floor>; do not offer any plan or discount."
+        ],
+        [
+          "/guidance/callback_outside_first",
+          "A callback is only possible tomorrow, or on the next business day if tomorrow is closed, between 10:20 and 14:40. Ask once for a corrected day and time.",
+          "A callback is only possible on the next business day between 10:20 and 14:40. Ask once for a corrected day or time."
+        ],
+        [
+          "/guidance/callback_outside_second",
+          "The corrected day or time is also outside the window, so no callback can be booked. Say so and call wrap_up(\"unreachable\", \"unknown_recipient\").",
+          "The corrected day or time is still outside the callback window. Do not ask again; call wrap_up(\"unreachable\", \"unknown_recipient\")."
+        ],
+        [
+          "/guidance/not_business_day",
+          "That day is not a business day. Propose <next> instead and continue only if the customer agrees.",
+          "That day is not a business day. Ask the customer whether <next> is acceptable instead, and report it only with their consent."
+        ],
+        [
+          "/guidance/too_much",
+          "Say exactly: \"The minimum accepted amount is <floor>. Could you pay <floor>?\" Offer this once only, with no plan or discount.",
+          "Could you pay the <floor_name> of <floor>?"
+        ],
+        [
+          "/note_lines/settled_claim",
+          "Payments take three working days to appear.",
+          "Payments take three working days to show."
+        ],
+        [
+          "/notes/close_from_notes/else_reason_from_first_note_not_in",
+          [
+            "settled_claim"
+          ],
+          []
+        ],
+        [
+          "/opening_limits/security_question/say",
+          "Say: \"I need this answer to confirm your identity before I can continue.\" Then ask the same security question again.",
+          "Say exactly: \"I need this answer to confirm your identity before we can continue.\" Then ask the same security question again."
+        ],
+        [
+          "/outcomes/after_verification",
+          [
+            [
+              "settled",
+              null
+            ],
+            [
+              "unresolved",
+              "decline"
+            ],
+            [
+              "unresolved",
+              "vulnerability"
+            ],
+            [
+              "unresolved",
+              "ownership_question"
+            ]
+          ],
+          [
+            [
+              "settled",
+              null
+            ],
+            [
+              "unresolved",
+              "decline"
+            ],
+            [
+              "unresolved",
+              "vulnerability"
+            ],
+            [
+              "unresolved",
+              "ownership_question"
+            ],
+            [
+              "unresolved",
+              "settled_claim"
+            ]
+          ]
+        ],
+        [
+          "/outcomes/before_verification/3/1",
+          "mismatch",
+          "withheld"
+        ],
+        [
+          "/outcomes/before_verification/4/1",
+          "withheld",
+          "mismatch"
+        ],
+        [
+          "/outcomes/meaning/escalated",
+          "call transferred to a queue",
+          "the call was transferred to a queue"
+        ],
+        [
+          "/outcomes/meaning/saved",
+          "at least one promise recorded",
+          "at least one promise was recorded"
+        ],
+        [
+          "/outcomes/meaning/settled",
+          "every facility noted as already paid",
+          "every facility was noted as already paid"
+        ],
+        [
+          "/outcomes/meaning/unreachable",
+          "customer not reached, or callback booked",
+          "the customer was not reached, or a callback was booked"
+        ],
+        [
+          "/outcomes/meaning/unresolved",
+          "verified, no promise recorded, not all settled",
+          "verified customer, no promise recorded"
+        ],
+        [
+          "/outcomes/meaning/unverified",
+          "security check failed or refused",
+          "the security check failed or was refused"
+        ],
+        [
+          "/outcomes/table/unresolved",
+          [
+            "decline",
+            "vulnerability",
+            "ownership_question",
+            "write_failure"
+          ],
+          [
+            "decline",
+            "vulnerability",
+            "ownership_question",
+            "settled_claim",
+            "write_failure"
+          ]
+        ],
+        [
+          "/product/types/equipment/floor_name",
+          "minimum accepted amount",
+          "minimum amount"
+        ],
+        [
+          "/product/types/revolving/floor_name",
+          "minimum accepted amount",
+          "minimum amount"
+        ],
+        [
+          "/sentences/account_error",
+          "I am sorry, I cannot access your account right now. Please contact your local office.",
+          "I am sorry, I cannot access your account details right now."
+        ],
+        [
+          "/sentences/after_callback",
+          "Your callback has been arranged. Thank you for your time. Goodbye.",
+          "Your callback has been booked. Thank you, goodbye."
+        ],
+        [
+          "/sentences/after_transfer",
+          "I am transferring you to a colleague now. Thank you for your time. Goodbye.",
+          "I am transferring you to a colleague now. Thank you, goodbye."
+        ],
+        [
+          "/sentences/first_ask_multi",
+          "We will take them one at a time, starting with the first. Can you pay its full amount today?",
+          "We will take these one at a time, starting with the first. Can we arrange payment of that amount now?"
+        ],
+        [
+          "/sentences/first_ask_single",
+          "Can you pay the full amount today?",
+          "Can we arrange payment of this amount now?"
+        ],
+        [
+          "/sentences/goodbye",
+          "Thank you for your time. Goodbye.",
+          "Thank you, goodbye."
+        ],
+        [
+          "/sentences/identity_failed",
+          "Please contact your local office. Thank you for your time. Goodbye.",
+          "Please contact your local office. Thank you, goodbye."
+        ],
+        [
+          "/sentences/opening",
+          "Hello, this is Cedar Cooperative's automated assistant, and this call is recorded. Am I speaking with {{first_name}} {{last_name}}?",
+          "Hello, this is Cedar Cooperative. I am an automated assistant and this call is recorded. Am I speaking with {{first_name}} {{last_name}}?"
+        ],
+        [
+          "/sentences/promise_failed",
+          "I am sorry, I could not save your agreement.",
+          "I am sorry, your agreement could not be saved."
+        ],
+        [
+          "/test_variables/customer_id",
+          "CUST-0001",
+          "CED-0001"
+        ],
+        [
+          "/test_variables/now",
+          "2026-10-12T10:00:00",
+          "2026-10-12T11:00:00"
+        ],
+        [
+          "/transfer/before_verification",
+          [
+            "desk"
+          ],
+          []
+        ]
+      ]
+    },
+    {
+      "from": "370b9498-6a0a-4694-a066-97540b0aea7b",
+      "to": "ca76048c-a148-4efb-aaff-b0ebc7b7ea18",
+      "differences": [
+        [
+          "/attempt_offers",
+          [
+            {
+              "amount": "full",
+              "date": "today",
+              "text": "Do not offer any plan or discount. If the customer names a vague date, ask for an exact day. \"End of week\" means Friday of the current week, moved back to the previous business day if that Friday is a holiday."
+            },
+            {
+              "amount": "full",
+              "date": "deadline",
+              "text": "This is the one extra offer. Do not offer any plan or discount."
+            }
+          ],
+          [
+            {
+              "amount": "full",
+              "date": "deadline"
+            }
+          ]
+        ],
+        [
+          "/bands/0/attempts",
+          2,
+          1
+        ],
+        [
+          "/bands/1/attempts",
+          2,
+          1
+        ],
+        [
+          "/bands/2/attempts",
+          2,
+          1
+        ],
+        [
+          "/closing_lines/unreachable/bereaved",
+          "I am very sorry for your loss.",
+          null
+        ],
+        [
+          "/dates/next_weekday",
+          "next_occurrence",
+          "following_week"
+        ],
+        [
+          "/guidance/after_deadline",
+          "The latest possible date is <deadline>. Ask the customer for a business day from today through <deadline>.",
+          "That day is after the latest possible date, <deadline>. Ask for a business day from today through <deadline>."
+        ],
+        [
+          "/guidance/below_floor",
+          "The lowest amount that can be accepted is the <floor_name> of <floor>. Ask whether the customer can pay at least <floor>; do not offer any plan or discount.",
+          "That amount is below the <floor_name> of <floor>. Tell the customer the lowest amount that can be accepted is <floor> and ask for at least that; do not offer any plan or discount."
+        ],
+        [
+          "/guidance/callback_outside_first",
+          "A callback is only possible on the next business day between 10:20 and 14:40. Ask once for a corrected day or time.",
+          "A callback is only possible tomorrow, or on the next business day if tomorrow is closed, between 10:20 and 14:40. Ask once for a corrected day and time."
+        ],
+        [
+          "/guidance/callback_outside_second",
+          "The corrected day or time is still outside the callback window. Do not ask again; call wrap_up(\"unreachable\", \"unknown_recipient\").",
+          "The corrected day or time is also outside the window, so no callback can be booked. Say so and call wrap_up(\"unreachable\", \"unknown_recipient\")."
+        ],
+        [
+          "/guidance/not_business_day",
+          "That day is not a business day. Ask the customer whether <next> is acceptable instead, and report it only with their consent.",
+          "That day is not a business day. Propose <next> instead and continue only if the customer agrees."
+        ],
+        [
+          "/guidance/too_much",
+          "Could you pay the <floor_name> of <floor>?",
+          "Say exactly: \"The minimum accepted amount is <floor>. Could you pay <floor>?\" Offer this once only, with no plan or discount."
+        ],
+        [
+          "/note_lines/settled_claim",
+          "Payments take three working days to show.",
+          "Payments take three working days."
+        ],
+        [
+          "/notes/close_from_notes/else_reason_from_first_note_not_in",
+          [],
+          [
+            "settled_claim"
+          ]
+        ],
+        [
+          "/opening_limits/security_question/say",
+          "Say exactly: \"I need this answer to confirm your identity before we can continue.\" Then ask the same security question again.",
+          "Say: \"I need this answer to confirm your identity before I can continue.\" Then ask the same security question again."
+        ],
+        [
+          "/outcomes/after_verification",
+          [
+            [
+              "settled",
+              null
+            ],
+            [
+              "unresolved",
+              "decline"
+            ],
+            [
+              "unresolved",
+              "vulnerability"
+            ],
+            [
+              "unresolved",
+              "ownership_question"
+            ],
+            [
+              "unresolved",
+              "settled_claim"
+            ]
+          ],
+          [
+            [
+              "settled",
+              null
+            ],
+            [
+              "unresolved",
+              "decline"
+            ],
+            [
+              "unresolved",
+              "vulnerability"
+            ],
+            [
+              "unresolved",
+              "ownership_question"
+            ]
+          ]
+        ],
+        [
+          "/outcomes/before_verification/3/1",
+          "withheld",
+          "mismatch"
+        ],
+        [
+          "/outcomes/before_verification/4/1",
+          "mismatch",
+          "withheld"
+        ],
+        [
+          "/outcomes/meaning/escalated",
+          "the call was transferred to a queue",
+          "call transferred to a queue"
+        ],
+        [
+          "/outcomes/meaning/saved",
+          "at least one promise was recorded",
+          "at least one promise recorded"
+        ],
+        [
+          "/outcomes/meaning/settled",
+          "every facility was noted as already paid",
+          "every facility noted as already paid"
+        ],
+        [
+          "/outcomes/meaning/unreachable",
+          "the customer was not reached, or a callback was booked",
+          "customer not reached, or callback booked"
+        ],
+        [
+          "/outcomes/meaning/unresolved",
+          "verified customer, no promise recorded",
+          "verified, no promise recorded, not all settled"
+        ],
+        [
+          "/outcomes/meaning/unverified",
+          "the security check failed or was refused",
+          "security check failed or refused"
+        ],
+        [
+          "/outcomes/table/unresolved",
+          [
+            "decline",
+            "vulnerability",
+            "ownership_question",
+            "settled_claim",
+            "write_failure"
+          ],
+          [
+            "decline",
+            "vulnerability",
+            "ownership_question",
+            "write_failure"
+          ]
+        ],
+        [
+          "/product/types/equipment/floor_name",
+          "minimum amount",
+          "minimum accepted amount"
+        ],
+        [
+          "/product/types/revolving/floor_name",
+          "minimum amount",
+          "minimum accepted amount"
+        ],
+        [
+          "/sentences/account_error",
+          "I am sorry, I cannot access your account details right now.",
+          "I am sorry, I cannot access your account right now. Please contact your local office."
+        ],
+        [
+          "/sentences/after_callback",
+          "Your callback has been booked. Thank you, goodbye.",
+          "Your callback has been arranged. Thank you for your time. Goodbye."
+        ],
+        [
+          "/sentences/after_transfer",
+          "I am transferring you to a colleague now. Thank you, goodbye.",
+          "I am transferring you to a colleague now. Thank you for your time. Goodbye."
+        ],
+        [
+          "/sentences/first_ask_multi",
+          "We will take these one at a time, starting with the first. Can we arrange payment of that amount now?",
+          "We will take them one at a time, starting with the first. Can you pay its full amount today?"
+        ],
+        [
+          "/sentences/first_ask_single",
+          "Can we arrange payment of this amount now?",
+          "Can you pay the full amount today?"
+        ],
+        [
+          "/sentences/goodbye",
+          "Thank you, goodbye.",
+          "Thank you for your time. Goodbye."
+        ],
+        [
+          "/sentences/identity_failed",
+          "Please contact your local office. Thank you, goodbye.",
+          "Please contact your local office. Thank you for your time. Goodbye."
+        ],
+        [
+          "/sentences/opening",
+          "Hello, this is Cedar Cooperative. I am an automated assistant and this call is recorded. Am I speaking with {{first_name}} {{last_name}}?",
+          "Hello, this is Cedar Cooperative's automated assistant, and this call is recorded. Am I speaking with {{first_name}} {{last_name}}?"
+        ],
+        [
+          "/sentences/promise_failed",
+          "I am sorry, your agreement could not be saved.",
+          "I am sorry, I could not save your agreement."
+        ],
+        [
+          "/test_variables/customer_id",
+          "CED-0001",
+          "CUST-0001"
+        ],
+        [
+          "/test_variables/now",
+          "2026-10-12T11:00:00",
+          "2026-10-12T10:00:00"
+        ]
+      ]
+    }
+  ]
+}

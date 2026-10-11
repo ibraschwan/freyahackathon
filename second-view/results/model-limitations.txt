@@ -1,0 +1,97 @@
+2026-10-11T13:49:06.959Z 13cd45d6-3dd1-4123-92f7-364e3fdf1fd4 <global_rules>
+Never offer or agree to a waiver, a discount, a new instalment plan or an amount above the arrears.
+Never say that a text message or an SMS will be sent.
+Never state an amount, a date or an offer of your own: the system words every offer and every read-back.
+Never say that a promise, a note, a transfer or a callback succeeded unless the tool result says so.
+If a CALL transfer_to_agent or CALL schedule_callback result says the service failed: CALL it once more. If it fails again: CALL wrap_up(no_promise, service_error) and say nothing else.
+If asked "are you a robot / an AI / a real person": say "I am Alder Mutual's automated assistant." Then continue where you were.
+If asked "is this a scam" or how they can trust the call: say "If you are concerned, please call the bank using the number on your statement." Never give a phone number yourself. Then continue where you were.
+If asked something the tools and these rules do not answer: say "I do not have that information." Never invent information.
+Only {{first_name}} {{last_name}} in person can pass the security check or agree a payment. A relative or any other person cannot.
+Say one short thing at a time. Never thank-and-say-goodbye yourself: the system speaks the goodbye.
+</global_rules>
+
+<opening>
+BEFORE THE CUSTOMER IS VERIFIED, to anyone, including the customer:
+- Never say or hint at: arrears, debt, collections, payment, products, amounts, or a reason for calling.
+- If {{first_name}} {{last_name}} asks what the call is about: say "I can tell you after a short security check."
+- If anyone else asks what the c
+2026-10-11T13:44:17.898Z 18149152-cfbd-40eb-acf1-42caf9cc17a7 Rules of the brief this configuration cannot fully express:
+
+- **Two wrong answers end verification (O3).** The engine only stops when the bank reports no wrong answers left, and the bank allows three. A third attempt is possible.
+- **Floor (O8).** The floor is max(50% of arrears rounded up, minimum_payment or instalment_amount), capped at arrears, but only one floor form is allowed per type. I chose 50% for cards and `instalment_amount` for loans as a best guess; either can be too low when the other term is larger.
+- **Persuasion budget (O7/O9).** I mapped "extra offers after the initial ask" to `attempts` 2/1/0. For the second and third product the engine opens with attempt 1 (full amount on the deadline) instead of an initial ask on the earliest date. What it does there for a 0-attempt band is undefined.
+- **Earliest payment date (O4).** The 15:00 cutoff for paying today has no field; it is only carried in `guidance.not_business_day`, and the first ask says "today or the next working day".
+- **Non-working day moves to the preceding working day (O4).** The engine only names the next business day; the preceding-day rule is carried in `guidance.not_business_day` only.
+- **"End of week" (O9).** Saturday of the current week, rolled back for holidays, has no field.
+- **Product order (O6, O15).** Sorting by days late descending, then product id, has no field. The engine uses account order, including for the first non-paid close reason.
+- **Per-product read-back and recording (O6).** The engine reads back and records only once every product is settled, not one product at a time.
+2026-10-11T13:47:21.249Z 219cdc03-73e1-41ac-87f1-273651ddf463
+2026-10-11T13:46:43.476Z 21ae3538-61bc-47d0-b326-cc73cf0baa98 Rules of the brief that this configuration cannot express, or only approximates:
+
+- **O3, two wrong answers end verification:** the engine closes only when the bank reports none left, and the bank allows three. A third attempt can therefore happen.
+- **O3, first refusal closes at once:** I set `security_question.times` to 0. The engine will then also close when the customer merely asks something instead of answering, although O1 wants such questions answered.
+- **O8, floor:** the floor is max(50% of past_due rounded up, minimum_payment or instalment_amount), capped at past_due, and the schema takes only one rule per type. I used 50% for cards and `instalment_amount` for loans; this is a guess and will be wrong whenever the other term is larger.
+- **O4/O8, earliest permitted date:** the 15:00 cut-off for paying today has no setting, and the first ask has no date token. The first ask is worded "today or on the next working day", and `check_terms` will not refuse "today" after 15:00.
+- **O4, non-working day moves to the preceding working day:** the engine only names the next working day. The preceding-day rule is carried in the `not_business_day` guidance text only. "End of week" (Saturday, moved back for holidays) is likewise left to the dialogue model, since no offer uses that date.
+- **O6, sorting:** products are worked in account order, not by days_late descending with product_id ties. The "first non-paid reason" for no_promise also follows account order.
+- **O6/O13/O14, per-product recording:** the engine reads back and records once all products are settled, not one produ
+2026-10-11T14:19:30.661Z 370b9498-6a0a-4694-a066-97540b0aea7b Rules I could not express, or had to approximate, in this configuration:
+
+- **Request envelope:** every body field sits inside `request`, and `customer_id` travels as `member_token`. I wrote the tool fields as dotted paths (`request.challenge`); the config has no slot for the `member_token` mapping.
+- **Success flag:** success is `result.state` equal to `"ACCEPTED"`, not a boolean. `response.ok` can only name the field, so the engine must compare the value.
+- **No hint field:** `verify_identity` returns no hint, so `hint` is null and `hints` is empty.
+- **Sort order (C5):** sorting facilities by `urgency_rank` and then `facility_key` has no slot, and neither does the limit of 1–3 facilities.
+- **Record each immediately (C5/C6):** the engine reads back and records once all products are settled, not product by product.
+- **Offers (C3):** I set two attempts per band, full today and then full on the deadline, with a neutral first question. If the engine counts the first question as an offer, the first facility gets one offer too many.
+- **Notes on transfer (C7):** the engine writes no notes on a transferred call, so "retain existing notes, add decline notes" cannot be done.
+- **Transfer overrides saved (C8):** this is already the engine's order.
+- **Hardship and model-led cases (C7):** there is no slot for "sympathy, no persuasion, offer care queue once", nor for the ownership-dispute and already-paid handling beyond the note line.
+- **End of week (C4):** "Friday of the current week, moved back for a holiday" and "ask for an exact day on vague dates" have no slot; I put them in
+2026-10-11T13:50:49.951Z 490af0c7-d300-433d-9342-bb6e3ed29e94 CHANGE: PART 2 – added the brief's limit of two wrong answers in total (O3). The bank allows three, so the engine would only close on the third; the model now closes not_verified/failed after the second wrong answer and gives the branch advice, written as separate first-time and second-time lines.
+CHANGE: R3 – hardship no longer sends the customer to R8, because R8 makes the model offer the DEADLINE and report customer_refused, which O11 forbids for a hardship product. The cross-references are now "R7 or R9", and R3 is stated to come before R8.
+CHANGE: R8 – added the losing-side priority line ("not if the customer mentioned illness, bereavement or unemployment for this product: then R3").
+CHANGE: R3 – the support-offer branches now depend on whether the support team was already offered in this call, not on the "first/second time hardship is mentioned". Before, a customer who mentioned hardship together with a day and refused later was never offered support (O11: offer support once).
+
+<global_rules>
+Never offer or agree to a waiver, a discount, a new instalment plan or an amount above the arrears.
+Never say that a text message or an SMS will be sent.
+Never state an amount, a date or an offer of your own: the system words every offer and every read-back.
+Never say that a promise, a note, a transfer or a callback succeeded unless the tool result says so.
+If a CALL transfer_to_agent or CALL schedule_callback result says the service failed: CALL it once more. If it fails again: CALL wrap_up(no_promise, service_error) and say nothing else.
+If asked "are you a robot / an AI / a re
+2026-10-11T13:44:31.823Z tool attempt: Bash
+2026-10-11T14:19:29.566Z 7cbcfa2d-10b8-4b2a-b853-145498c934b3 Rules I could not express, or had to approximate:
+
+- **Nested fields**: the API wraps everything in `request`, `payload` and `result`, so I wrote field names as dotted paths (`request.challenge`, `payload.facilities`, `result.state`). If the engine resolves bare names, strip the prefixes.
+- **Success flag**: success is `result.state` equal to `"ACCEPTED"`, not a boolean, so `response.ok` only points at that field.
+- **Customer id**: `member_token` must carry `customer_id`, but it has a different name and the configuration has no mapping for it.
+- **Sorting (C5)**: sorting by `urgency_rank`, then `facility_key`, has no key, and neither does the 1–3 facilities limit. Two facilities of the same kind get the same spoken name.
+- **Record each immediately (C5/C6)**: the engine reads back and records only after all products are settled.
+- **Notes on transfer (C7)**: the brief wants existing notes kept and decline notes added for the other unresolved facilities, but the engine writes no notes on a transferred call.
+- **Hardship (C7)**: sympathy, no persuasion, one care-queue offer and then a vulnerability note have no guidance key. So do the ownership-dispute flow, the relative-may-only-book-a-callback rule and the bereavement sympathy.
+- **Dates (C4)**: "end of week = Friday of the current week, moved back for a holiday" and "ask for an exact day on vague dates" have no key. `dates.next_weekday` is my choice; the brief is silent.
+- **Persuasion count (C3)**: I mapped the initial full-amount offer today to the first ask and the one extra offer to a single attempt on the deadline. A
+2026-10-11T13:44:09.012Z aa179e67-ec02-4398-95eb-3ea69701004e Rules of the brief that this configuration cannot express, or only approximately:
+
+- **O3, two wrong answers:** the engine only ends the check when the bank reports no wrong answers left, and the bank allows three. The limit of two total is not enforceable here.
+- **O3/O1, refusal versus question:** `security_question.times` is 0 so a first refusal closes `not_verified/declined`. The engine counts a question asked instead of an answer the same way, so "are you a robot?" at that point would also close the call.
+- **O8, floor:** the floor is max(50% of `past_due` rounded up to the cent, `minimum_payment` or `instalment_amount`), capped at `past_due`. Only one floor source per type is possible; I used 50% of full, so the max with the field and the rounding-up are lost.
+- **O6, order and recording:** sorting by `days_late` descending (ties by `product_id`) is not configurable, so account order applies. That also affects the "first non-paid reason in sorted order" at closing (O15). The engine reads back and records once at the end, not product by product.
+- **O4, O8 and O9, dates:**
+  - The 15:00 cut-off for paying today has no key.
+  - The first ask cannot name the amount or the earliest date, and later products open with attempt 1 (full amount on the deadline) rather than on the earliest date.
+  - The engine names the next working day for a non-working date; the "preceding working day" rule is only in the guidance text.
+  - "End of week = Saturday, adjusted backwards" and "ask once to clarify a vague date" have no key.
+- **O9, what counts as a refusal:** only an explicit refus
+2026-10-11T13:46:35.393Z be960fa1-3359-4a58-a4eb-d9b73621c118 Rules of the brief this configuration cannot express, or only approximates:
+
+- **O3, two wrong answers end verification:** the engine only closes when the bank reports none left, and the bank allows three. A third attempt is therefore possible.
+- **O3, first refusal closes at once:** I set `security_question.times` to 0. This also closes the call when the customer merely asks a question instead of answering (for example "are you a robot?"), which O1 wants answered.
+- **O8, floor:** the brief wants the higher of 50% (rounded up to the cent) and `minimum_payment` / `instalment_amount`, capped at arrears. The config takes only one source per type, so I chose 50% for cards and `instalment_amount` for loans. This choice is a guess; whenever the other term is the higher one, the engine's floor is too low.
+- **O4/O8, first ask on the earliest permitted date:** there is no date token for the first ask and no 15:00 cutoff, so the first-ask sentences are worded generically. The engine may accept "today" at 15:00 or later, or on a closed day.
+- **O4, non-working day moves to the preceding working day:** the engine only names the next business day, so the backward move is left to the dialogue model through `guidance.not_business_day`. "End of week = Saturday, adjusted backwards for holidays" is likewise not configurable.
+- **O6, product order:** sorting by `days_late` descending then `product_id` is not configurable, so the engine uses account order. That order also decides the "first non-paid reason" in O15.
+- **O6/O13/O14, one product at a time:** the engine reads back and records on
+2026-10-11T14:21:02.496Z ca76048c-a148-4efb-aaff-b0ebc7b7ea18
+2026-10-11T14:21:13.455Z tool attempt: Bash
