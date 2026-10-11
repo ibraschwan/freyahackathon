@@ -72,14 +72,15 @@ def main(argv):
     except Exception as e: trace.log("SELF-TEST against a fake bank FAILED (the agent is still deployed): " + type(e).__name__ + ": " + str(e)[:400])
     if opt.get("--no-deploy"): trace.end("not deployed"); return
     import freya
-    freya.validate_workflow(slot, wf); trace.log("Freya dry run: valid")
-    ids = freya.save_workflow(slot, wf, state_file=str(ROOT / ".freya-agents.json"))
+    from builder import deploy
+    deploy.again("dry run", lambda: freya.validate_workflow(slot, wf), trace); trace.log("Freya dry run: valid")
+    ids = deploy.save(freya, slot, wf, str(ROOT / ".freya-agents.json"), trace)
     trace.log(f"CREATED ON FREYA: workflow {ids['workflow_id']} agent {ids['agent_id']}" + (f" (updated in place, published version {ids['version']})" if ids.get("version") else " (new workflow)"))
     (ROOT / "submission").mkdir(exist_ok=True)
-    out = freya.export_workflow(ids["workflow_id"], str(ROOT / "submission" / (slot + ".workflow.json")))
+    out = deploy.again("exporting the workflow", lambda: freya.export_workflow(ids["workflow_id"], str(ROOT / "submission" / (slot + ".workflow.json"))), trace)
     trace.log("exported to " + os.path.relpath(out, ROOT))
     try:
-        r = freya.api("POST", "/api/v2/chat/message", {"workflowId": ids["workflow_id"], "message": "Hello?", "customerVariables": spec.get("test_variables") or {}})
+        r = deploy.again("chat test", lambda: freya.api("POST", "/api/v2/chat/message", {"workflowId": ids["workflow_id"], "message": "Hello?", "customerVariables": spec.get("test_variables") or {}}), trace, tries=4)
         trace.log("TEST over the chat route, first line of the agent: " + json.dumps(r.get("response")))
         try: freya.api("POST", "/api/v2/chat/end", {"callId": r["callId"]})
         except Exception: pass

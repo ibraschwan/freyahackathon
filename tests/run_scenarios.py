@@ -43,6 +43,10 @@ def transcript(call_id):
 def simulate(agent_id, name, variables_by_persona, concurrency, max_seconds=420):
     """Start a text simulation and wait until every call has a verdict. The platform sometimes leaves a simulation
     at "running" after all calls are judged (seen with an "inconclusive" verdict), so the calls are watched, not the status."""
+    name = name + " " + hashlib.sha1(json.dumps(variables_by_persona, sort_keys=True).encode()).hexdigest()[:6]       # unique, so a simulation can be found again by its name
+    def find():
+        r = freya.api("GET", "/api/v2/simulations", workspaceId=freya.workspace_id()); items = r.get("simulations") or r.get("items") or r
+        return next((s for s in items if s.get("name") == name), None)
     while True:
         try:
             sim = freya.api("POST", "/api/v2/simulations", {
@@ -51,9 +55,14 @@ def simulate(agent_id, name, variables_by_persona, concurrency, max_seconds=420)
                 "assistantLlmOverride": freya.AGENT_LLM, "routingLlmOverride": freya.AGENT_LLM, "extractionLlmOverride": freya.AGENT_LLM,
                 "personaLlmOverride": freya.SIM_LLM, "analysisLlmOverride": freya.SIM_LLM})
             break
-        except RuntimeError as e:
-            if "concurrent simulations" not in str(e): raise
-            print("another simulation is running in this workspace, waiting 30 s", flush=True); time.sleep(30)
+        except Exception as e:
+            if "concurrent simulations" in str(e):
+                print("another simulation is running in this workspace, waiting 30 s", flush=True); time.sleep(30); continue
+            # a gateway error or a dropped connection: the simulation may have been created all the same. Look for it before trying again.
+            print("starting the simulation failed, checking whether it exists:", str(e)[:100], flush=True); time.sleep(30)
+            try: sim = find()
+            except Exception: sim = None
+            if sim: break
     sim_id = (sim.get("simulation") or sim)["id"]; it_id, settled = None, 0
     while True:
         time.sleep(10)
