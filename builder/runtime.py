@@ -154,7 +154,27 @@ def fold(st, evs):
         elif e[0] == 'finish':
             st['mo'] = e[1]
             st['mr'] = e[2]
+    for k, es in evs:
+        for e in es:
+            # one day named for several products, reported product by product: the product whose deadline is earlier goes on its own
+            # deadline, as it does when the day is reported for "all". Only when the other product's agreement came in the same message.
+            if e[0] != 'late' or e[1] in st['promises'] or e[1] in st['plan'] or e[1] in st['pnotes'] or e[1] in st['perr'] or e[1] in st['given'] or e[1] in noted:
+                continue
+            for k2, es2 in evs:
+                if [x for x in es2 if x[0] == 'plan' and x[1] != e[1] and x[3] == e[3] and x[1] in st['plan']] and abs(evtime(k) - evtime(k2)) <= 3.0:
+                    st['plan'][e[1]] = dict(amount=e[2], date=e[4], capped=1)
+                    break
     return ref, new
+def evtime(k):
+    try:
+        t = datetime.datetime.strptime(str(k)[3:23], '%Y%m%d%H%M%S%f')
+        return (t - datetime.datetime(2020, 1, 1)).total_seconds()
+    except Exception:
+        return 0.0
+def mark_late(v, i, am, dt, dl):
+    """Remember, without waking the sync step, that a day after the deadline was asked for product i. It only counts if the same
+    message also agreed that day for another product (see fold)."""
+    v['ev_' + datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S%f') + '_late' + str(i)] = json.dumps([['late', i, am, dt.isoformat(), dl.isoformat()]])
 def gst(v):
     st = base(v)
     evs = pending(v)
@@ -897,6 +917,8 @@ for p in targets:
     late = str(G.get('after_deadline') or 'Say that the latest date you can record is <deadline> and offer it.')
     if not isbd(dt):
         if dl is not None and dt > dl:
+            if len(ps) > 1 and not allmode:
+                mark_late(vars, i, am, dt, dl)
             raise Exception('RULE: ' + say(dt) + ' is after the deadline for the ' + p['words'] + '. Nothing was noted. ' + late.replace('<deadline>', say(dl)) + ' If the customer accepts, CALL check_terms with ' + dl.isoformat() + '. If not, CALL customer_refused.')
         nb = insteadbd(dt, first)
         if dl is not None and nb > dl:
@@ -909,6 +931,8 @@ for p in targets:
             use = dl
             capped = 1
         else:
+            if len(ps) > 1 and not allmode:
+                mark_late(vars, i, am, dt, dl)
             raise Exception('RULE: ' + say(dt) + ' is after the deadline for the ' + p['words'] + '. Nothing was noted. ' + late.replace('<deadline>', say(dl)) + ' If the customer accepts, CALL check_terms with ' + dl.isoformat() + '. If not, CALL customer_refused.')
     evs.append(['plan', i, am, use.isoformat(), capped, 1 if allmode else 0])
 if not evs:

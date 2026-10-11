@@ -143,7 +143,7 @@ class Sim:
         for name, params in calls:
             self.vars = dict(snap)
             try: self._run(name.upper(), params=params)
-            except Rule as e: writes.append({}); continue
+            except Rule as e: pass                  # on the platform a tool that raises keeps what it wrote before (the opening's counters rely on it)
             writes.append({k: v for k, v in self.vars.items() if snap.get(k) != v})
         self.vars = dict(snap)
         for w in writes: self.vars.update(w)
@@ -508,4 +508,15 @@ if __name__ == "__main__":
     s.verify("phone_last4", "0001"); check("limit per question: the second wrong answer to the same question ends it", (s.vars.get("id_state"), s.summary()[:2]), ("failed", ("not_verified", "failed")))
     s = Sim(golden.spec(True), pid(PUB["PUB-01"]["products"]), PUB["PUB-01"]["variables"]["now"], identity=PUB["PUB-01"]["identity"]); s.verify("date_of_birth", "1970-01-01"); s.verify("date_of_birth", "1970-01-02")
     check("no limit of its own: two wrong answers leave the check open, as the service counts three", s.vars.get("id_state"), "open")
+    # one day for two products, reported product by product in one message; the day is after the deadline of one of them (PUB-13)
+    s = mk("PUB-13").login(); k = len(s.said)
+    s.together(("set_promise", dict(product_id="p1", amount="full", date="2026-10-30")), ("set_promise", dict(product_id="p2", amount="full", date="2026-10-30")))
+    check("one day for two, reported separately: the product with the earlier deadline goes on its deadline", (s.state["plan"].get("p2"), s.said[k:]),
+          ({"amount": 900.0, "date": "2026-10-23", "capped": 1}, ["To confirm: you will pay 300.00 for your credit card ending 6604 on Friday 30 October 2026, and 900.00 for your personal loan on Friday 23 October 2026 (the latest possible date for this product). Do you confirm?"]))
+    s.tool("confirm"); s.tool("finish", outcome="promise"); check("... and both are recorded", s.summary()[2], [("p1", 300.0, "2026-10-30"), ("p2", 900.0, "2026-10-23")])
+    s = mk("PUB-13").login(); r = refused(s.tool, "set_promise", product_id="p2", amount="full", date="2026-10-30")
+    check("a day after the deadline for one product alone: refused as before, nothing planned, no sync", ("after the deadline" in r, s.state["plan"], s.vars.get("dirty") in ("", "0", None)), (True, {}, True))
+    for key in [x for x in s.vars if "_late" in x]: s.vars["ev_20260101000000000000_late"] = s.vars.pop(key)          # the customer's next message comes seconds later
+    s.tool("set_promise", product_id="p1", amount="full", date="2026-10-30")
+    check("the same day agreed for the other product in a LATER message does not move the first one", "p2" in s.state["plan"], False)
     print(f"\nall {n} checks passed")
