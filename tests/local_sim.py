@@ -497,4 +497,15 @@ if __name__ == "__main__":
     check("callback in the past: refused as a wrongly written date, not counted", ("in the past" in r, s.state.get("cb_bad") or 0), (True, 0))
     r = refused(s.callback, "2026-10-17", "11:30")
     check("the first day outside the window is still the first", "is OUTSIDE the callback window" in r and "again" not in r, True)
+    # the brief's own limit on wrong answers, below what the service counts
+    def capped(cap):
+        sp = copy.deepcopy(golden.spec(True)); sp["identity"]["max_wrong"] = cap; c = PUB["PUB-01"]
+        return Sim(sp, pid(c["products"]), c["variables"]["now"], identity=c["identity"])
+    s = capped({"total": 2}); s.verify("date_of_birth", "1970-01-01"); check("limit of two in total: after one wrong answer the check is open", (s.vars.get("id_state"), s.ended), ("open", False))
+    s.verify("date_of_birth", "1970-01-02"); check("limit of two in total: the second wrong answer ends it", (s.vars.get("id_state"), s.summary()[:2], [c["tool"] for c in s.ledger["calls"]].count("get_account")), ("failed", ("not_verified", "failed"), 0))
+    s = capped({"per_question": 2}); s.verify("date_of_birth", "1970-01-01"); s.verify("date_of_birth", PUB["PUB-01"]["identity"]["date_of_birth"]); s.verify("phone_last4", "0000")
+    check("limit per question: one wrong answer on each of two questions leaves the check open", s.vars.get("id_state"), "open")
+    s.verify("phone_last4", "0001"); check("limit per question: the second wrong answer to the same question ends it", (s.vars.get("id_state"), s.summary()[:2]), ("failed", ("not_verified", "failed")))
+    s = Sim(golden.spec(True), pid(PUB["PUB-01"]["products"]), PUB["PUB-01"]["variables"]["now"], identity=PUB["PUB-01"]["identity"]); s.verify("date_of_birth", "1970-01-01"); s.verify("date_of_birth", "1970-01-02")
+    check("no limit of its own: two wrong answers leave the check open, as the service counts three", s.vars.get("id_state"), "open")
     print(f"\nall {n} checks passed")

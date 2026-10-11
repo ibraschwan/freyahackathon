@@ -1102,6 +1102,24 @@ try:
     if flag('verified', 'verified') and asked and asked not in st['idv']:
         st['idv'].append(asked)
     todo = [q.get('field') for q in qs if q.get('field') not in st['idv']]
+    cap = I.get('max_wrong')
+    if isinstance(cap, dict) and (cap.get('total') is not None or cap.get('per_question') is not None):
+        # the brief ends the check after fewer wrong answers than the service counts: the engine counts them itself
+        if d.get(R.get('verified') or 'verified') is not None and not flag('verified', 'verified') and not (hint and hint in (I.get('hints') or dict())):
+            w = st.get('wrong') or dict()
+            w['*'] = int(w.get('*') or 0) + 1
+            w[asked] = int(w.get(asked) or 0) + 1
+            st['wrong'] = w
+            rem = []
+            if cap.get('total') is not None:
+                rem.append(int(cap.get('total')) - w['*'])
+            if cap.get('per_question') is not None:
+                rem.append(int(cap.get('per_question')) - w[asked])
+            try:
+                rem.append(int(left))
+            except Exception:
+                pass
+            left = max(0, min(rem))
     if flag('all_verified', 'all_verified') or (qs and not todo and flag('verified', 'verified')):
         st['id'] = 'verified'
         d['id_state'] = 'verified'

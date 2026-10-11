@@ -79,7 +79,8 @@ def main(argv):
     briefs, api = inputs(args)
     if api is None or not briefs: sys.exit(__doc__)
     slot = opt.get("--slot") or pathlib.Path([a for a in args if pathlib.Path(a) != api][-1]).stem      # the last brief file, or the folder
-    trace = llm.Trace(str(ROOT / "traces" / (slot + ".log")))
+    global TRACE
+    trace = TRACE = llm.Trace(str(ROOT / "traces" / (slot + ".log")))
     trace.log(f"builder run for slot '{slot}' | briefs: {', '.join(str(b) for b in briefs)} | tool API: {api} | builder model: {llm.MODEL}")
     api_text = api.read_text(); openapi = json.loads(api_text)
     texts = [(b.name, read_text(b)) for b in briefs]
@@ -118,4 +119,10 @@ def main(argv):
     trace.end(f"workflow {ids['workflow_id']} agent {ids['agent_id']}")
     print(json.dumps(ids))
 
-if __name__ == "__main__": main(sys.argv[1:])
+TRACE = None
+
+if __name__ == "__main__":
+    try: main(sys.argv[1:])
+    except BaseException as e:                     # a run that breaks off still ends its trace, with the reason and what it cost
+        if TRACE is not None and not TRACE.ended: TRACE.end("FAILED, nothing was delivered by this run: " + type(e).__name__ + ": " + " ".join(str(e).split())[:400])
+        raise

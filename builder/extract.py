@@ -57,6 +57,7 @@ SCHEMA = """THE CONFIGURATION. Return one JSON object with exactly these keys.
   "response": the names of the verify_identity response fields with these roles: {"verified": this answer was right, "all_verified": the whole check is passed, "left": how many wrong answers are left, "hint": the hint field},
   "hints": {<hint value from the tool API>: the instruction for the dialogue model when this hint comes back, including the exact sentence to say, and whether it counts as a wrong answer},
   "wrong_sentence": what to say after a wrong answer before the question is repeated. It must not reveal which part was wrong.
+  "max_wrong": optional, only when the brief ends the security check after a number of wrong answers that it states itself: {"total": number} for wrong answers in the whole check, or {"per_question": number} for wrong answers to one and the same question. The engine then counts them itself, whatever the service counts. Leave the key out when the brief only follows the service's count.
 }
 "opening_limits": the two things the brief limits before the customer is verified. Both keys are required.
   {"who_is_speaking": {"times": how many more times the agent may ask whether it is speaking with the customer after the first ask in the opening line got no confirmation (the brief's "ask once more" = 1),
@@ -182,13 +183,16 @@ def material(briefs, api_text):
     if len(briefs) > 1: parts.append("(These files belong together. A later file adds to or replaces rules of an earlier one.)")
     return "\n\n".join(parts) + "\n\n=== TOOL API FILE (OpenAPI) ===\n" + api_text
 
-async def ask_json(trace, purpose, prompt, tries=3):
+async def ask_json(trace, purpose, prompt, tries=3, notes=None):
     """A model call whose answer must hold one JSON object. An answer that cannot be read is asked for again."""
     for attempt in range(1, tries + 1):
         text = await llm.ask(trace, purpose, SYSTEM, prompt)
         try:
             obj = llm.json_of(text)
-            if isinstance(obj, dict): return obj
+            if isinstance(obj, dict):
+                said = " ".join(text[:text.find("```")].split()) if notes and "```" in text else ""
+                if said: trace.log(f"{notes}: {said[:900]}")
+                return obj
             why = "the JSON is not an object"
         except ValueError as e: why = str(e)[:120]
         trace.log(f"the answer to '{purpose}' holds no readable JSON object ({why}), try {attempt} of {tries}")
@@ -196,7 +200,8 @@ async def ask_json(trace, purpose, prompt, tries=3):
 
 async def policy_once(trace, n, mat):
     return await ask_json(trace, f"read the brief and the tool API file into the policy configuration (independent reading {n})",
-                          ENGINE + "\n" + SCHEMA + "\n\n" + mat + "\n\nReturn the JSON object in one ```json block. Before it, in a few lines, note any rule of the brief you could not express in this configuration.")
+                          ENGINE + "\n" + SCHEMA + "\n\n" + mat + "\n\nReturn the JSON object in one ```json block. Before it, in a few lines, note any rule of the brief you could not express in this configuration.",
+                          notes=f"reading {n}, on rules of the brief it could not express in the configuration")
 
 def differences(a, b, path=""):
     """Paths at which two policies differ. Sentences are compared too: a different sentence is a difference to settle."""
@@ -225,6 +230,9 @@ def floor_ok(f, depth=3):
     if many is not None: return depth > 0 and isinstance(many, list) and len(many) >= 1 and all(floor_ok(x, depth - 1) for x in many)
     return bool(f.get("field")) or isinstance(f.get("percent_of_full"), (int, float)) or isinstance(f.get("amount"), (int, float))
 
+def cap_ok(c):
+    return isinstance(c, dict) and bool(c) and set(c) <= {"total", "per_question"} and all(isinstance(v, int) and v >= 1 for v in c.values())
+
 def without_optional(spec):
     """Takes out every optional setting whose form the engine could not use. A floor that cannot be read is taken out too: the engine then records the full amount only."""
     if spec["calendar"].get("non_business_day") not in (None, "previous", "next"): spec["calendar"].pop("non_business_day")
@@ -235,6 +243,7 @@ def without_optional(spec):
     for v in (((spec.get("product") or {}).get("types")) or {}).values():
         if isinstance(v, dict) and v.get("floor") is not None and not floor_ok(v["floor"]): v.pop("floor")
     if (spec.get("product") or {}).get("confirm") not in (None, "each", "together"): spec["product"].pop("confirm")
+    if (spec.get("identity") or {}).get("max_wrong") is not None and not cap_ok(spec["identity"]["max_wrong"]): spec["identity"].pop("max_wrong")
 
 def check(spec, openapi):
     """Problems in a policy that can be seen without a model: missing keys, values the tool API does not know."""
@@ -308,6 +317,7 @@ def check(spec, openapi):
     if until is not None and not re.match(r"^\d{1,2}:\d{2}$", str(until)): bad.append(OPTIONAL + "dates.today_until must be HH:MM or left out")
     order = (spec.get("product") or {}).get("order")
     if order is not None and not (isinstance(order, dict) and order.get("field") and order.get("direction") in ("ascending", "descending")): bad.append(OPTIONAL + 'product.order needs "field" and "direction" ("ascending" or "descending"), or is left out')
+    if (spec.get("identity") or {}).get("max_wrong") is not None and not cap_ok(spec["identity"]["max_wrong"]): bad.append(OPTIONAL + 'identity.max_wrong must be {"total": whole number} or {"per_question": whole number}, or left out')
     if (spec.get("product") or {}).get("confirm") not in (None, "each", "together"): bad.append(OPTIONAL + 'product.confirm must be "each" or left out')
     for t, v in (((spec.get("product") or {}).get("types")) or {}).items():
         if isinstance(v, dict) and v.get("floor") is not None and not floor_ok(v["floor"]):

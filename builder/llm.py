@@ -10,7 +10,7 @@ MODEL = os.environ.get("BUILDER_MODEL", "claude-opus-5-5")
 class Trace:
     """Plain-text log of one build run: start and end, every model call, what was created, what was tested."""
     def __init__(self, path):
-        self.path, self.t0, self.calls, self.usd = path, time.time(), 0, 0.0
+        self.path, self.t0, self.calls, self.usd, self.ended = path, time.time(), 0, 0.0, False
         os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
         open(path, "w").write("")
         self.log("START " + time.strftime("%Y-%m-%dT%H:%M:%S%z"))
@@ -19,6 +19,7 @@ class Trace:
         with open(self.path, "a") as f: f.write(f"[{time.time() - self.t0:7.1f}s] {line}\n")
         print(line, flush=True)
     def end(self, note=""):
+        self.ended = True
         self.log(f"END {time.strftime('%Y-%m-%dT%H:%M:%S%z')} | {time.time() - self.t0:.0f} s | {self.calls} model calls, {self.usd:.2f} USD{' | ' + note if note else ''}")
         root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         try:                                                                         # the spend ledger of the improvement loop, and a copy of every trace
