@@ -31,6 +31,24 @@ def nextbd(d):
         d = d + ONE
         n += 1
     return d
+def prevbd(d):
+    d = d - ONE
+    n = 0
+    while not isbd(d) and n < 400:
+        d = d - ONE
+        n += 1
+    return d
+def cutoff():
+    m = re.match(r'(\d{1,2}):(\d{2})', str((S.get('dates') or dict()).get('today_until') or ''))
+    return int(m.group(1)) * 60 + int(m.group(2)) if m else None
+def firstday(today, mins):
+    c = cutoff()
+    return today if isbd(today) and (c is None or mins < c) else nextbd(today)
+def insteadbd(d, first):
+    if CAL.get('non_business_day') == 'previous':
+        x = prevbd(d)
+        return x if x >= first else first
+    return nextbd(d)
 #@cal
 def addbd(d, n):
     for _ in range(int(n)):
@@ -199,12 +217,12 @@ def lastbd_week(d):
     while x >= mon and not isbd(x):
         x = x - ONE
     return x if x >= mon else None
-def pick_date(kind, today, dl):
+def pick_date(kind, today, dl, first=None):
     x = None
     if kind == 'deadline':
         x = dl
     elif kind == 'today':
-        x = today if isbd(today) else nextbd(today)
+        x = first or (today if isbd(today) else nextbd(today))
     elif kind == 'next_business_day':
         x = nextbd(today)
     elif kind == 'last_business_day_of_week':
@@ -217,7 +235,26 @@ def pick_date(kind, today, dl):
         x = dl
     return x
 #@terms
-def terms(p, today):
+def floor_of(F, p, full):
+    many = F.get('greatest_of') or F.get('least_of')
+    if many:
+        xs = [x for x in [floor_of(f or dict(), p, full) for f in many] if x is not None]
+        if not xs:
+            return None
+        return max(xs) if F.get('greatest_of') else min(xs)
+    if F.get('field'):
+        return num(p.get(F.get('field')))
+    if F.get('percent_of_full') is not None:
+        c = full * float(F.get('percent_of_full'))
+        if F.get('round') == 'up':
+            return (int(c) + (1 if c - int(c) > 0.000001 else 0)) / 100.0
+        if F.get('round') == 'down':
+            return int(c + 0.000001) / 100.0
+        return round(c / 100.0, 2)
+    if F.get('amount') is not None:
+        return float(F.get('amount'))
+    return None
+def terms(p, today, first=None):
     P = S.get('product') or dict()
     typ = str(p.get(P.get('type_field') or 'type') or '')
     T = (P.get('types') or dict()).get(typ) or (P.get('types') or dict()).get('*') or dict()
@@ -226,13 +263,7 @@ def terms(p, today):
         words = words.replace('<' + str(k) + '>', str(p.get(k)))
     full = num(p.get(P.get('full_field') or 'past_due')) or 0.0
     F = T.get('floor') or dict()
-    floor = None
-    if F.get('field'):
-        floor = num(p.get(F.get('field')))
-    elif F.get('percent_of_full') is not None:
-        floor = round(full * float(F.get('percent_of_full')) / 100.0, 2)
-    elif F.get('amount') is not None:
-        floor = float(F.get('amount'))
+    floor = floor_of(F, p, full)
     if floor is None or floor > full or floor <= 0:
         floor = full
     late = int(num(p.get(P.get('days_late_field') or 'days_late')) or 0)
@@ -257,7 +288,7 @@ def terms(p, today):
     offers = []
     k = int(band.get('attempts') if band.get('attempts') is not None else 0)
     for a in (S.get('attempt_offers') or [])[:k]:
-        x = pick_date(a.get('date'), today, dl)
+        x = pick_date(a.get('date'), today, dl, first)
         offers.append(dict(amount=str(a.get('amount') or 'full'), date=x.isoformat() if x else '', text=str(a.get('text') or '')))
     return dict(id=str(p.get(P.get('id_field') or 'product_id')), type=typ, words=words, full=round(full, 2), floor=round(floor, 2), floor_name=str(T.get('floor_name') or 'minimum amount'),
                 late=late, band=str(band.get('name') or ''), deadline=dl.isoformat() if dl else '', attempts=k, offers=offers)
@@ -441,7 +472,12 @@ def _run(vars):
         raw = json.loads(raw)
     if isinstance(raw, dict):
         raw = [raw[k] for k in sorted(raw)]
-    ps = [terms(p, today) for p in raw]
+    O = (S.get('product') or dict()).get('order') or dict()
+    if O.get('field'):
+        sign = -1 if O.get('direction') == 'descending' else 1
+        raw = [x[2] for x in sorted([(sign * (num(q.get(O.get('field'))) or 0.0), n, q) for n, q in enumerate(raw)])]
+    first = firstday(today, mins)
+    ps = [terms(p, today, first) for p in raw]
     if not ps:
         raise Exception('no products')
     st['products'] = ps
@@ -468,9 +504,13 @@ def _run(vars):
         n = 0
         while d <= last and n < 70:
             lab = '- ' + tag(d) + (' (today)' if d == today else '') + ': '
-            if not isbd(d):
+            if not isbd(d) and CAL.get('non_business_day') == 'previous':
+                lab += 'NOT allowed, it is ' + why(d) + ' -> the day to offer instead is ' + tag(insteadbd(d, first))
+            elif not isbd(d):
                 nb = nextbd(d)
                 lab += 'NOT allowed, it is ' + why(d) + ' -> the next business day is ' + tag(nb)
+            elif d == today and first > today:
+                lab += 'NOT allowed, payments for today are closed -> the earliest day is ' + tag(first)
             elif many:
                 okp = [str(i + 1) for i, p in enumerate(ps) if p['deadline'] and d <= iso(p['deadline'])]
                 bad = [str(i + 1) for i, p in enumerate(ps) if p['deadline'] and d > iso(p['deadline'])]
@@ -776,12 +816,15 @@ for p in targets:
         am = p['full']
     if dt < today:
         raise Exception('RULE: ' + say(dt) + ' is in the past. Look the day up in the FACTS.')
+    first = firstday(today, mins)
+    if dt == today and first > today and isbd(today):
+        raise Exception('RULE: a payment for today can no longer be recorded, payments for today closed at ' + hm(cutoff()) + '. Nothing was noted. Say so and offer ' + say(first) + ' instead. If the customer accepts, CALL check_terms with ' + first.isoformat() + '.')
     dl = iso(p['deadline']) if p['deadline'] else None
     late = str(G.get('after_deadline') or 'Say that the latest date you can record is <deadline> and offer it.')
     if not isbd(dt):
         if dl is not None and dt > dl:
             raise Exception('RULE: ' + say(dt) + ' is after the deadline for the ' + p['words'] + '. Nothing was noted. ' + late.replace('<deadline>', say(dl)) + ' If the customer accepts, CALL check_terms with ' + dl.isoformat() + '. If not, CALL customer_refused.')
-        nb = nextbd(dt)
+        nb = insteadbd(dt, first)
         if dl is not None and nb > dl:
             nb = dl
         raise Exception('RULE: ' + say(dt) + ' is ' + why(dt) + ', not a business day. Nothing was noted. ' + str(G.get('not_business_day') or 'Offer the next business day, <next>.').replace('<next>', say(nb)) + ' If the customer accepts, CALL check_terms with ' + nb.isoformat() + '.')
@@ -1241,7 +1284,7 @@ CORE_KEYS = ["now_variable", "calendar", "sentences", "closing_lines", "outcomes
 ALL = dict(
     SETUP=(SETUP, ["cal", "live"], ["callback"]), PREPARE=(PREPARE, ["cal", "terms", "live"], ["product", "bands", "attempt_offers", "dates"]),
     SYNC=(SYNC, ["live", "decide"], ["guidance", "note_lines"]), STALL=(STALL, [], []), REC_NEXT=(REC_NEXT, ["live", "decide"], []), NOTE_NEXT=(NOTE_NEXT, ["live", "decide"], ["note_lines"]),
-    SET_PROMISE=(SET_PROMISE, [], ["guidance"]), SET_NOTE=(SET_NOTE, [], []), REFUSAL=(REFUSAL, [], []), CONFIRM=(CONFIRM, [], []), NO_ANSWER=(NO_ANSWER, [], ["opening_limits"]), FINISH=(FINISH, ["decide"], []),
+    SET_PROMISE=(SET_PROMISE, [], ["guidance", "dates"]), SET_NOTE=(SET_NOTE, [], []), REFUSAL=(REFUSAL, [], []), CONFIRM=(CONFIRM, [], []), NO_ANSWER=(NO_ANSWER, [], ["opening_limits"]), FINISH=(FINISH, ["decide"], []),
     VERIFY_PRE=(VERIFY_PRE, [], ["identity"]), VERIFY_POST=(VERIFY_POST, ["live"], ["identity"]),
     CALLBACK_PRE=(CALLBACK_PRE, ["cal"], ["callback", "guidance"]), CALLBACK_POST=(CALLBACK_POST, [], []),
     TRANSFER_PRE=(TRANSFER_PRE, [], ["transfer"]), TRANSFER_POST=(TRANSFER_POST, ["live"], []), ACCOUNT_POST=(ACCOUNT_POST, [], ["product"]),

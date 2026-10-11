@@ -369,4 +369,37 @@ if __name__ == "__main__":
     check("late deadline across the 11 November holiday", s.state["products"][0]["deadline"], "2026-11-19")
     s = Sim(golden.spec(False), [{"product_id": "p1", "type": "credit_card", "card_last4": "1", "past_due": 100.0, "days_late": 3, "minimum_payment": 30.0}], "2026-12-22T14:00").login()
     check("early deadline across the year end", s.state["products"][0]["deadline"], "2027-01-11")
+    # optional keys of the configuration: absent in every spec above, so everything above runs without them
+    import copy
+    def opt(change, products, now):
+        sp = copy.deepcopy(golden.spec(True)); change(sp); return Sim(sp, products, now).login()
+    loan = lambda pid, due, inst, late: {"product_id": pid, "type": "personal_loan", "past_due": due, "days_late": late, "instalment_amount": inst}
+    card = lambda pid, due, mn, late: {"product_id": pid, "type": "credit_card", "card_last4": "9012", "past_due": due, "days_late": late, "minimum_payment": mn}
+    def both(sp):
+        for t in sp["product"]["types"].values(): t["floor"] = {"greatest_of": [{"percent_of_full": 50, "round": "up"}, dict(t["floor"])]}
+    s = opt(both, [loan("p1", 600.0, 100.0, 10), card("p2", 401.01, 80.0, 10), loan("p3", 600.0, 400.0, 10)], "2026-10-14T11:00")
+    check("floor: the greater of half (rounded up to the cent) and the product's own floor", [q["floor"] for q in s.state["products"]], [300.0, 200.51, 400.0])
+    check("floor below it refused", "below the floor" in refused(s.tool, "set_promise", product_id="p1", amount="299.99", date="2026-10-15"), True)
+    def least(sp):
+        for t in sp["product"]["types"].values(): t["floor"] = {"least_of": [{"percent_of_full": 50, "round": "down"}, {"amount": 250}]}
+    check("floor: the smaller of two", [q["floor"] for q in opt(least, [loan("p1", 600.0, 100.0, 10), card("p2", 401.01, 80.0, 10)], "2026-10-14T11:00").state["products"]], [250.0, 200.5])
+    def order(sp): sp["product"]["order"] = {"field": "days_late", "direction": "descending"}
+    s = opt(order, [card("p1", 100.0, 30.0, 4), loan("p2", 600.0, 100.0, 22), loan("p3", 300.0, 100.0, 4)], "2026-10-14T11:00")
+    check("products ordered by a field, ties in account order", [q["id"] for q in s.state["products"]], ["p2", "p1", "p3"])
+    def until(sp): sp.setdefault("dates", {})["today_until"] = "15:00"
+    s = opt(until, [card("p1", 100.0, 30.0, 4)], "2026-10-15T15:00")
+    r = refused(s.tool, "set_promise", product_id="p1", amount="full", date="2026-10-15")
+    check("today after the cut-off refused, next business day offered", "closed at 15:00" in r and "2026-10-16" in r, True)
+    s = opt(until, [card("p1", 100.0, 30.0, 4)], "2026-10-15T14:59"); s.tool("set_promise", product_id="p1", amount="full", date="2026-10-15"); s.tool("confirm"); s.tool("finish", outcome="promise")
+    check("today before the cut-off recorded", s.summary()[2], [("p1", 100.0, "2026-10-15")])
+    def back(sp): sp["calendar"]["non_business_day"] = "previous"
+    s = opt(back, [card("p1", 100.0, 30.0, 4)], "2026-10-14T11:00")
+    r = refused(s.tool, "set_promise", product_id="p1", amount="full", date="2026-10-17")
+    check("weekend day -> the business day before it", "Friday 16 October 2026" in r and "2026-10-16" in r, True)
+    r = refused(s.tool, "set_promise", product_id="p1", amount="full", date="2026-10-26")
+    check("holiday -> the business day before it", "2026-10-23" in r, True)
+    def back_until(sp): back(sp); until(sp)
+    s = opt(back_until, [card("p1", 100.0, 30.0, 4)], "2026-10-16T16:00")
+    r = refused(s.tool, "set_promise", product_id="p1", amount="full", date="2026-10-17")
+    check("the business day before it is closed already -> the earliest day", "2026-10-19" in r and "2026-10-16" not in r, True)
     print(f"\nall {n} checks passed")
