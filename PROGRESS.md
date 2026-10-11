@@ -47,6 +47,7 @@ Same 100 scenarios unless said otherwise. "Passed" is the judge's verdict on the
 | 18:21 | final builder | `corrects`, 25 scenarios | 0 / 25 | platform down: in 16 calls the customer's first sentence was never answered, the rest were cut later |
 | 18:46 | final builder | held-out 12, 5 calls at once | 5 / 12 | 3 calls that had passed were played again by the platform on the same bank customer (twenty more `verify_identity` after the close), 4 calls in which `create_promise` got no answer twice |
 | 18:56 | final builder | `corrects`, 25 scenarios | 22 / 25 | A45 and A49 `create_promise` failed at the bank; B10 persuasion offers counted wrongly (weak point 2) |
+| 19:04 | final builder | `asks_back`, 25 scenarios | 22 / 25 | B10 again; A29 the simulated customer's question back was "Is there a payment plan?", which the brief answers with a transfer, so no promise followed; A05 after answering the flatmate's question the agent repeated its request for another time and the judge counted two requests |
 
 Three runs of all 100 on the candidate: 90 scenarios passed in every run by the call verdict, 82 by the run outcome
 the kit's script reads. Of the 10 that did not: 6 platform silence, 2 no verdict, 1 simulated customer, 1 agent (B10).
