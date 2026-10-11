@@ -234,6 +234,7 @@ def without_optional(spec):
     if o is not None and not (isinstance(o, dict) and o.get("field") and o.get("direction") in ("ascending", "descending")): spec["product"].pop("order")
     for v in (((spec.get("product") or {}).get("types")) or {}).values():
         if isinstance(v, dict) and v.get("floor") is not None and not floor_ok(v["floor"]): v.pop("floor")
+    if (spec.get("product") or {}).get("confirm") not in (None, "each", "together"): spec["product"].pop("confirm")
 
 def check(spec, openapi):
     """Problems in a policy that can be seen without a model: missing keys, values the tool API does not know."""
@@ -307,6 +308,7 @@ def check(spec, openapi):
     if until is not None and not re.match(r"^\d{1,2}:\d{2}$", str(until)): bad.append(OPTIONAL + "dates.today_until must be HH:MM or left out")
     order = (spec.get("product") or {}).get("order")
     if order is not None and not (isinstance(order, dict) and order.get("field") and order.get("direction") in ("ascending", "descending")): bad.append(OPTIONAL + 'product.order needs "field" and "direction" ("ascending" or "descending"), or is left out')
+    if (spec.get("product") or {}).get("confirm") not in (None, "each", "together"): bad.append(OPTIONAL + 'product.confirm must be "each" or left out')
     for t, v in (((spec.get("product") or {}).get("types")) or {}).items():
         if isinstance(v, dict) and v.get("floor") is not None and not floor_ok(v["floor"]):
             bad.append(OPTIONAL + f'product.types.{t}.floor is not one of the allowed forms: {{"field": ...}}, {{"percent_of_full": number, optional "round"}}, {{"amount": number}}, or {{"greatest_of": [several of these]}} / {{"least_of": [...]}}')
