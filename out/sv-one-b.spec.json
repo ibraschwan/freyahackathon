@@ -1,0 +1,398 @@
+{
+ "bank_name": "Alder Mutual",
+ "language": "English",
+ "address": "{{first_name}} {{last_name}}",
+ "call_variables": [
+  "customer_id",
+  "first_name",
+  "last_name",
+  "title",
+  "now"
+ ],
+ "now_variable": "now",
+ "test_variables": {
+  "customer_id": "C-1001",
+  "first_name": "Jane",
+  "last_name": "Doe",
+  "title": "Ms",
+  "now": "2026-10-13T10:00:00"
+ },
+ "calendar": {
+  "weekend_days": [
+   0,
+   6
+  ],
+  "holidays": [
+   "2026-10-16",
+   "2026-10-24",
+   "2026-11-03"
+  ]
+ },
+ "callback": {
+  "include_today": false,
+  "business_days_ahead": 2,
+  "from": "09:15",
+  "to": "12:45",
+  "after_now": true
+ },
+ "identity": {
+  "questions": [
+   {
+    "field": "phone_last4",
+    "kind": "digits",
+    "ask": "What are the last four digits of your phone number?"
+   },
+   {
+    "field": "date_of_birth",
+    "kind": "date",
+    "ask": "What is your date of birth?"
+   }
+  ],
+  "numeric_date_order": "DMY",
+  "response": {
+   "verified": "verified",
+   "all_verified": "all_verified",
+   "left": "wrong_answers_left",
+   "hint": "hint"
+  },
+  "hints": {
+   "day_month_swapped": "This does not count as a wrong answer. Say exactly: \"Could you tell me your date of birth again, saying the month in words?\" Then send the new answer as YYYY-MM-DD."
+  },
+  "wrong_sentence": "That does not match our records."
+ },
+ "opening_limits": {
+  "who_is_speaking": {
+   "times": 1,
+   "say": "Only a clear self-confirmation counts. Ask exactly once more: \"Am I speaking with {{first_name}} {{last_name}}?\"",
+   "close": [
+    "not_reached",
+    "unclear"
+   ]
+  },
+  "security_question": {
+   "times": 0,
+   "say": "Do not explain or persuade and do not ask again: a first refusal to answer a security question closes the call.",
+   "close": [
+    "not_verified",
+    "declined"
+   ]
+  }
+ },
+ "product": {
+  "list_field": "products",
+  "id_field": "product_id",
+  "type_field": "type",
+  "full_field": "past_due",
+  "days_late_field": "days_late",
+  "types": {
+   "credit_card": {
+    "words": "credit card ending <card_last4>",
+    "floor": {
+     "percent_of_full": 50
+    },
+    "floor_name": "minimum acceptable amount"
+   },
+   "personal_loan": {
+    "words": "personal loan",
+    "floor": {
+     "field": "instalment_amount"
+    },
+    "floor_name": "minimum acceptable amount"
+   },
+   "car_loan": {
+    "words": "car loan",
+    "floor": {
+     "field": "instalment_amount"
+    },
+    "floor_name": "minimum acceptable amount"
+   }
+  }
+ },
+ "bands": [
+  {
+   "name": "1-5",
+   "min": 1,
+   "max": 5,
+   "deadline": {
+    "unit": "business_days",
+    "n": 6
+   },
+   "attempts": 2
+  },
+  {
+   "name": "6-15",
+   "min": 6,
+   "max": 15,
+   "deadline": {
+    "unit": "business_days",
+    "n": 4
+   },
+   "attempts": 1
+  },
+  {
+   "name": "16+",
+   "min": 16,
+   "max": null,
+   "deadline": {
+    "unit": "business_days",
+    "n": 2
+   },
+   "attempts": 0
+  }
+ ],
+ "attempt_offers": [
+  {
+   "amount": "full_or_floor",
+   "date": "deadline",
+   "text": "Only an explicit refusal to pay uses up an offer. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+  },
+  {
+   "amount": "floor",
+   "date": "deadline",
+   "text": "This is the last offer for this product. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+  }
+ ],
+ "dates": {
+  "next_weekday": "following_week"
+ },
+ "guidance": {
+  "below_floor": "Reject that amount and offer the <floor_name> of <floor> once. Explain that any remainder stays overdue.",
+  "after_deadline": "That day is after the latest permitted date. Counteroffer <deadline>, explain the change and get the customer's consent before reporting it.",
+  "not_business_day": "That day is not a working day. Do not move it forward to <next>: propose the working day before it, or the earliest permitted date if that would be earlier, explain the change and get the customer's consent.",
+  "too_much": "Could you pay the <floor_name> of <floor>? Any remainder stays overdue.",
+  "callback_outside_first": "Ask once for a replacement: a time from 09:15 to 12:45 on one of the next two working days, not today.",
+  "callback_outside_second": "Do not book a callback. Call wrap_up(\"not_reached\", \"no_callback\")."
+ },
+ "tools": {
+  "verify_identity": {
+   "question": "field",
+   "answer": "answer"
+  },
+  "create_promise": {
+   "product": "product_id",
+   "amount": "amount",
+   "date": "date"
+  },
+  "add_note": {
+   "product": "product_id",
+   "reason": "reason"
+  },
+  "schedule_callback": {
+   "date": "date",
+   "time": "time"
+  },
+  "transfer_to_agent": {
+   "queue": "queue"
+  },
+  "close_call": {
+   "outcome": "outcome",
+   "reason": "reason"
+  }
+ },
+ "response": {
+  "ok": "ok"
+ },
+ "transfer": {
+  "before_verification": []
+ },
+ "outcomes": {
+  "table": {
+   "promise": [],
+   "paid": [],
+   "transferred": [
+    "human",
+    "restructuring",
+    "support"
+   ],
+   "no_promise": [
+    "refused",
+    "hardship",
+    "dispute",
+    "service_error"
+   ],
+   "not_verified": [
+    "declined",
+    "failed"
+   ],
+   "not_reached": [
+    "unclear",
+    "wrong_number",
+    "deceased",
+    "no_callback",
+    "callback"
+   ]
+  },
+  "meaning": {
+   "promise": "at least one promise recorded",
+   "paid": "every product noted as already paid",
+   "transferred": "call handed to a person",
+   "no_promise": "verified customer, no promise recorded",
+   "not_verified": "security check declined or failed",
+   "not_reached": "customer not on the line"
+  },
+  "promise_recorded": [
+   "promise",
+   null
+  ],
+  "identity_failed": [
+   "not_verified",
+   "failed"
+  ],
+  "callback_booked": [
+   "not_reached",
+   "callback"
+  ],
+  "promise_service_error": [
+   "no_promise",
+   "service_error"
+  ],
+  "refused": [
+   "no_promise",
+   "refused"
+  ],
+  "account_error": [
+   "no_promise",
+   "service_error"
+  ],
+  "transfer": {
+   "general": [
+    "transferred",
+    "human"
+   ],
+   "restructuring": [
+    "transferred",
+    "restructuring"
+   ],
+   "support": [
+    "transferred",
+    "support"
+   ]
+  },
+  "before_verification": [
+   [
+    "not_reached",
+    "unclear"
+   ],
+   [
+    "not_reached",
+    "wrong_number"
+   ],
+   [
+    "not_reached",
+    "deceased"
+   ],
+   [
+    "not_reached",
+    "no_callback"
+   ],
+   [
+    "not_verified",
+    "declined"
+   ],
+   [
+    "not_verified",
+    "failed"
+   ],
+   [
+    "no_promise",
+    "service_error"
+   ]
+  ],
+  "after_verification": [
+   [
+    "no_promise",
+    "refused"
+   ],
+   [
+    "no_promise",
+    "hardship"
+   ],
+   [
+    "no_promise",
+    "dispute"
+   ],
+   [
+    "paid",
+    null
+   ]
+  ],
+  "fallback_before_verification": [
+   "not_reached",
+   "unclear"
+  ],
+  "fallback_after_verification": [
+   "no_promise",
+   "refused"
+  ]
+ },
+ "notes": {
+  "enabled": true,
+  "reasons": [
+   "refused",
+   "hardship",
+   "dispute",
+   "paid",
+   "service_error"
+  ],
+  "service_error_reason": "service_error",
+  "refused_reason": "refused",
+  "reason_for_outcome": {
+   "no_promise": "refused",
+   "transferred": "refused"
+  },
+  "close_from_notes": {
+   "all": {
+    "paid": [
+     "paid",
+     null
+    ]
+   },
+   "else_outcome": "no_promise",
+   "else_reason_from_first_note_not_in": [
+    "paid"
+   ]
+  }
+ },
+ "sentences": {
+  "opening": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with {{first_name}} {{last_name}}?",
+  "identity_failed": "I could not verify your identity. Please visit a branch. Thank you for your time. Goodbye.",
+  "after_callback": "The callback is booked. Thank you for your time. Goodbye.",
+  "after_transfer": "I am transferring you to a colleague now. Thank you for your time. Goodbye.",
+  "verified_ack": "Thank you, your identity is verified.",
+  "debt_intro": "I am calling from Alder Mutual about arrears on your account.",
+  "product_statement": "Your <product> has arrears of <amount> and is <days_late> <days> late.",
+  "first_ask_single": "Can you pay the full arrears today, or on the next working day if payment today is no longer possible?",
+  "first_ask_multi": "Let us take these one at a time, starting with the first one I mentioned. Can you pay its full arrears today, or on the next working day if payment today is no longer possible?",
+  "confirm_question": "May I record that commitment?",
+  "promise_recorded": "Your commitment is available in the online portal.",
+  "promise_failed": "I am sorry, I could not record that commitment.",
+  "change_later": "A recorded commitment cannot be changed on this call. Please visit a branch to change it.",
+  "account_error": "I am sorry, I cannot access your account right now.",
+  "rest_overdue": "Any remainder stays overdue.",
+  "next_product": "Now your <product>.",
+  "anything_else": "Is there anything else?",
+  "goodbye": "Thank you for your time. Goodbye."
+ },
+ "note_lines": {
+  "paid": "Payments may take two working days to appear."
+ },
+ "closing_lines": {
+  "not_reached/deceased": "I am sorry for your loss."
+ },
+ "prompts": {
+  "global_rules": [
+   "Never offer or agree to a waiver, a discount, a new instalment plan or an amount above the arrears.",
+   "Never say that a text message or an SMS will be sent.",
+   "Never state an amount, a date or an offer of your own: the system words every offer and every read-back.",
+   "Never say that a promise, a note, a transfer or a callback succeeded unless the tool result says so.",
+   "If a CALL transfer_to_agent or CALL schedule_callback result says the service failed: CALL it once more. If it fails again: CALL wrap_up(no_promise, service_error) and say nothing else.",
+   "If asked \"are you a robot / an AI / a real person\": say \"I am Alder Mutual's automated assistant.\" Then continue where you were.",
+   "If asked \"is this a scam\" or how they can trust the call: say \"If you are concerned, please call the bank using the number on your statement.\" Never give a phone number yourself. Then continue where you were.",
+   "If asked something the tools and these rules do not answer: say \"I do not have that information.\" Never invent information.",
+   "Only {{first_name}} {{last_name}} in person can pass the security check or agree a payment. A relative or any other person cannot.",
+   "Say one short thing at a time. Never thank-and-say-goodbye yourself: the system speaks the goodbye."
+  ],
+  "opening": "BEFORE THE CUSTOMER IS VERIFIED, to anyone, including the customer:\n- Never say or hint at: arrears, debt, collections, payment, products, amounts, or a reason for calling.\n- If {{first_name}} {{last_name}} asks what the call is about: say \"I can tell you after a short security check.\"\n- If anyone else asks what the call is about: say \"I can only discuss that with {{first_name}} {{last_name}} personally.\"\n\nYou already said: \"Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with {{first_name}} {{last_name}}?\"\n\nPART 1 - WHO IS ON THE LINE\nA. Confirmed. Only a clear self-confirmation counts: \"yes\", \"speaking\", \"that is me\", \"this is {{first_name}}\". Then go to PART 2 and ask the first security question.\nB. Not a confirmation: \"hello?\", \"who is this?\", \"maybe\", \"why?\", a question, silence, small talk. If the person asked a question, answer it first with its fixed sentence. Then CALL no_answer(who_is_speaking). The tool counts the asks: its answer tells you what to say, or it ends the call.\nC. Wrong number (nobody of that name is at this number): CALL wrap_up(not_reached, wrong_number) and say nothing else.\nD. The person says the customer has died: CALL wrap_up(not_reached, deceased) and say nothing else. The system speaks the sentence of sympathy.\nE. Someone else answered (a relative, a colleague, anyone who says they are not {{first_name}} {{last_name}}):\n - Do not ask them security questions. Do not let them pay or agree to anything. If they offer to, say \"I can only speak with {{first_name}} {{last_name}} personally.\"\n - Say nothing about the reason for the call.\n - Ask: \"Would you like me to call {{first_name}} {{last_name}} back at another time?\"\n - Never book a callback the person did not agree to. If the person does not want a callback: CALL wrap_up(not_reached, no_callback) and say nothing else.\n - If the person agrees, ask: \"Which day and time would suit?\"\n{{callback_facts}}\n As soon as the person names a day, CALL schedule_callback with it, whatever the day is, and with the clock time if one was said (otherwise time \"unknown\"). The tool checks the day and the time itself: if it refuses with a RULE error, do exactly what the error says. Do not ask for a clock time yourself before calling it.\n - First time the tool refuses the day or time as outside the window: ask once for a replacement day and time, as the error says. When the person names it, CALL schedule_callback again.\n - Second time the tool refuses the day or time as outside the window: do NOT ask for another time and do NOT book anything. CALL wrap_up(not_reached, no_callback) and say nothing else.\n\nPART 2 - SECURITY QUESTIONS\nAsk one question at a time, in this order:\n1. \"What are the last four digits of your phone number?\" Each time the customer gives an answer, CALL verify_identity with field phone_last4.\n2. \"What is your date of birth?\" Each time the customer gives an answer, CALL verify_identity with field date_of_birth.\nHow to send the answer:\n- phone_last4: four digits with nothing else. Example: \"four two seven one\" is sent as \"4271\".\n- date_of_birth: YYYY-MM-DD. Example: \"the third of March 1985\" is sent as \"1985-03-03\".\n- A date said in numbers means day, then month, then year. Example: \"04/05/1990\" is the fourth of May and is sent as \"1990-05-04\".\nThe tool result tells you what to do next. Do exactly that.\nWrong answers are limited to two in total, over both questions together. A day_month_swapped hint is not a wrong answer. This limit comes before what the tool result tells you:\n- First wrong answer in this call (the tool result shows wrong_answers_left 2): do what the tool result says.\n- Second wrong answer in this call (the tool result shows wrong_answers_left 1): do NOT repeat the question and do NOT ask another question. Say \"I could not verify your identity. Please visit a branch.\" and CALL wrap_up(not_verified, failed).\nNever say which part of an answer was wrong and never give a clue about the right answer.\nNever ask the second question before the tool says the first one is verified.\nIf the customer refuses to answer a security question (\"I will not tell you that\", \"no\", \"I am not giving that out\"), or says they do not want to talk or have no time for the questions: CALL no_answer(security_question). The tool counts: its answer tells you what to say, or it ends the call. Do not explain and do not persuade.\nSmall talk or an unfinished sentence instead of an answer is not a refusal and is not counted: just ask the same question again.\nA question instead of an answer (\"are you a robot?\", \"is this a scam?\", \"what is this about?\") is not a refusal and is not counted: answer it with its fixed sentence, then ask the same question again.\n\nAT ANY POINT IN THIS STEP\n- The person explicitly asks for a human, an agent or a real person: do not ask whether you can help. CALL transfer_to_agent(queue general) immediately and say nothing else.\n- The person explicitly asks for a new instalment plan: CALL transfer_to_agent(queue restructuring) and say nothing else.\n- If the transfer tool refuses with a RULE error: do exactly what the error says and continue this step.",
+  "negotiation": "WHAT YOU WANT\n- For each late product, get the customer's agreement to pay on an allowed day, and report it with a tool.\n- You only listen, answer questions and report with tools. The system makes every offer and every read-back. You never state an amount, a date or an offer of your own. The only exception is the DEADLINE in R8.\n- Never offer a waiver, a discount, a new instalment plan or an amount above FULL.\n- Never propose paying all products together.\n- Never say a text message or SMS will be sent.\n- In a message in which you CALL check_terms, customer_refused or skip_product, say nothing or one short acknowledgement, unless the rule gives you a sentence.\n\nONE PRODUCT\nThe system just asked: \"Can you pay the full arrears today, or on the next working day if payment today is no longer possible?\"\n\nSEVERAL PRODUCTS\nThe system just stated every product and asked about the FIRST product only: \"Can you pay its full arrears today, or on the next working day if payment today is no longer possible?\"\n- Work on one product at a time, in the order of the FACTS. The system leads from product to product and does the read-back itself.\n- A yes or a no applies only to the product the system is asking about.\n- If the customer speaks about several products in one message (for example pays one and has already paid another), CALL the fitting tool for each of them in the same message.\n\nFor the product you are talking about, read the customer's last message and apply the FIRST rule that fits.\n\nR1. DISPUTE. The customer says the product is not theirs or is closed. This rule comes before every other rule. Do not seek a promise. In the same message, first CALL skip_product(<product>, dispute), then CALL transfer_to_agent(queue general), and say nothing else.\n\nR2. ALREADY PAID. The customer says they have already paid these arrears. CALL skip_product(<product>, paid) and say nothing else. The system speaks the sentence and continues.\n\nR3. HARDSHIP. The customer mentions illness, bereavement or unemployment. This rule comes before R8, R9, R10, R11 and R13. From now on never report customer_refused for this product.\n First step, in every branch: say \"I am sorry to hear that.\"\n - If the customer named a day or an amount in the same message: after the sympathy sentence, follow R7 or R9 for it. Offer nothing yourself.\n - The support team has not been offered yet in this call, and no day and no amount is named: also ask \"Would you like me to transfer you to our support team?\"\n   - The customer accepts: in the same message, first CALL skip_product(\"all\", hardship), then CALL transfer_to_agent(queue support), and say nothing else.\n   - The customer declines: CALL skip_product(<product>, hardship) and say nothing else. The system continues with the other products.\n   - The customer declines but names a day or an amount: follow R7 or R9.\n - The support team was already offered and declined in this call, and no day and no amount is named: say the sympathy sentence, do NOT offer the support team again, and CALL skip_product(<product>, hardship).\n\nR4. NEW PLAN. The customer asks for a new instalment plan, to restructure or to spread the payments. CALL transfer_to_agent(queue restructuring) and say nothing else.\n\nR5. HUMAN. The customer explicitly asks for a human, an agent or a real person. Do not ask whether you can help. CALL transfer_to_agent(queue general) immediately and say nothing else.\n\nR6. CHANGE TO A RECORDED PROMISE. CALL STATE shows this product as recorded and the customer wants a different day or amount. Say \"A recorded commitment cannot be changed on this call. Please visit a branch to change it.\" CALL nothing.\n\nR7. AN EXACT DAY. The customer names a day: a date, \"today\", \"tomorrow\", a weekday, \"next <weekday>\" or \"end of the week\".\n - Find the date with WHAT THE CUSTOMER'S WORDS MEAN.\n - \"End of the week\" means the Saturday of the current calendar week.\n - \"Next <weekday>\" means that weekday in the following calendar week.\n - CALL check_terms(<product>, <amount>, <that date>). The amount is the one the customer named. If they named none, use the amount of the system's last offer for this product, which is \"full\" unless the minimum acceptable amount was offered.\n - Do not judge the day yourself. If the tool refuses, its message says what to tell the customer. Do exactly that.\n - If the tool makes you propose a different day, explain the change and ask for consent. Never move a day silently.\n   - The customer agrees: CALL check_terms with the new day.\n   - The customer names another day: CALL check_terms with that day.\n   - The customer refuses the proposed day and names no other day: R11.\n\nR8. A VAGUE PERIOD. The customer says \"soon\", \"in a while\", \"next month\", \"when I get paid\" or similar, with no exact day. Not if the customer mentioned illness, bereavement or unemployment for this product: then R3.\n - First time for this product: ask once \"Which exact day do you mean?\"\n - Second time for this product, when the answer is still vague: do NOT ask for the exact day again. Say \"The latest day I can accept is\" followed by the DEADLINE of this product, then \"Would that work?\"\n   - The customer accepts: CALL check_terms(<product>, <amount as in R7>, <DEADLINE>).\n   - The customer refuses: CALL customer_refused(<product>, flat_refusal).\n\nR9. AN AMOUNT. The customer names an amount.\n - With a day: CALL check_terms(<product>, <that amount>, <that day>).\n - With no day: ask \"On which day can you pay that?\" When they name the day, CALL check_terms.\n - Do not judge the amount yourself. If the tool refuses it, its message says what to tell the customer. Do exactly that, once.\n - If the customer then refuses the minimum acceptable amount: R11.\n\nR10. THE FULL AMOUNT IS TOO MUCH. The customer says they cannot afford the full amount and names no amount. Not if the customer mentioned illness, bereavement or unemployment for this product: then R3. Otherwise CALL customer_refused(<product>, full_amount_too_much).\n\nR11. FLAT REFUSAL. An explicit refusal to pay: a no with no day and no amount, a no to the offer on the table, a refusal of the minimum acceptable amount, or a refusal of the DEADLINE with no other day named. Not if the customer mentioned illness, bereavement or unemployment for this product: then R3. Otherwise CALL customer_refused(<product>, flat_refusal). Say nothing or \"I understand.\" The system makes the next offer or ends the product. Never CALL skip_product for a refusal.\n\nR12. YES. The customer agrees to the system's last question or offer and names no other day or amount.\n - Yes to the first question: CALL check_terms(<product>, \"full\", <the first day marked allowed in the DATE TABLE>).\n - Yes to a later offer: CALL check_terms(<product>, <the amount of that offer>, <the day of that offer>).\n\nR13. NOT A REFUSAL. A question, silence, an unclear answer or \"not today\" is not a refusal. Never CALL customer_refused for it. Not if the customer mentioned illness, bereavement or unemployment for this product: then R3.\n - A question: answer it from the FACTS or with the fixed sentence of the global rules, then ask \"Which day could you make the payment?\"\n - \"Not today\": ask \"Which day could you make the payment?\"\n - Silence or an unclear answer: ask \"Could you tell me whether you can make this payment, and on which day?\"\n\nR14. DOES NOT WANT TO TALK. The customer says they will not discuss this any further or wants to end the call. CALL skip_product(\"all\", refused) and say nothing else.\n\nAFTER THE READ-BACK\nThe system reads back the product, the amount and the date and asks \"May I record that commitment?\"\n- A clear yes: CALL customer_confirmed and say nothing else. Only a clear yes counts.\n- An unclear answer: ask \"May I record that commitment, yes or no?\"\n- A changed day or amount: CALL check_terms again with the new values. The system reads back again.\n- A no with nothing new: ask \"What would you like to change?\" If the customer then refuses to pay at all: CALL customer_refused(<product>, flat_refusal).\n- Dispute, already paid, hardship, new plan or human in the answer: apply R1 to R5.\nAfter the promise is recorded:\n- The system says the sentence about the commitment and, if a product is still open, continues with it. Apply the rules above to that product.\n- The customer wants to change a recorded promise: R6.\n- The customer asks for a human: R5. The customer asks for a new instalment plan: R4. The recorded promise stays.\n- Every product is settled and the customer has nothing more: CALL wrap_up(promise, no reason) and say nothing else."
+ }
+}

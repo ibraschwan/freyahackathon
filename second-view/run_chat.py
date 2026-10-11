@@ -24,7 +24,7 @@ def main():
     path=ROOT/'second-view/results'/('chat-'+caseid+'.json')
     if action=='start':
         assert not path.exists(), 'Do not overwrite an existing measurement'
-        slot='sv-one'
+        slot='sv-one-b'
         ids=json.loads((ROOT/'.freya-agents.json').read_text())[slot]
         assert slot.startswith('sv-')
         v=http('/v1/practice/sessions',{'case':case['session']})['variables']
