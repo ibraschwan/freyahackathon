@@ -1,0 +1,1363 @@
+{
+ "openapi": "3.0.3",
+ "info": {
+  "title": "Freya Bank voice assistant: statement and debt services",
+  "version": "2026-10-01"
+ },
+ "servers": [
+  {
+   "url": "https://freyahackathon.stajyer.app/voice/v1"
+  }
+ ],
+ "paths": {
+  "/cards.list": {
+   "post": {
+    "summary": "Called with the customer number; gives back the customer's cards the assistant may talk about.",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "data": {
+          "type": "object",
+          "properties": {
+           "customerNo": {
+            "type": "string",
+            "description": "Customer number handed over by the phone menu, e.g. \"90000001\". May be sent as a string or as a number, both are accepted."
+           },
+           "aiFlow": {
+            "type": "string",
+            "enum": [
+             "CardOps"
+            ],
+            "description": "Tells the bank which use case is asking; for this one it is \"CardOps\" (not validated in test)."
+           }
+          },
+          "required": [
+           "customerNo"
+          ]
+         },
+         "call": {
+          "type": "object",
+          "description": "Call metadata the bank logs; nothing in the contract depends on it and the test environment ignores it.",
+          "properties": {
+           "ani": {
+            "type": "string",
+            "description": "Caller's number."
+           },
+           "lang": {
+            "type": "string",
+            "description": "Call language, e.g. \"tr\"."
+           }
+          }
+         }
+        },
+        "required": [
+         "data"
+        ]
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Success when result.returnCode is \"1\". Errors (no data object): 404 FB_IVR_CHANNEL_102 (customer has no valid card, WARNING), 400 INVALID_ARGUMENTS_ERROR, 500 FBE00099.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "data": {
+           "type": "object",
+           "properties": {
+            "cards": {
+             "type": "array",
+             "description": "Only active cards come back. Two cards can have the same product name and the same last four digits.",
+             "items": {
+              "type": "object",
+              "properties": {
+               "cardNumber": {
+                "type": "string",
+                "description": "Card number; in the test environment masked, first 6 and last 4 digits visible (e.g. 540000******1234). Send it to the other services exactly as returned here."
+               },
+               "cardNumberLast4": {
+                "type": "string",
+                "description": "Last four digits of the card. Not necessarily unique."
+               },
+               "productName": {
+                "type": "string",
+                "description": "Card product name, free text from the card system; can be empty."
+               },
+               "status": {
+                "type": "string",
+                "enum": [
+                 "A"
+                ],
+                "description": "Card status; only active cards (\"A\") come back."
+               },
+               "isMainCard": {
+                "type": "boolean",
+                "description": "false for a card that isn't the customer's own main card."
+               }
+              }
+             }
+            },
+            "validCardsCount": {
+             "type": "integer",
+             "description": "Number of valid cards in the list."
+            },
+            "exitState": {
+             "type": "string",
+             "enum": [
+              "1_CARD",
+              "MULTI_CARD"
+             ],
+             "description": "\"1_CARD\" or \"MULTI_CARD\"."
+            }
+           }
+          },
+          "result": {
+           "type": "object",
+           "properties": {
+            "guid": {
+             "type": "string",
+             "description": "Trace id."
+            },
+            "returnCode": {
+             "type": "string",
+             "description": "\"1\" on success, otherwise the error code. Same value as code."
+            },
+            "messageText": {
+             "type": "string",
+             "description": "Message for logs; not to be read to the caller. Same value as message."
+            },
+            "code": {
+             "type": "string",
+             "description": "Same value as returnCode."
+            },
+            "message": {
+             "type": "string",
+             "description": "Same value as messageText."
+            },
+            "type": {
+             "type": "string",
+             "nullable": true,
+             "enum": [
+              "ERROR",
+              "WARNING",
+              null
+             ],
+             "description": "null on success; \"ERROR\" or \"WARNING\" on errors."
+            },
+            "details": {
+             "type": "object",
+             "properties": {
+              "guid": {
+               "type": "string",
+               "description": "Trace id."
+              },
+              "rootCause": {
+               "type": "string",
+               "nullable": true,
+               "description": "Diagnostic string; log it, don't branch on it."
+              },
+              "errorOrigin": {
+               "type": "string",
+               "nullable": true,
+               "description": "Diagnostic string; log it, don't branch on it."
+              }
+             }
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/cards.balance": {
+   "post": {
+    "summary": "Called with the card number; gives back statement and due dates and the debt per currency.",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "data": {
+          "type": "object",
+          "properties": {
+           "cardNumber": {
+            "type": "string",
+            "description": "Card number exactly as cards.list returned it (e.g. 540000******1234)."
+           }
+          },
+          "required": [
+           "cardNumber"
+          ]
+         },
+         "call": {
+          "type": "object",
+          "description": "Call metadata the bank logs; ignored by the test environment.",
+          "properties": {
+           "ani": {
+            "type": "string",
+            "description": "Caller's number."
+           },
+           "lang": {
+            "type": "string",
+            "description": "Call language, e.g. \"tr\"."
+           }
+          }
+         }
+        },
+        "required": [
+         "data"
+        ]
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Success when result.returnCode is \"1\". Errors (no data object): 400 INVALID_ARGUMENTS_ERROR (empty card number), 404 FB_IVR_CHANNEL_120 (card not found), 500 FBE00099.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "data": {
+           "type": "object",
+           "properties": {
+            "cardNumber": {
+             "type": "string",
+             "description": "Masked differently from the card list (first 4 + last 4, e.g. 5400********1234). Don't use it to match against the list."
+            },
+            "cardNumberLast4": {
+             "type": "string",
+             "description": "Last four digits of the card."
+            },
+            "productName": {
+             "type": "string",
+             "description": "Card product name."
+            },
+            "statementDate": {
+             "type": "string",
+             "description": "Date of the last issued statement, dd.MM.yyyy."
+            },
+            "lastPayDate": {
+             "type": "string",
+             "description": "Due date of the last issued statement, dd.MM.yyyy."
+            },
+            "nextStatementDate": {
+             "type": "string",
+             "description": "Coming statement date, dd.MM.yyyy."
+            },
+            "nextLastPayDate": {
+             "type": "string",
+             "description": "Coming due date, dd.MM.yyyy."
+            },
+            "debtTL": {
+             "type": "object",
+             "description": "Turkish Lira debt block. A block can be missing; missing is not the same as NO_DEBT.",
+             "properties": {
+              "statementPaymentStatus": {
+               "type": "string",
+               "enum": [
+                "HAS_DEBT",
+                "NO_DEBT"
+               ],
+               "description": "Statement debt status for this currency."
+              },
+              "transferAmount": {
+               "type": "number",
+               "description": "Amount carried over from the previous period."
+              },
+              "statementDebt": {
+               "type": "number",
+               "description": "Statement debt."
+              },
+              "minPayment": {
+               "type": "number",
+               "description": "Minimum payment on the statement."
+              },
+              "remainingDebt": {
+               "type": "number",
+               "description": "What is left of the statement debt after payments made since."
+              },
+              "remainingMinPayment": {
+               "type": "number",
+               "description": "What is left of the minimum payment after payments made since."
+              },
+              "currentPeriodExpense": {
+               "type": "number",
+               "description": "Spending after the statement."
+              },
+              "totalDebt": {
+               "type": "number",
+               "description": "Total debt including spending after the statement; can be negative (credit balance)."
+              },
+              "totalDebtPaymentStatus": {
+               "type": "string",
+               "enum": [
+                "HAS_DEBT",
+                "NO_DEBT"
+               ],
+               "description": "Total debt status for this currency."
+              },
+              "remainAutomaticPaymentAmount": {
+               "type": "number",
+               "description": "Remaining automatic payment amount; only meaningful when automaticPaymentFlag is \"Y\"."
+              }
+             }
+            },
+            "debtUSD": {
+             "type": "object",
+             "description": "US Dollar debt block. A block can be missing; missing is not the same as NO_DEBT.",
+             "properties": {
+              "statementPaymentStatus": {
+               "type": "string",
+               "enum": [
+                "HAS_DEBT",
+                "NO_DEBT"
+               ],
+               "description": "Statement debt status for this currency."
+              },
+              "transferAmount": {
+               "type": "number",
+               "description": "Amount carried over from the previous period."
+              },
+              "statementDebt": {
+               "type": "number",
+               "description": "Statement debt."
+              },
+              "minPayment": {
+               "type": "number",
+               "description": "Minimum payment on the statement."
+              },
+              "remainingDebt": {
+               "type": "number",
+               "description": "What is left of the statement debt after payments made since."
+              },
+              "remainingMinPayment": {
+               "type": "number",
+               "description": "What is left of the minimum payment after payments made since."
+              },
+              "currentPeriodExpense": {
+               "type": "number",
+               "description": "Spending after the statement."
+              },
+              "totalDebt": {
+               "type": "number",
+               "description": "Total debt including spending after the statement; can be negative (credit balance)."
+              },
+              "totalDebtPaymentStatus": {
+               "type": "string",
+               "enum": [
+                "HAS_DEBT",
+                "NO_DEBT"
+               ],
+               "description": "Total debt status for this currency."
+              },
+              "remainAutomaticPaymentAmount": {
+               "type": "number",
+               "description": "Remaining automatic payment amount; only meaningful when automaticPaymentFlag is \"Y\"."
+              }
+             }
+            },
+            "debtEUR": {
+             "type": "object",
+             "description": "Euro debt block. A block can be missing; missing is not the same as NO_DEBT.",
+             "properties": {
+              "statementPaymentStatus": {
+               "type": "string",
+               "enum": [
+                "HAS_DEBT",
+                "NO_DEBT"
+               ],
+               "description": "Statement debt status for this currency."
+              },
+              "transferAmount": {
+               "type": "number",
+               "description": "Amount carried over from the previous period."
+              },
+              "statementDebt": {
+               "type": "number",
+               "description": "Statement debt."
+              },
+              "minPayment": {
+               "type": "number",
+               "description": "Minimum payment on the statement."
+              },
+              "remainingDebt": {
+               "type": "number",
+               "description": "What is left of the statement debt after payments made since."
+              },
+              "remainingMinPayment": {
+               "type": "number",
+               "description": "What is left of the minimum payment after payments made since."
+              },
+              "currentPeriodExpense": {
+               "type": "number",
+               "description": "Spending after the statement."
+              },
+              "totalDebt": {
+               "type": "number",
+               "description": "Total debt including spending after the statement; can be negative (credit balance)."
+              },
+              "totalDebtPaymentStatus": {
+               "type": "string",
+               "enum": [
+                "HAS_DEBT",
+                "NO_DEBT"
+               ],
+               "description": "Total debt status for this currency."
+              },
+              "remainAutomaticPaymentAmount": {
+               "type": "number",
+               "description": "Remaining automatic payment amount; only meaningful when automaticPaymentFlag is \"Y\"."
+              }
+             }
+            },
+            "debtGBP": {
+             "type": "object",
+             "description": "Pound Sterling debt block. A block can be missing (some cards have no GBP block at all); missing is not the same as NO_DEBT.",
+             "properties": {
+              "statementPaymentStatus": {
+               "type": "string",
+               "enum": [
+                "HAS_DEBT",
+                "NO_DEBT"
+               ],
+               "description": "Statement debt status for this currency."
+              },
+              "transferAmount": {
+               "type": "number",
+               "description": "Amount carried over from the previous period."
+              },
+              "statementDebt": {
+               "type": "number",
+               "description": "Statement debt."
+              },
+              "minPayment": {
+               "type": "number",
+               "description": "Minimum payment on the statement."
+              },
+              "remainingDebt": {
+               "type": "number",
+               "description": "What is left of the statement debt after payments made since."
+              },
+              "remainingMinPayment": {
+               "type": "number",
+               "description": "What is left of the minimum payment after payments made since."
+              },
+              "currentPeriodExpense": {
+               "type": "number",
+               "description": "Spending after the statement."
+              },
+              "totalDebt": {
+               "type": "number",
+               "description": "Total debt including spending after the statement; can be negative (credit balance)."
+              },
+              "totalDebtPaymentStatus": {
+               "type": "string",
+               "enum": [
+                "HAS_DEBT",
+                "NO_DEBT"
+               ],
+               "description": "Total debt status for this currency."
+              },
+              "remainAutomaticPaymentAmount": {
+               "type": "number",
+               "description": "Remaining automatic payment amount; only meaningful when automaticPaymentFlag is \"Y\"."
+              }
+             }
+            },
+            "statementPaymentStatus": {
+             "type": "string",
+             "enum": [
+              "HAS_DEBT",
+              "NO_DEBT"
+             ],
+             "description": "Statement debt status for the card overall."
+            },
+            "totalDebtPaymentStatus": {
+             "type": "string",
+             "enum": [
+              "HAS_DEBT",
+              "NO_DEBT"
+             ],
+             "description": "Total debt status for the card overall."
+            },
+            "automaticPaymentFlag": {
+             "type": "string",
+             "enum": [
+              "Y",
+              "N"
+             ],
+             "description": "Whether the card has an automatic payment instruction."
+            }
+           }
+          },
+          "result": {
+           "type": "object",
+           "properties": {
+            "guid": {
+             "type": "string",
+             "description": "Trace id."
+            },
+            "returnCode": {
+             "type": "string",
+             "description": "\"1\" on success, otherwise the error code. Same value as code."
+            },
+            "messageText": {
+             "type": "string",
+             "description": "Message for logs; not to be read to the caller. Same value as message."
+            },
+            "code": {
+             "type": "string",
+             "description": "Same value as returnCode."
+            },
+            "message": {
+             "type": "string",
+             "description": "Same value as messageText."
+            },
+            "type": {
+             "type": "string",
+             "nullable": true,
+             "enum": [
+              "ERROR",
+              "WARNING",
+              null
+             ],
+             "description": "null on success; \"ERROR\" or \"WARNING\" on errors."
+            },
+            "details": {
+             "type": "object",
+             "properties": {
+              "guid": {
+               "type": "string",
+               "description": "Trace id."
+              },
+              "rootCause": {
+               "type": "string",
+               "nullable": true,
+               "description": "Diagnostic string; log it, don't branch on it."
+              },
+              "errorOrigin": {
+               "type": "string",
+               "nullable": true,
+               "description": "Diagnostic string; log it, don't branch on it."
+              }
+             }
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/statement.week.get": {
+   "post": {
+    "summary": "Called with the card number; gives back the card's current statement week and day and the joint statement info.",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "data": {
+          "type": "object",
+          "properties": {
+           "cardNumber": {
+            "type": "string",
+            "description": "Card number exactly as cards.list returned it."
+           }
+          },
+          "required": [
+           "cardNumber"
+          ]
+         },
+         "call": {
+          "type": "object",
+          "description": "Call metadata the bank logs; ignored by the test environment.",
+          "properties": {
+           "ani": {
+            "type": "string",
+            "description": "Caller's number."
+           },
+           "lang": {
+            "type": "string",
+            "description": "Call language, e.g. \"tr\"."
+           }
+          }
+         }
+        },
+        "required": [
+         "data"
+        ]
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Success when result.returnCode is \"1\". Errors (no data object): 400 INVALID_ARGUMENTS_ERROR, 404 FB_IVR_CHANNEL_121 (card not found), 500 FBE00099.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "data": {
+           "type": "object",
+           "properties": {
+            "cardNumber": {
+             "type": "string",
+             "description": "Card number, masked first 6 + last 4 in the test environment."
+            },
+            "cardNumberLast4": {
+             "type": "string",
+             "description": "Last four digits of the card."
+            },
+            "productName": {
+             "type": "string",
+             "description": "Card product name."
+            },
+            "statementWeek": {
+             "type": "integer",
+             "description": "1 to 4, the week of the month the statement is cut."
+            },
+            "statementDay": {
+             "type": "integer",
+             "description": "Day of the month the statement is cut."
+            },
+            "statementDate": {
+             "type": "string",
+             "description": "Statement date, dd.MM.yyyy."
+            },
+            "lastPayDate": {
+             "type": "string",
+             "description": "Due date, dd.MM.yyyy."
+            },
+            "nextStatementDate": {
+             "type": "string",
+             "description": "Next statement date, dd.MM.yyyy."
+            },
+            "nextLastPayDate": {
+             "type": "string",
+             "description": "Next due date, dd.MM.yyyy."
+            },
+            "relationType": {
+             "type": "string",
+             "enum": [
+              "",
+              "M",
+              "C"
+             ],
+             "description": "Empty string when the card has its own statement. \"M\" = this is the main card of a pair sharing one statement, \"C\" = this is the card linked to it."
+            },
+            "relatedCardNumber": {
+             "type": "string",
+             "description": "The other card of the shared statement; empty string otherwise."
+            },
+            "relatedCardProductName": {
+             "type": "string",
+             "description": "Product name of the other card of the shared statement; empty string otherwise."
+            }
+           }
+          },
+          "result": {
+           "type": "object",
+           "properties": {
+            "guid": {
+             "type": "string",
+             "description": "Trace id."
+            },
+            "returnCode": {
+             "type": "string",
+             "description": "\"1\" on success, otherwise the error code. Same value as code."
+            },
+            "messageText": {
+             "type": "string",
+             "description": "Message for logs; not to be read to the caller. Same value as message."
+            },
+            "code": {
+             "type": "string",
+             "description": "Same value as returnCode."
+            },
+            "message": {
+             "type": "string",
+             "description": "Same value as messageText."
+            },
+            "type": {
+             "type": "string",
+             "nullable": true,
+             "enum": [
+              "ERROR",
+              "WARNING",
+              null
+             ],
+             "description": "null on success; \"ERROR\" or \"WARNING\" on errors."
+            },
+            "details": {
+             "type": "object",
+             "properties": {
+              "guid": {
+               "type": "string",
+               "description": "Trace id."
+              },
+              "rootCause": {
+               "type": "string",
+               "nullable": true,
+               "description": "Diagnostic string; log it, don't branch on it."
+              },
+              "errorOrigin": {
+               "type": "string",
+               "nullable": true,
+               "description": "Diagnostic string; log it, don't branch on it."
+              }
+             }
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/statement.week.decide": {
+   "post": {
+    "summary": "Preview only: called with the card number and the requested week; gives back what the dates would be with that week. Does not change the card.",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "data": {
+          "type": "object",
+          "properties": {
+           "cardNumber": {
+            "type": "string",
+            "description": "Card number exactly as cards.list returned it."
+           },
+           "newStatementWeek": {
+            "type": "integer",
+            "enum": [
+             1,
+             2,
+             3,
+             4
+            ],
+            "description": "Requested statement week, 1-4 (number or string both fine). Do not call with the week the card already has; that gives an error."
+           },
+           "statementDay": {
+            "type": "integer",
+            "description": "The card's current statementDay from statement.week.get."
+           }
+          },
+          "required": [
+           "cardNumber",
+           "newStatementWeek",
+           "statementDay"
+          ]
+         },
+         "call": {
+          "type": "object",
+          "description": "Call metadata the bank logs; ignored by the test environment.",
+          "properties": {
+           "ani": {
+            "type": "string",
+            "description": "Caller's number."
+           },
+           "lang": {
+            "type": "string",
+            "description": "Call language, e.g. \"tr\"."
+           }
+          }
+         }
+        },
+        "required": [
+         "data"
+        ]
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Success when result.returnCode is \"1\". Errors (no data object): 400 INVALID_ARGUMENTS_ERROR, 500 FBE00099.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "data": {
+           "type": "object",
+           "properties": {
+            "statementDate": {
+             "type": "string",
+             "description": "First statement date under the requested week, dd.MM.yyyy."
+            },
+            "statementDueDate": {
+             "type": "string",
+             "description": "First due date under the requested week, dd.MM.yyyy."
+            },
+            "statementDay": {
+             "type": "integer",
+             "description": "Day of the month the card would get with the requested week."
+            },
+            "responseCode": {
+             "type": "integer",
+             "description": "0 = fine."
+            },
+            "responseMessage": {
+             "type": "string",
+             "description": "Response message, e.g. \"Success\"."
+            }
+           }
+          },
+          "result": {
+           "type": "object",
+           "properties": {
+            "guid": {
+             "type": "string",
+             "description": "Trace id."
+            },
+            "returnCode": {
+             "type": "string",
+             "description": "\"1\" on success, otherwise the error code. Same value as code."
+            },
+            "messageText": {
+             "type": "string",
+             "description": "Message for logs; not to be read to the caller. Same value as message."
+            },
+            "code": {
+             "type": "string",
+             "description": "Same value as returnCode."
+            },
+            "message": {
+             "type": "string",
+             "description": "Same value as messageText."
+            },
+            "type": {
+             "type": "string",
+             "nullable": true,
+             "enum": [
+              "ERROR",
+              "WARNING",
+              null
+             ],
+             "description": "null on success; \"ERROR\" or \"WARNING\" on errors."
+            },
+            "details": {
+             "type": "object",
+             "properties": {
+              "guid": {
+               "type": "string",
+               "description": "Trace id."
+              },
+              "rootCause": {
+               "type": "string",
+               "nullable": true,
+               "description": "Diagnostic string; log it, don't branch on it."
+              },
+              "errorOrigin": {
+               "type": "string",
+               "nullable": true,
+               "description": "Diagnostic string; log it, don't branch on it."
+              }
+             }
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/statement.week.change": {
+   "post": {
+    "summary": "Called with the card number and the requested week; changes the card's statement week. Call it only after the caller has agreed to the dates from statement.week.decide.",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "data": {
+          "type": "object",
+          "properties": {
+           "cardNumber": {
+            "type": "string",
+            "description": "Card number exactly as cards.list returned it."
+           },
+           "newStatementWeek": {
+            "type": "integer",
+            "enum": [
+             1,
+             2,
+             3,
+             4
+            ],
+            "description": "Requested statement week, 1-4 (number or string both fine)."
+           },
+           "statementDay": {
+            "type": "integer",
+            "description": "The card's current statement day; required by the request model even though the backend recalculates the day."
+           }
+          },
+          "required": [
+           "cardNumber",
+           "newStatementWeek",
+           "statementDay"
+          ]
+         },
+         "call": {
+          "type": "object",
+          "description": "Call metadata the bank logs; ignored by the test environment.",
+          "properties": {
+           "ani": {
+            "type": "string",
+            "description": "Caller's number."
+           },
+           "lang": {
+            "type": "string",
+            "description": "Call language, e.g. \"tr\"."
+           }
+          }
+         }
+        },
+        "required": [
+         "data"
+        ]
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Success = exitState \"OK\" and responseCode 0 (result.returnCode \"1\"). Errors (no data object): 400 INVALID_ARGUMENTS_ERROR, 401 (token), 500 FBE00099.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "data": {
+           "type": "object",
+           "properties": {
+            "responseCode": {
+             "type": "integer",
+             "description": "0 on success."
+            },
+            "responseMessage": {
+             "type": "string",
+             "description": "Response message, e.g. \"00\"."
+            },
+            "statementWeek": {
+             "type": "string",
+             "description": "New statement week, returned as a string here."
+            },
+            "statementDay": {
+             "type": "string",
+             "description": "Returned as a string here; ignore it, the dates to tell the caller are the ones from statement.week.decide."
+            },
+            "exitState": {
+             "type": "string",
+             "description": "\"OK\" on success."
+            }
+           }
+          },
+          "result": {
+           "type": "object",
+           "properties": {
+            "guid": {
+             "type": "string",
+             "description": "Trace id."
+            },
+            "returnCode": {
+             "type": "string",
+             "description": "\"1\" on success, otherwise the error code. Same value as code."
+            },
+            "messageText": {
+             "type": "string",
+             "description": "Message for logs; not to be read to the caller. Same value as message."
+            },
+            "code": {
+             "type": "string",
+             "description": "Same value as returnCode."
+            },
+            "message": {
+             "type": "string",
+             "description": "Same value as messageText."
+            },
+            "type": {
+             "type": "string",
+             "nullable": true,
+             "enum": [
+              "ERROR",
+              "WARNING",
+              null
+             ],
+             "description": "null on success; \"ERROR\" or \"WARNING\" on errors."
+            },
+            "details": {
+             "type": "object",
+             "properties": {
+              "guid": {
+               "type": "string",
+               "description": "Trace id."
+              },
+              "rootCause": {
+               "type": "string",
+               "nullable": true,
+               "description": "Diagnostic string; log it, don't branch on it."
+              },
+              "errorOrigin": {
+               "type": "string",
+               "nullable": true,
+               "description": "Diagnostic string; log it, don't branch on it."
+              }
+             }
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/contact.email.get": {
+   "post": {
+    "summary": "Called with the customer number; gives back the registered e-mail / phone.",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "data": {
+          "type": "object",
+          "properties": {
+           "customerNo": {
+            "type": "string",
+            "description": "Customer number, e.g. 90000001. May be sent as a string or as a number."
+           },
+           "intAddressInfoType": {
+            "type": "string",
+            "enum": [
+             "E",
+             "P",
+             "B"
+            ],
+            "description": "\"E\" e-mail, \"P\" phone, \"B\" both. An empty value gives a 400."
+           }
+          },
+          "required": [
+           "customerNo",
+           "intAddressInfoType"
+          ]
+         },
+         "call": {
+          "type": "object",
+          "description": "Call metadata the bank logs; ignored by the test environment.",
+          "properties": {
+           "ani": {
+            "type": "string",
+            "description": "Caller's number."
+           },
+           "lang": {
+            "type": "string",
+            "description": "Call language, e.g. \"tr\"."
+           }
+          }
+         }
+        },
+        "required": [
+         "data"
+        ]
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Success when result.returnCode is \"1\". Errors (no data object): 400 INVALID_ARGUMENTS_ERROR, 500 FBE00099.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "data": {
+           "type": "object",
+           "properties": {
+            "communicationType": {
+             "type": "string",
+             "description": "E.g. \"Both\", or \"Phone\" when only a phone is registered."
+            },
+            "ibanCountryCode": {
+             "type": "string",
+             "description": "Phone country code (the iban prefix is historical, nothing to do with IBANs)."
+            },
+            "ibanAreaCode": {
+             "type": "string",
+             "description": "Phone area code."
+            },
+            "ibanPhoneNum": {
+             "type": "string",
+             "description": "Phone number."
+            },
+            "ibanEmail": {
+             "type": "string",
+             "description": "The registered e-mail address; empty string when no e-mail is registered."
+            },
+            "ttsEmail": {
+             "type": "string",
+             "description": "The same address prepared for reading aloud; empty string when no e-mail is registered."
+            },
+            "commGramType": {
+             "type": "string",
+             "description": "E.g. \"A\"."
+            },
+            "exitState": {
+             "type": "string",
+             "description": "E.g. \"Done\"."
+            }
+           }
+          },
+          "result": {
+           "type": "object",
+           "properties": {
+            "guid": {
+             "type": "string",
+             "description": "Trace id."
+            },
+            "returnCode": {
+             "type": "string",
+             "description": "\"1\" on success, otherwise the error code. Same value as code."
+            },
+            "messageText": {
+             "type": "string",
+             "description": "Message for logs; not to be read to the caller. Same value as message."
+            },
+            "code": {
+             "type": "string",
+             "description": "Same value as returnCode."
+            },
+            "message": {
+             "type": "string",
+             "description": "Same value as messageText."
+            },
+            "type": {
+             "type": "string",
+             "nullable": true,
+             "enum": [
+              "ERROR",
+              "WARNING",
+              null
+             ],
+             "description": "null on success; \"ERROR\" or \"WARNING\" on errors."
+            },
+            "details": {
+             "type": "object",
+             "properties": {
+              "guid": {
+               "type": "string",
+               "description": "Trace id."
+              },
+              "rootCause": {
+               "type": "string",
+               "nullable": true,
+               "description": "Diagnostic string; log it, don't branch on it."
+              },
+              "errorOrigin": {
+               "type": "string",
+               "nullable": true,
+               "description": "Diagnostic string; log it, don't branch on it."
+              }
+             }
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/statement.pdf.send": {
+   "post": {
+    "summary": "Called with customer, card, currency, statement date and address; sends the statement PDF by e-mail to the address in the request.",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "type": "object",
+        "properties": {
+         "data": {
+          "type": "object",
+          "properties": {
+           "customerNo": {
+            "type": "string",
+            "description": "Customer number, e.g. \"90000001\". May be sent as a string or as a number."
+           },
+           "cardNumber": {
+            "type": "string",
+            "description": "Card number exactly as cards.list returned it."
+           },
+           "currencyType": {
+            "type": "string",
+            "enum": [
+             "TL",
+             "USD",
+             "EUR",
+             "GBP"
+            ],
+            "description": "Currency of the statement."
+           },
+           "statementDate": {
+            "type": "string",
+            "description": "The statementDate from cards.balance (the issued statement), dd.MM.yyyy."
+           },
+           "emailAddress": {
+            "type": "string",
+            "description": "Address the statement is sent to; the backend does not check it against the registered address."
+           }
+          },
+          "required": [
+           "customerNo",
+           "cardNumber",
+           "currencyType",
+           "statementDate",
+           "emailAddress"
+          ]
+         },
+         "call": {
+          "type": "object",
+          "description": "Call metadata the bank logs; ignored by the test environment.",
+          "properties": {
+           "ani": {
+            "type": "string",
+            "description": "Caller's number."
+           },
+           "lang": {
+            "type": "string",
+            "description": "Call language, e.g. \"tr\"."
+           }
+          }
+         }
+        },
+        "required": [
+         "data"
+        ]
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Success when result.returnCode is \"1\" (data.exitState \"DONE\"). Errors (no data object): 400 INVALID_ARGUMENTS_ERROR, 404 FB_IVR_CHANNEL_107 (no PDF for that statement), 500 FBE00099.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "properties": {
+          "data": {
+           "type": "object",
+           "properties": {
+            "exitState": {
+             "type": "string",
+             "description": "\"DONE\" on a successful send."
+            }
+           }
+          },
+          "result": {
+           "type": "object",
+           "properties": {
+            "guid": {
+             "type": "string",
+             "description": "Trace id."
+            },
+            "returnCode": {
+             "type": "string",
+             "description": "\"1\" on success, otherwise the error code. Same value as code."
+            },
+            "messageText": {
+             "type": "string",
+             "description": "Message for logs; not to be read to the caller. Same value as message."
+            },
+            "code": {
+             "type": "string",
+             "description": "Same value as returnCode."
+            },
+            "message": {
+             "type": "string",
+             "description": "Same value as messageText."
+            },
+            "type": {
+             "type": "string",
+             "nullable": true,
+             "enum": [
+              "ERROR",
+              "WARNING",
+              null
+             ],
+             "description": "null on success; \"ERROR\" or \"WARNING\" on errors."
+            },
+            "details": {
+             "type": "object",
+             "properties": {
+              "guid": {
+               "type": "string",
+               "description": "Trace id."
+              },
+              "rootCause": {
+               "type": "string",
+               "nullable": true,
+               "description": "Diagnostic string; log it, don't branch on it."
+              },
+              "errorOrigin": {
+               "type": "string",
+               "nullable": true,
+               "description": "Diagnostic string; log it, don't branch on it."
+              }
+             }
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ }
+}
