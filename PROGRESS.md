@@ -1,6 +1,6 @@
 # Progress: Build the Builder (Freya hackathon)
 
-State as of Sunday 11 October 2026, 18:30 Istanbul. Hidden briefs open at 20:00, submission closes at 23:00.
+State as of Sunday 11 October 2026, 19:05 Istanbul. Hidden briefs open at 20:00, submission closes at 23:00.
 
 ## Where we are
 
@@ -44,11 +44,14 @@ Same 100 scenarios unless said otherwise. "Passed" is the judge's verdict on the
 | 17:48 | new builder | `in_words`, 25 scenarios | 25 / 25 | |
 | 17:59 | **final builder, slot `x5-final`** | plain | **96 / 100** | X13 sandbox returned nothing; A45 the platform played the call a second time on the same bank session; B02 the simulated customer mixed up its two products; X09 the model reported a date after the deadline as a refusal (the only one owned by the agent) |
 | 18:13 | final builder | `pieces`, 20 identity scenarios | 13 / 20 | all 7: the call stopped answering around 18:15 and even the closing request got a Cloudflare 530 from the platform |
+| 18:21 | final builder | `corrects`, 25 scenarios | 0 / 25 | platform down: in 16 calls the customer's first sentence was never answered, the rest were cut later |
+| 18:46 | final builder | held-out 12, 5 calls at once | 5 / 12 | 3 calls that had passed were played again by the platform on the same bank customer (twenty more `verify_identity` after the close), 4 calls in which `create_promise` got no answer twice |
+| 18:56 | final builder | `corrects`, 25 scenarios | 22 / 25 | A45 and A49 `create_promise` failed at the bank; B10 persuasion offers counted wrongly (weak point 2) |
 
 Three runs of all 100 on the candidate: 90 scenarios passed in every run by the call verdict, 82 by the run outcome
 the kit's script reads. Of the 10 that did not: 6 platform silence, 2 no verdict, 1 simulated customer, 1 agent (B10).
 
-The platform was degraded for much of the afternoon (about 14:00 to 15:06, again around 16:20, 17:20 and 18:15).
+The platform was degraded for much of the afternoon (about 14:00 to 15:06, again around 16:20 and 17:20, and from 18:15 to about 19:00).
 A run in such a window says little about the agent; `docs/run-outcome-vs-call-verdict.md` has the measurements that
 tell a silent platform from a wrong agent (answer times, calls ended by the customer, calls with no verdict).
 
