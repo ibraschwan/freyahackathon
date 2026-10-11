@@ -10,7 +10,7 @@ MODEL = os.environ.get("BUILDER_MODEL", "claude-opus-5-5")
 class Trace:
     """Plain-text log of one build run: start and end, every model call, what was created, what was tested."""
     def __init__(self, path):
-        self.path, self.t0, self.calls, self.usd, self.ended = path, time.time(), 0, 0.0, False
+        self.path, self.t0, self.calls, self.usd, self.ended, self.sessions = path, time.time(), 0, 0.0, False, []
         os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
         open(path, "w").write("")
         self.log("START " + time.strftime("%Y-%m-%dT%H:%M:%S%z"))
@@ -18,8 +18,23 @@ class Trace:
         line = re.sub(r"fak_[A-Za-z0-9]+", "fak_***", str(line))                      # a trace must never hold a key
         with open(self.path, "a") as f: f.write(f"[{time.time() - self.t0:7.1f}s] {line}\n")
         print(line, flush=True)
+    def keep_sessions(self):
+        """Copies the session log of every model call of this run next to the trace (keys masked), so the trace can be checked call by call."""
+        import glob
+        if not self.sessions: return
+        out = os.path.splitext(self.path)[0] + ".sessions"; os.makedirs(out, exist_ok=True); kept = 0
+        secrets = [v for v in (os.environ.get(k) for k in ("FREYA_API_KEY", "FREYA_BANK_TEAM_KEY", "ANTHROPIC_API_KEY")) if v]
+        for n, sid in enumerate(self.sessions, 1):
+            for f in glob.glob(os.path.expanduser("~/.claude/projects/*/" + sid + ".jsonl")):
+                text = open(f, errors="replace").read()
+                for v in secrets: text = text.replace(v, "***")
+                text = re.sub(r"fak_[A-Za-z0-9]+", "fak_***", text); text = re.sub(r"sk-ant-[A-Za-z0-9_\-]+", "sk-ant-***", text)
+                open(os.path.join(out, "%02d-%s.jsonl" % (n, sid)), "w").write(text); kept += 1
+        self.log(f"session logs of {kept} model call(s) copied to {os.path.relpath(out, os.path.dirname(os.path.dirname(os.path.abspath(self.path))))}/")
     def end(self, note=""):
         self.ended = True
+        try: self.keep_sessions()
+        except Exception as e: self.log("session logs could not be copied: " + str(e)[:200])
         self.log(f"END {time.strftime('%Y-%m-%dT%H:%M:%S%z')} | {time.time() - self.t0:.0f} s | {self.calls} model calls, {self.usd:.2f} USD{' | ' + note if note else ''}")
         root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         try:                                                                         # the spend ledger of the improvement loop, and a copy of every trace
@@ -35,16 +50,17 @@ async def ask(trace, purpose, system, prompt, model=None, tries=3):
     # tools=[] takes every tool away from the model: with tools at hand it sometimes reaches for one, and the single turn it has then ends in an error
     opts = ClaudeAgentOptions(model=model, system_prompt=system, tools=[], allowed_tools=[], max_turns=1, setting_sources=[], permission_mode="dontAsk")
     for attempt in range(1, tries + 1):
-        t0, text, cost, err = time.time(), "", None, None
+        t0, text, cost, err, sid = time.time(), "", None, None, None
         try:
             async for m in query(prompt=prompt, options=opts):
                 if isinstance(m, AssistantMessage): text += "".join(b.text for b in m.content if isinstance(b, TextBlock))
-                elif isinstance(m, ResultMessage): cost = m.total_cost_usd
+                elif isinstance(m, ResultMessage): cost = m.total_cost_usd; sid = getattr(m, "session_id", None)
         except Exception as e:
             err = type(e).__name__ + ": " + " ".join(str(e).split())[:300]
         trace.calls += 1
         trace.usd += float(cost or 0)
-        trace.log(f"MODEL CALL {trace.calls}: model={model} | purpose: {purpose} | {time.time() - t0:.0f} s | prompt {len(prompt)} chars, answer {len(text)} chars" + (f" | ${cost:.2f}" if cost else "")
+        if sid and hasattr(trace, "sessions"): trace.sessions.append(sid)
+        trace.log(f"MODEL CALL {trace.calls}: model={model} | purpose: {purpose} | {time.time() - t0:.0f} s | prompt {len(prompt)} chars, answer {len(text)} chars" + (f" | ${cost:.2f}" if cost else "") + (f" | session {sid}" if sid else "")
                   + (f" | FAILED ({err or 'empty answer'}), try {attempt} of {tries}" if err or not text.strip() else ""))
         if not err and text.strip(): return text
         if attempt < tries: await asyncio.sleep(5 * attempt)
