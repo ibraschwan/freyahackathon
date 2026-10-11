@@ -51,7 +51,9 @@ Return one JSON object with exactly these keys:
 "language": the language the agent speaks, as an English word.
 "address": how to address the customer, from call variables in double braces, for example "{{title}} {{last_name}}".
 "call_variables": the names of the variables every call starts with, as the documents list them.
-"variable_fields": {<request field of the services>: <call variable>} for every request field that carries the value of a call variable under ANOTHER name than the variable's own (the system then fills it in every call; the model never has to know the value). {} when the names are the same.
+"variable_fields": {<request field of the services>: <call variable>} for every request field that carries the value of a call variable under ANOTHER name than the variable's own (the system then fills it in every call; the model never has to know the value). {} when the names are the same. Name the field itself, also when it sits inside an object of the request.
+"constant_fields": {<request field>: <value>} for every request field that carries the same value in every call of this agent, as the documents give it (the system fills it; the model never sees it). {} when there is none.
+"service_timeout_seconds": how long the agent waits for an answer of a service before it counts as failed, as a number. Take it from what the documents say about slow answers (an answer that may take N seconds and still succeed needs more than N); 12 when they say nothing.
 "now_variable": the call variable that holds the current date and time (ISO, for example 2026-01-05T11:00).
 "test_variables": one example value per call variable, from the documents' examples.
 "calendar": null when the documents have no date rules; otherwise {"weekend_days": numbers of the days that are NOT business days, Monday = 0 ... Sunday = 6, "holidays": ["YYYY-MM-DD", ...], "weekday_names": the seven day names in the agent's language, Monday first, "month_names": the twelve month names, January first}. The system then shows the model a table of the next 45 days with these facts, so the model never calculates a date.
@@ -145,7 +147,11 @@ def check(spec, openapi):
     if spec["now_variable"] not in cv: bad.append("now_variable is not a call variable")
     for f, v in (spec.get("variable_fields") or {}).items():
         if v not in cv: bad.append(f"variable_fields: '{v}' is not a call variable")
-        if not any(f in t.get("props", {}) for t in api.values()): bad.append(f"variable_fields: no service has a request field '{f}'")
+        if not any(f == pth[-1] for t in api.values() for pth, _ in leaves(t.get("props") or {})): bad.append(f"variable_fields: no service has a request field '{f}'")
+    for f in (spec.get("constant_fields") or {}):
+        if not any(f == pth[-1] for t in api.values() for pth, _ in leaves(t.get("props") or {})): bad.append(f"constant_fields: no service has a request field '{f}'")
+    try: float(spec.get("service_timeout_seconds") or 12)
+    except Exception: bad.append("service_timeout_seconds must be a number")
     for k in ("opening", "goodbye", "address"):
         for v in re.findall(r"\{\{\s*(\w+)\s*\}\}", str(spec.get(k) or "")):
             if v not in cv: bad.append(f"{k} uses {{{{{v}}}}}, which is not a call variable")
@@ -210,7 +216,7 @@ try:
             d = dict()
             result['data'] = d
         if str(result.get('status')) != 'success' or d.get('error') or (isinstance(result.get('status_code'), int) and result.get('status_code') >= 400):
-            d['what_to_do_next'] = 'This call FAILED: nothing was done or recorded. Tell the customer honestly, in your language, that it could not be done right now. Never say it was done.'
+            d['what_to_do_next'] = 'This call did NOT succeed (status ' + str(result.get('status_code')) + '): nothing was done or recorded by it. Do what your step instructions say for this answer of this service; if they say nothing, tell the customer honestly that it could not be done right now. Never say it was done.'
 except Exception:
     pass
 '''
@@ -283,6 +289,75 @@ def speaks(spec):
 def node_id(i): return f"step{i + 1}"
 
 # ------------------------------------------------------------------ the workflow
+NEST_PRE = r'''
+try:
+    import json
+    PATHS = json.loads(PATHS_TEXT)
+    b = config.get('body') if isinstance(config, dict) and isinstance(config.get('body'), dict) else dict()
+    out = dict()
+    for k in PATHS:
+        path = PATHS[k][0]
+        kind = PATHS[k][1]
+        v = b.get(k)
+        if v is None or chr(123) in str(v):
+            continue
+        if kind in ('number', 'integer'):
+            try:
+                v = float(str(v).replace(',', '.'))
+                if kind == 'integer' or v == int(v):
+                    v = int(v)
+            except Exception:
+                pass
+        node = out
+        for seg in path[:-1]:
+            if not isinstance(node.get(seg), dict):
+                node[seg] = dict()
+            node = node[seg]
+        node[path[-1]] = v
+    config['body'] = out
+except Exception:
+    pass
+'''
+
+def leaves(props, path=()):
+    """The fields of a request body that carry a value, each with its path: an object with properties of its own is walked into."""
+    out = []
+    for k, p in (props or {}).items():
+        p = p if isinstance(p, dict) else {}
+        if p.get("type") == "object" and isinstance(p.get("properties"), dict) and p["properties"]: out += leaves(p["properties"], path + (k,))
+        else: out.append((path + (k,), p))
+    return out
+
+def service_tool(api, name, spec, description, post=None, pre=None, baked=None, retries=0, config=None):
+    """A bank service as a tool of the dialogue model. The model and the system fill flat fields (a call variable under its own or another
+    name, a value that is always the same, or what the model heard); when the service wants them inside objects, a hook puts them there."""
+    t = api[name]; call_vars = set(spec.get("call_variables") or [])
+    var_fields, const_fields = spec.get("variable_fields") or {}, spec.get("constant_fields") or {}
+    ls = leaves(t["props"]); last = [pth[-1] for pth, _ in ls]
+    props, required, paths = {}, [], {}
+    for pth, pr in ls:
+        k = pth[-1] if last.count(pth[-1]) == 1 else "_".join(pth)
+        paths[k] = [list(pth), str(pr.get("type") or "string")]
+        if pth[-1] in var_fields: props[k] = {"type": "string", "default": "{{" + str(var_fields[pth[-1]]) + "}}"}
+        elif pth[-1] in call_vars: props[k] = {"type": "string", "default": "{{" + pth[-1] + "}}"}
+        elif pth[-1] in const_fields: props[k] = {"type": "string", "default": str(const_fields[pth[-1]])}
+        elif baked is not None and pth[-1] in baked: props[k] = {"type": "string", "default": "{{" + baked[pth[-1]] + "}}"}
+        elif baked is not None: paths.pop(k); continue                 # a call the system makes sends only what the system knows
+        else:
+            props[k] = leaf(k, pr, "{{" + k + "}}")
+            if pth[-1] in (t.get("required") or []) or len(pth) > 1: required.append(k)
+    nested = any(len(v[0]) > 1 for v in paths.values()) or any(v[1] in ("number", "integer") for v in paths.values())
+    tool = {"type": "function", "config": dict({"timeoutMs": int(float(spec.get("service_timeout_seconds") or 12) * 1000), "maxRetries": retries}, **(config or {})),
+            "function": {"name": fn_name(name), "handler": "__function__:api_call", "description": description,
+                         "parameters": {"type": "object", "properties": {
+                             "url": {"type": "string", "default": t["url"]}, "method": {"type": "string", "default": t["method"]},
+                             "headers": {"type": "object", "properties": {"Content-Type": {"type": "string", "default": "application/json"}}},
+                             "body": {"type": "object", "properties": props, "required": required}}}}}
+    hook = (snippet(NEST_PRE, PATHS_TEXT=json.dumps(paths)) if nested else "")
+    if pre or hook: tool["pre_process_code"] = (pre + "\n" if pre else "") + hook
+    if post: tool["post_process_code"] = post
+    return tool
+
 def fn_name(service):
     """The name under which the dialogue model calls a service: the service's name with everything but letters, digits and _ turned into _."""
     return re.sub(r"\W", "_", str(service))
@@ -321,7 +396,7 @@ def build_workflow(spec, openapi):
         tools = []
         for name in s.get("tools") or []:
             t = api[name]
-            tools.append(named(bank_tool(api, name, call_vars, (t["summary"] + ". " if t["summary"] else "") + "CALL it when the step instructions say so, with the field values they name.", post=TOOL_POST), name, spec))
+            tools.append(service_tool(api, name, spec, (t["summary"] + ". " if t["summary"] else "") + "CALL it when the step instructions say so, with the field values they name.", post=TOOL_POST))
         tools.append(wrap_up)
         trans = []
         if s.get("next"):
@@ -342,10 +417,10 @@ def build_workflow(spec, openapi):
     if end:
         baked = {k: "ff_end_" + k for k in api[end["tool"]]["props"] if k not in call_vars}
         pre = snippet(CLOSE_PRE, DEFAULT_TEXT=json.dumps(end.get("default") or {}))
-        nodes["close"] = api_node("close", named(bank_tool(api, end["tool"], call_vars, "Close the call in the bank's records.", baked=baked, retries=1, pre=pre, post=CLOSE_POST), end["tool"], spec), "end")
+        nodes["close"] = api_node("close", service_tool(api, end["tool"], spec, "Close the call in the bank's records.", baked=baked, retries=1, pre=pre, post=CLOSE_POST), "end")
         # safety net: a call that ends any other way (the customer hangs up, a step fails) is still closed, once
-        fb = bank_tool(api, end["tool"], call_vars, "Record how the call ended.", baked=baked, pre=snippet(FALLBACK_PRE, DEFAULT_TEXT=json.dumps(end.get("default") or {})), config={"alwaysRunsAt": ["end_of_call"]})
-        named(fb, end["tool"], spec); fb["function"]["name"] = fn_name(end["tool"]) + "_at_end"
+        fb = service_tool(api, end["tool"], spec, "Record how the call ended.", baked=baked, pre=snippet(FALLBACK_PRE, DEFAULT_TEXT=json.dumps(end.get("default") or {})), config={"alwaysRunsAt": ["end_of_call"]})
+        fb["function"]["name"] = fn_name(end["tool"]) + "_at_end"
         wf_tools.append(fb)
     nodes["end"] = {"name": "end", "node_type": "end_call", "on_enter": {"type": "silent"}, "disable_inactivity_monitor": True, "transitions": [],
                     "terminal": {"type": "function", "function": {"name": "call_closed", "handler": "__function__:end_call",
