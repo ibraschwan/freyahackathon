@@ -24,6 +24,7 @@ def selftest(spec, openapi, trace):
     """The compiled code against a fake bank, on an account made up from the tool API file. Raises if a basic call breaks."""
     from local_sim import Sim
     api = engine.read_api(openapi); P = spec["product"]
+    api = dict(api, get_account=api[engine.service(api, spec.get("tools") or {}, "get_account")])        # the account service may have another name
     types = [t for t in P.get("types", {}) if t != "*"] or ["product"]
     def product(i, t):
         p = {P["id_field"]: f"p{i + 1}", P["type_field"]: t, P["full_field"]: 300.0 * (i + 1), P["days_late_field"]: (spec["bands"][min(i, len(spec["bands"]) - 1)].get("min") or 1)}
@@ -129,16 +130,31 @@ def main(argv):
     (ROOT / "out").mkdir(exist_ok=True)
     # the engine handles one kind of call and needs services for four roles; for any other set of services the free-form way runs (freeform.py)
     from builder import freeform
-    free = bool(opt.get("--freeform")) or not freeform.fits_engine(openapi)
-    trace.log("WAY: free-form (--freeform given)" if opt.get("--freeform") else
-              f"WAY: free-form, the tool API lacks a service for {', '.join(r for r in freeform.ROLES if r not in engine.read_api(openapi))}" if free else "WAY: engine, the tool API has every service the engine needs")
+    named = freeform.fits_engine(openapi)
+    free = bool(opt.get("--freeform"))
     if opt.get("--spec"):
         spec = json.load(open(opt["--spec"])); trace.log("spec read from " + str(opt["--spec"]) + " (no model call)")
+        free = free or "steps" in spec
     else:
-        spec = llm.run(freeform.read(trace, texts, openapi, api_text) if free else extract.extract(trace, texts, openapi, api_text))
+        if free: trace.log("WAY: free-form (--freeform given)")
+        else:
+            # the engine first: its services may carry other names than its roles (tools.<role>.service). Only when the reading finds no service
+            # for a role the engine cannot do without, or cannot be made to pass the check, the free-form way runs
+            trace.log("WAY: engine, " + ("the tool API has a service under the name of every role the engine needs" if named else
+                      "tried first although the tool API names its services differently: the reading maps the engine's roles to them"))
+            try: spec = llm.run(extract.extract(trace, texts, openapi, api_text))
+            except Exception as e:                 # a reading that fails is not the end of the run: the free-form way still makes an agent
+                free = True; trace.log("WAY: free-form, the engine's reading did not fit these services: " + type(e).__name__ + ": " + " ".join(str(e).split())[:500])
+        if free: spec = llm.run(freeform.read(trace, texts, openapi, api_text))
         (ROOT / "out" / (slot + ".spec.json")).write_text(json.dumps(spec, indent=1))
         trace.log(f"spec written to out/{slot}.spec.json")
-    wf = freeform.build_workflow(spec, openapi) if free else engine.lint(engine.build_workflow(spec, openapi))
+    if not free:
+        try: wf = engine.lint(engine.build_workflow(spec, openapi))
+        except Exception as e:
+            if opt.get("--spec"): raise
+            free = True; trace.log("WAY: free-form, the engine could not compile this policy: " + type(e).__name__ + ": " + " ".join(str(e).split())[:500])
+            spec = llm.run(freeform.read(trace, texts, openapi, api_text)); (ROOT / "out" / (slot + ".spec.json")).write_text(json.dumps(spec, indent=1))
+    if free: wf = freeform.build_workflow(spec, openapi)
     (ROOT / "out" / (slot + ".workflow.json")).write_text(json.dumps(wf, indent=1))
     trace.log(f"workflow compiled: {len(wf['nodes'])} steps, {len(json.dumps(wf))} bytes, checks passed")
     if free: trace.log("SELF-TEST skipped: it tests the engine's in-call code, which the free-form workflow does not use")

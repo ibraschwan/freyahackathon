@@ -13,7 +13,12 @@ Nothing here knows a bank: every name, value and sentence comes from the spec th
 """
 import datetime, json, re
 from . import llm
-from .engine import read_api, bank_tool, code_tool, code_node, api_node, say_node, to, eq, eq_any, leaf
+from . import engine
+from .engine import bank_tool, code_tool, code_node, api_node, say_node, to, eq, eq_any, leaf
+
+def read_api(openapi):
+    """The services by name, without the entries the engine keeps for a last path segment that several paths share."""
+    return {k: v for k, v in engine.read_api(openapi).items() if "ambiguous" not in v}
 
 ROLES = ["verify_identity", "get_account", "create_promise", "close_call"]
 
