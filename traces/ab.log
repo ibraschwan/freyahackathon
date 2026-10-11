@@ -12,3 +12,9 @@
 [  605.7s] exported to submission/ab.workflow.json
 [  646.6s] chat test: the platform did not answer (RuntimeError: POST /api/v2/chat/message -> 502: error code: 502
 ). Again in 10 s
+[  716.8s] chat test: the platform did not answer (RuntimeError: POST /api/v2/chat/message -> 504: error code: 504
+). Again in 20 s
+[  797.1s] chat test: the platform did not answer (RuntimeError: POST /api/v2/chat/message -> 504: error code: 504
+). Again in 30 s
+[  863.2s] TEST over the chat route did not answer: POST /api/v2/chat/message -> 503: {"success":false,"data":{"message":"API key validation is temporarily unavailable. Retry shortly.","result":null}}
+[  863.2s] END 2026-10-11T15:04:00+0300 | 863 s | 0 model calls, 0.00 USD | workflow d95fb457-c759-4afb-bb6c-f93407c3e7cf agent c45cae8b-a2c6-4a2c-8567-b3805823343c
