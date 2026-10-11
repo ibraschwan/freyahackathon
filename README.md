@@ -12,9 +12,11 @@ python3 builder/build.py {brief_path} {tool_api_path}
 ```
 
 A brief that builds on another one takes both files, base first:
-`python3 builder/build.py briefs/brief-a.md briefs/brief-b.md tools/openapi.json`.
+`python3 builder/build.py briefs/brief-a.md briefs/brief-b.md tools/openapi.json`. A brief that comes as several
+documents can be given as a folder; the tool API file is recognised by its content, so a code list in `.json` stays
+brief material.
 
-The slot name is the brief's file name without its ending (`hidden-1.md` -> `hidden-1`). One run writes:
+The slot name is the brief's file or folder name without its ending (`hidden-1.md` -> `hidden-1`). One run writes:
 
 | File | What |
 |---|---|
@@ -22,7 +24,8 @@ The slot name is the brief's file name without its ending (`hidden-1.md` -> `hid
 | `traces/<slot>.log` | the trace: start and end, every model call with model and purpose, what was created, what was tested |
 | `out/<slot>.spec.json` | the policy the builder read out of the brief |
 
-A run takes about five minutes and four or five model calls.
+A run takes five to eight minutes and five or six model calls. The model calls run with every tool switched off and
+are made again when they fail; a run that still fails ends its trace with the reason.
 
 ## How it works
 
@@ -30,7 +33,10 @@ A run takes about five minutes and four or five model calls.
    deadlines per lateness band, floors, persuasion offers, security questions, limits, outcome table, the fixed
    sentences. Two independent readings; a third call settles them only if they disagree on a rule or a value. Then
    the step instructions for the dialogue model are written and reviewed against the brief. Every value is checked
-   against the tool API file before it is used.
+   against the tool API file before it is used. What a reading could not express in the spec is written to the trace.
+   Rules that only some banks have are optional settings: a floor that is the greatest or least of several amounts,
+   the order of the products, a time of day after which today is closed, the business day before a day that is not
+   one, one read-back and recording per product, the bank's own limit on wrong security answers.
 2. **Compile** (`builder/engine.py`, `builder/runtime.py`). No model involved. The spec becomes a Freya workflow of
    the same shape for every brief. The dialogue model listens and reports with code tools; it never writes to the
    bank and never words an offer. Code checks every day and amount, counts the persuasion attempts and the limits
@@ -52,6 +58,9 @@ a known brief appears there.
   every single test.
 - `tests/variants/`: a brief for a different bank in raw form (mail, policy extract, memo, code list) with another
   tool API, to see that the builder reads rules it has not seen.
+- A second, independent session wrote two banks of its own without knowing the builder and audited what the
+  builder made of them (branch `ibraschwan/second-view`). Its findings led to the optional settings above and to
+  the crash fixes.
 - `PROGRESS.md`: what was measured and when. `docs/`: what we noticed about the platform.
 
 The starter kit's own README is `KIT_README.md`.
