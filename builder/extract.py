@@ -26,11 +26,11 @@ OPENING step
 - verify_identity: after each result the engine tells the model what to do: repeat the same question after a wrong answer (it makes the model say `identity.wrong_sentence` first), ask the next question (the order of `identity.questions`, using each question's `ask` sentence), or follow `identity.hints[<hint value>]` when the bank returns a hint. When the bank reports that no wrong answers are left, the engine speaks `sentences.identity_failed` and closes the call with `outcomes.identity_failed`.
 - schedule_callback: the engine refuses a day or time outside the `callback` window, without calling the bank, and tells the model `guidance.callback_outside_first` the first time and `guidance.callback_outside_second` the second time. After a booked callback it speaks `sentences.after_callback` and closes the call with `outcomes.callback_booked`.
 
-After the last security answer is verified the engine calls get_account and computes, for every late product: its name in words, the full amount, the floor, the days late, its band, its deadline and its persuasion offers. Then it speaks: `sentences.verified_ack` + `sentences.debt_intro` + one `sentences.product_statement` per product + `sentences.first_ask_single` (one product) or `sentences.first_ask_multi` (several).
+After the last security answer is verified the engine calls get_account and computes, for every late product (in the order of get_account, or sorted by `product.order`): its name in words, the full amount, the floor, the days late, its band, its deadline and its persuasion offers. Then it speaks: `sentences.verified_ack` + `sentences.debt_intro` + one `sentences.product_statement` per product + `sentences.first_ask_single` (one product) or `sentences.first_ask_multi` (several).
 
 NEGOTIATION step
 - The dialogue model never writes to the bank and never words an offer or a read-back. It reports with these tools, and after each report the ENGINE says the next sentence to the customer:
-  - check_terms(product_id, amount, date): the customer agreed to pay. The engine refuses, with an instruction to the model: an amount below the product's floor (`guidance.below_floor`), a day that is not a business day (`guidance.not_business_day`, it names the next business day), a day after the product's deadline (`guidance.after_deadline`), a day in the past, a product whose promise is already recorded (it makes the model say `sentences.change_later`). With several products and one day for all, a product whose deadline is earlier is put on its own deadline and the read-back says so.
+  - check_terms(product_id, amount, date): the customer agreed to pay. The engine refuses, with an instruction to the model: an amount below the product's floor (`guidance.below_floor`), a day that is not a business day (`guidance.not_business_day`, it names the business day to offer instead), today when `dates.today_until` has passed (it names the earliest day), a day after the product's deadline (`guidance.after_deadline`), a day in the past, a product whose promise is already recorded (it makes the model say `sentences.change_later`). With several products and one day for all, a product whose deadline is earlier is put on its own deadline and the read-back says so.
   - customer_refused(product_id, kind): the customer does not agree. kind flat_refusal (a no with no day and no amount, a non-answer, a no to the offer on the table) or kind full_amount_too_much. This is how the persuasion attempts are counted, by code. For full_amount_too_much the engine says `guidance.too_much`, once per product. For flat_refusal it says the next entry of `attempt_offers` as "Could you pay <amount> for your <product> by <date>?" (plus `sentences.rest_overdue` when the amount is the floor), as many times as the product's band allows. When the attempts are used up the engine ends the product: with notes enabled it notes it with `notes.refused_reason`, otherwise it closes the call with `outcomes.refused`.
   - skip_product(product_id, reason), only when notes are enabled: the product ends without a promise for that reason. If `note_lines[<reason>]` exists the engine says that sentence.
 - What the engine says after a report: the next persuasion offer; or, when a product is settled and another is open, `sentences.next_product` followed by that product's persuasion attempt 1; or, when every product is settled and something was agreed, the read-back "To confirm: you will pay <amount> for your <product> on <date>. " + `sentences.confirm_question`; or, when every product is settled and nothing was agreed, the closing (see below).
@@ -48,7 +48,8 @@ SCHEMA = """THE CONFIGURATION. Return one JSON object with exactly these keys.
 "call_variables": the names of the variables every call starts with, as the brief lists them. Tool body fields with these names are filled by the engine.
 "now_variable": the call variable that holds the current date and time.
 "test_variables": an object with one example value per call variable (from the brief's examples).
-"calendar": {"weekend_days": numbers of the days that are NOT business days, Monday = 0 ... Sunday = 6, "holidays": ["YYYY-MM-DD", ...]}.
+"calendar": {"weekend_days": numbers of the days that are NOT business days, Monday = 0 ... Sunday = 6, "holidays": ["YYYY-MM-DD", ...],
+  "non_business_day": optional. "previous" only when the brief moves a weekend day or holiday the customer names to the business day BEFORE it. Leave the key out when the brief moves it to the next business day or says nothing}.
 "callback": {"include_today": true/false, "business_days_ahead": how many business days after today a callback may be booked (1 = the next business day only), "from": "HH:MM", "to": "HH:MM" (both ends count as inside), "after_now": true when a callback today must be later than now}.
 "identity": {
   "questions": the security questions in the order to ask them: [{"field": the value of the verify_identity question field for it, taken from the tool API enum, "kind": "date" | "digits" | "text", "ask": the exact question sentence to say, "transform": optional list for a text answer the brief wants normalised before it is sent, from "uppercase", "lowercase", "remove_spaces"}],
@@ -66,8 +67,9 @@ SCHEMA = """THE CONFIGURATION. Return one JSON object with exactly these keys.
                          "close": [outcome, reason] for the refusal after that}}
 "product": {
   "list_field": the get_account response field that holds the products, "id_field", "type_field", "full_field": the field with the full past-due amount, "days_late_field",
+  "order": optional, only when the brief goes through the products in another order than get_account returns them: {"field": the product field to sort by, "direction": "ascending" | "descending"} (products with the same value keep the order of get_account),
   "types": {<product type value>: {"words": how the brief says to name this product aloud; a field of the product goes in angle brackets, for example "credit card ending <card_last4>",
-                                   "floor": the lowest amount that can be recorded for it: {"field": <product field>} or {"percent_of_full": number} or {"amount": number},
+                                   "floor": the lowest amount that can be recorded for it: {"field": <product field>} or {"percent_of_full": number} or {"amount": number}; when the brief combines several of these: {"greatest_of": [two or more of them]} or {"least_of": [two or more of them]}; a percent may carry "round": "up" or "down" when the brief says how it is rounded to the cent,
                                    "floor_name": what that amount is called aloud}}. Use the key "*" for a rule that covers every other type.
 }
 "bands": the table that turns days late into a deadline and a number of persuasion attempts, in the brief's order:
@@ -76,11 +78,12 @@ SCHEMA = """THE CONFIGURATION. Return one JSON object with exactly these keys.
   [{"amount": "full" | "floor" | "full_or_floor" (the full amount, but the floor if the customer already said the full amount is too much),
     "date": "last_business_day_of_week" (of this week; if today is that day or it has passed, of next week) | "deadline" | "next_business_day" | "today",
     "text": optional extra words the model must say or respect with this attempt}]
-"dates": {"next_weekday": "following_week" when "next Friday" means the Friday of the following calendar week, "next_occurrence" when it means the first Friday after today}.
+"dates": {"next_weekday": "following_week" when "next Friday" means the Friday of the following calendar week, "next_occurrence" when it means the first Friday after today,
+  "today_until": optional "HH:MM", only when the brief allows a payment for today only before a time of day: from that time on the earliest day that can be recorded is the next business day}.
 "guidance": instructions to the dialogue model, each one or two sentences, taken from the brief's rule for that case. They may use the tokens shown.
   {"below_floor": the customer proposed less than the floor (tokens <floor>, <floor_name>),
    "after_deadline": the customer named a day after the deadline (token <deadline>),
-   "not_business_day": the customer named a weekend day or a holiday inside the deadline (token <next> = the next business day),
+   "not_business_day": the customer named a weekend day or a holiday inside the deadline (token <next> = the business day the engine offers instead: the next one, or the one before it when calendar.non_business_day is "previous"),
    "too_much": the exact sentence that offers the floor when the customer says the full amount is too much, with everything the brief wants said with that offer (tokens <floor>, <floor_name>),
    "callback_outside_first": the first day or time offered for a callback is outside the window,
    "callback_outside_second": the second one is outside too. Name the wrap_up(outcome, reason) to call.}
@@ -270,6 +273,18 @@ def check(spec, openapi):
         if a.get("date") not in ("last_business_day_of_week", "deadline", "next_business_day", "today", "", None): bad.append(f"attempt_offers[{i}].date is not one of the allowed kinds")
     for h in spec["calendar"].get("holidays") or []:
         if not re.match(r"^\d{4}-\d{2}-\d{2}$", str(h)): bad.append(f"calendar.holidays: '{h}' is not YYYY-MM-DD")
+    if spec["calendar"].get("non_business_day") not in (None, "previous", "next"): bad.append('calendar.non_business_day must be "previous" or left out')
+    until = (spec.get("dates") or {}).get("today_until")
+    if until is not None and not re.match(r"^\d{1,2}:\d{2}$", str(until)): bad.append("dates.today_until must be HH:MM or left out")
+    order = (spec.get("product") or {}).get("order")
+    if order is not None and not (isinstance(order, dict) and order.get("field") and order.get("direction") in ("ascending", "descending")): bad.append('product.order needs "field" and "direction" ("ascending" or "descending"), or is left out')
+    def floor_ok(f, deep=True):
+        if not isinstance(f, dict): return False
+        many = f.get("greatest_of") or f.get("least_of")
+        if many is not None: return deep and isinstance(many, list) and len(many) >= 2 and all(floor_ok(x, False) for x in many)
+        return bool(f.get("field")) or isinstance(f.get("percent_of_full"), (int, float)) or isinstance(f.get("amount"), (int, float))
+    for t, v in (((spec.get("product") or {}).get("types")) or {}).items():
+        if isinstance(v, dict) and v.get("floor") is not None and not floor_ok(v["floor"]): bad.append(f"product.types.{t}.floor is not one of the allowed forms")
     for k in ("opening", "identity_failed", "after_callback", "after_transfer", "verified_ack", "debt_intro", "product_statement", "first_ask_single", "confirm_question", "promise_recorded", "promise_failed", "change_later", "goodbye"):
         if not (spec["sentences"].get(k) or "").strip(): bad.append("sentences." + k + " is empty")
     cv = set(spec["call_variables"])
