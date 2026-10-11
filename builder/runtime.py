@@ -853,6 +853,25 @@ kind = str(params.get('kind') or 'flat_refusal').strip()
 emit(vars, [['refuse', pid, kind if kind == 'full_amount_too_much' else 'flat_refusal']])
 '''
 
+# counts, before the security check is passed, how often the person on the line did not answer: who they are, or a security question
+NO_ANSWER = r'''
+about = str(params.get('about') or '').strip()
+LIM = S.get('opening_limits') or dict()
+L = LIM.get(about)
+if not L:
+    raise Exception('RULE: about must be one of: ' + ', '.join(sorted(LIM.keys())) + '.')
+st = gst(vars)
+if st['stage'] == 'verified':
+    raise Exception('RULE: the security check is already passed. This tool is only for the time before it.')
+n = int(vars.get('na_' + about) or 0) + 1
+vars['na_' + about] = n
+if n <= int(L.get('times') if L.get('times') is not None else 1):
+    raise Exception('RULE: ' + fill(vars, L.get('say') or 'Ask the same question once more.') + ' Do this once, now, and nothing else.')
+o, r = pair(L.get('close'))
+emit(vars, [['finish', o, r]])
+vars['fin_state'] = 'go'
+'''
+
 CONFIRM = r'''
 st = gst(vars)
 todo = [i for i in st['plan'] if i not in st['promises']]
@@ -897,6 +916,8 @@ if st['id'] == 'failed':
     raise Exception('RULE: the security check is over. Do not ask again.')
 if st['stage'] == 'verified':
     raise Exception('RULE: identity is already verified. Do not ask security questions again.')
+# an answer was given: the count of not-answered security questions starts again (it counts non-answers in a row)
+vars['na_security_question'] = 0
 try:
     A = (S.get('tools') or dict()).get('verify_identity') or dict()
     fq = A.get('question') or 'field'
@@ -1220,7 +1241,7 @@ CORE_KEYS = ["now_variable", "calendar", "sentences", "closing_lines", "outcomes
 ALL = dict(
     SETUP=(SETUP, ["cal", "live"], ["callback"]), PREPARE=(PREPARE, ["cal", "terms", "live"], ["product", "bands", "attempt_offers", "dates"]),
     SYNC=(SYNC, ["live", "decide"], ["guidance", "note_lines"]), STALL=(STALL, [], []), REC_NEXT=(REC_NEXT, ["live", "decide"], []), NOTE_NEXT=(NOTE_NEXT, ["live", "decide"], ["note_lines"]),
-    SET_PROMISE=(SET_PROMISE, [], ["guidance"]), SET_NOTE=(SET_NOTE, [], []), REFUSAL=(REFUSAL, [], []), CONFIRM=(CONFIRM, [], []), FINISH=(FINISH, ["decide"], []),
+    SET_PROMISE=(SET_PROMISE, [], ["guidance"]), SET_NOTE=(SET_NOTE, [], []), REFUSAL=(REFUSAL, [], []), CONFIRM=(CONFIRM, [], []), NO_ANSWER=(NO_ANSWER, [], ["opening_limits"]), FINISH=(FINISH, ["decide"], []),
     VERIFY_PRE=(VERIFY_PRE, [], ["identity"]), VERIFY_POST=(VERIFY_POST, ["live"], ["identity"]),
     CALLBACK_PRE=(CALLBACK_PRE, ["cal"], ["callback", "guidance"]), CALLBACK_POST=(CALLBACK_POST, [], []),
     TRANSFER_PRE=(TRANSFER_PRE, [], ["transfer"]), TRANSFER_POST=(TRANSFER_POST, ["live"], []), ACCOUNT_POST=(ACCOUNT_POST, [], ["product"]),
