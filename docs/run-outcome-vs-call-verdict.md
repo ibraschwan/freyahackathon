@@ -96,3 +96,17 @@ sentence was awaited the call ended with `customer-ended-call`. Two of the three
 - `12f619de-e37b-464e-bb90-cd5110114bb2`: payment day named at 73.0 s, the date check ran at 126.0 s, call over at 133 s.
 
 Nothing in a workflow can shorten the model's answer time, so calls like these fail whatever the agent is.
+
+## A fifth thing: 11 October, about 15:15 to 15:55 UTC
+
+Three patterns in our simulations in this window, on an agent that had passed 96 of the same 100 customers at 15:00 UTC:
+
+- **The first sentence is never answered.** In simulation "scen 18:21:16 209095" 16 of 25 calls, and in "scen 18:39:41 040135" 10 of the
+  first 10, hold two messages: the agent's opening line and the customer's answer. After 60 seconds the customer hangs up. The request that
+  closes the call at its end then gets `Error code: 530` (a Cloudflare error page) from the platform.
+- **`create_promise` gets no answer.** The workflow sends the request twice (the brief's one retry), neither comes back, the customer hangs up
+  (call `4748c2aa-c054-467d-b5f7-7ce25d1bb56d`).
+- **A call that had ended is played again on the same practice customer.** Call `91e3b8ec-96db-4655-b06f-35527010c2dd` verifies, records the promise, closes the call
+  and ends as `assistant-ended-call`. The bank's ledger for that customer then shows more than twenty further `verify_identity` requests
+  after the `close_call`. The judged call passes; a scorer that reads the ledger's last entry does not see a closed call.
+
