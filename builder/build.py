@@ -2,8 +2,8 @@
 
     python3 builder/build.py <brief file> [more brief files] <tool API file> [--slot NAME] [--no-deploy] [--spec FILE]
 
-Arguments ending in .json are the tool API file, the others are brief files (a brief that builds on another: pass both,
-base first). What it does:
+The tool API file is the .json file that holds an OpenAPI description; every other file is brief material (a brief that
+builds on another: pass both, base first). A folder stands for all files in it. What it does:
   1. reads the brief and the tool API file into a policy spec (model calls, see extract.py)
   2. compiles the spec into a workflow (engine.py), with no model involved
   3. checks the workflow and runs its in-call code against a fake bank
@@ -47,22 +47,50 @@ def selftest(spec, openapi, trace):
         ran.append(f"{n} product(s): promise on {d}, break-off closes as {s.ledger['outcome']}/{s.ledger['reason']}")
     trace.log("SELF-TEST against a fake bank passed: " + "; ".join(ran))
 
+def inputs(args):
+    """(brief files, tool API file) from the arguments. Folders are opened; the tool API file is recognised by what is in it,
+    so a code list that comes as .json stays brief material."""
+    files = []
+    for a in args:
+        p = pathlib.Path(a)
+        files += sorted(x for x in p.rglob("*") if x.is_file() and not x.name.startswith(".")) if p.is_dir() else [p]
+    def is_api(f):
+        try: d = json.loads(f.read_text())
+        except Exception: return False
+        return isinstance(d, dict) and isinstance(d.get("paths"), dict)
+    js = [f for f in files if f.suffix.lower() == ".json"]
+    apis = [f for f in js if is_api(f)] or js[-1:]
+    api = apis[-1] if apis else None
+    return [f for f in files if f != api], api
+
+def read_text(f):
+    """A brief file as text; None for a file that is not text (it is named in the trace and left out)."""
+    raw = f.read_bytes()
+    if b"\x00" in raw[:4096]: return None
+    try: return raw.decode("utf-8")
+    except UnicodeDecodeError: return raw.decode("latin-1")
+
 def main(argv):
     args = [a for a in argv if not a.startswith("--")]
     opt = {a.split("=")[0]: (a.split("=", 1)[1] if "=" in a else True) for a in argv if a.startswith("--")}
     for i, a in enumerate(argv):                                   # "--slot NAME" as well as "--slot=NAME"
         if a in ("--slot", "--spec") and i + 1 < len(argv): opt[a] = argv[i + 1]; args.remove(argv[i + 1])
-    apis = [a for a in args if a.endswith(".json")]; briefs = [a for a in args if not a.endswith(".json")]
-    if len(apis) != 1 or not briefs: sys.exit(__doc__)
-    slot = opt.get("--slot") or pathlib.Path(briefs[-1]).stem
+    briefs, api = inputs(args)
+    if api is None or not briefs: sys.exit(__doc__)
+    slot = opt.get("--slot") or pathlib.Path([a for a in args if pathlib.Path(a) != api][-1]).stem      # the last brief file, or the folder
     trace = llm.Trace(str(ROOT / "traces" / (slot + ".log")))
-    trace.log(f"builder run for slot '{slot}' | briefs: {', '.join(briefs)} | tool API: {apis[0]} | builder model: {llm.MODEL}")
-    api_text = open(apis[0]).read(); openapi = json.loads(api_text)
+    trace.log(f"builder run for slot '{slot}' | briefs: {', '.join(str(b) for b in briefs)} | tool API: {api} | builder model: {llm.MODEL}")
+    api_text = api.read_text(); openapi = json.loads(api_text)
+    texts = [(b.name, read_text(b)) for b in briefs]
+    for name, t in texts:
+        if t is None: trace.log(f"brief file {name} is not text and was left out")
+    texts = [(n, t) for n, t in texts if t is not None]
+    if not texts: sys.exit("no brief file could be read as text")
     (ROOT / "out").mkdir(exist_ok=True)
     if opt.get("--spec"):
         spec = json.load(open(opt["--spec"])); trace.log("spec read from " + str(opt["--spec"]) + " (no model call)")
     else:
-        spec = llm.run(extract.extract(trace, [(pathlib.Path(b).name, open(b).read()) for b in briefs], openapi, api_text))
+        spec = llm.run(extract.extract(trace, texts, openapi, api_text))
         (ROOT / "out" / (slot + ".spec.json")).write_text(json.dumps(spec, indent=1))
         trace.log(f"spec written to out/{slot}.spec.json")
     wf = engine.lint(engine.build_workflow(spec, openapi))
