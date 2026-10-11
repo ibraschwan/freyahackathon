@@ -8,8 +8,11 @@ pip install -r requirements.txt          # Python 3.10 or newer
 export FREYA_API_KEY=fak_...             # your Freya workspace key
 # a Claude login (Claude Code) or ANTHROPIC_API_KEY for the builder's model calls
 
-python3 builder/build.py {brief_path} {tool_api_path}
+python3 builder/build.py {case_folder} {mock_url}
 ```
+
+`{case_folder}` is the folder with the bank's documents (Markdown, Word, PDF, Excel), `{mock_url}` the address of the
+bank's services the phone agent's tools call. With the practice kit: `python3 builder/build.py briefs/brief-a.md tools/openapi.json`.
 
 A brief that builds on another one takes both files, base first:
 `python3 builder/build.py briefs/brief-a.md briefs/brief-b.md tools/openapi.json`. A brief that comes as several
@@ -61,6 +64,8 @@ a known brief appears there.
 - A second, independent session wrote two banks of its own without knowing the builder and audited what the
   builder made of them (branch `ibraschwan/second-view`). Its findings led to the optional settings above and to
   the crash fixes.
+- `mock/`: the mock of the bank's services for the final case, a Cloudflare Worker with one durable record per
+  customer. It is written by hand from the case's service contract and is not part of the builder.
 - `PROGRESS.md`: what was measured and when. `docs/`: what we noticed about the platform.
 
 The starter kit's own README is `KIT_README.md`.

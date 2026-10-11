@@ -8,3 +8,5 @@ __pycache__/
 .venv/
 .DS_Store
 traces/*.jsonl
+mock/node_modules/
+mock/.wrangler/
