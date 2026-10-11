@@ -382,7 +382,7 @@ A DIGEST under an answer was worked out by the system's code from that answer: t
 DATES (computed by the system; always current):
 {{{{date_facts}}}}
 
-WHAT THE SERVICES HAVE ANSWERED IN THIS CALL (kept by the system; always current). Work from these values in every turn: never from memory, never invented. A service that is not listed has not answered yet.
+{failures}WHAT THE SERVICES HAVE ANSWERED IN THIS CALL (kept by the system; always current). Work from these values in every turn: never from memory, never invented. A service that is not listed has not answered yet.
 {answers}"""
 
 def speaks(spec):
@@ -557,6 +557,34 @@ def digest_problems(spec, api, trace=None):
         if trace: trace.log(f"digest of {name}: ran on {ran} of {len(ex.get(name) or [])} example answers found in the documents" + (". One result: " + " / ".join(shown.splitlines())[:600] if shown else ""))
     return bad
 
+def failure_guide(spec, api):
+    """What each digest says about the failure answers the documents show for its service, as lines for the step prompt. An answer with an
+    HTTP error status never reaches the digest in a call (the platform hands the model the raw failure), so the digest's verdict on every
+    failure the documents list is worked out here, at build time."""
+    import collections
+    lines, ex = [], examples(api)
+    for name, src in sorted((spec.get("digests") or {}).items()):
+        got = ex.get(name) or []
+        if name not in api or not got: continue
+        usual = collections.Counter(tuple(sorted(a)) for a in got).most_common(1)[0][0]
+        seen = []
+        for a in got:
+            if tuple(sorted(a)) == usual or not (set(a) < set(usual)): continue          # a failure answer lacks a part every usual answer has
+            try: out = " / ".join(x.strip() for x in run_digest(src, json.loads(json.dumps(a))).splitlines() if x.strip())
+            except Exception: continue
+            texts = sorted(set(str(v) for v in _values(a) if isinstance(v, str) and 2 <= len(v) <= 40 and re.fullmatch(r"[A-Z0-9_.\-]{3,40}", v)))
+            mark = ", ".join(texts[:3]) or json.dumps(a, ensure_ascii=False)[:120]
+            if out and (mark, out) not in seen: seen.append((mark, out))
+        for mark, out in seen[:6]: lines.append(f"- {fn_name(name)} failed and the failure holds {mark}: {out[:700]}")
+    return "\n".join(lines).replace("{{", "{ {").replace("}}", "} }")
+
+def _values(x):
+    if isinstance(x, dict):
+        for v in x.values(): yield from _values(v)
+    elif isinstance(x, list):
+        for v in x: yield from _values(v)
+    else: yield x
+
 def run_digest(src, answer, request=None, now="2026-01-05T10:00:00+03:00"):
     """Runs a digest outside a call, as the build's own test does. Returns its text; raises what it raises."""
     import textwrap, re as _re, datetime as _dt, math as _math
@@ -602,6 +630,9 @@ def build_workflow(spec, openapi):
     has_bye = bool(str(spec.get("goodbye") or "").strip())
     after = "goodbye" if has_bye else ("close" if end else "end")          # a goodbye step with nothing to say would never move on
     fin = to(after, "wrap_up was called", eq("fin_state", "go"))
+    guide = failure_guide(spec, api)
+    failures = ("WHEN A SERVICE CALL FAILS (the tool result says the request failed): nothing was done by it, and no DIGEST is made for it. Find the service and what the failure holds "
+                "in the list below and do exactly what that line says. Never say any text of the failure itself to the customer.\n" + guide + "\n\n") if guide else ""
     for i, s in enumerate(steps):
         tools = []
         for name in s.get("tools") or []:
@@ -619,7 +650,7 @@ def build_workflow(spec, openapi):
         nodes[node_id(i)] = {
             "name": node_id(i), "node_type": "conversation", "on_enter": on_enter, "on_enter_first_entry_only": True, "max_node_turns": 60, "max_turn_transition": after,
             "task_message": STEP.format(n=i + 1, total=len(steps), name=s["name"], goal=s.get("goal", ""), instructions=str(s["instructions"]).strip(), tools=", ".join(t["function"]["name"] + ("" if t["function"]["name"] == n0 else " (the service " + n0 + ")") for t, n0 in zip(tools, list(s.get("tools") or []) + ["wrap_up"])),
-                                        args=", ".join(end_props) if end_props else "", answers="\n".join("{{ff_ans_" + fn_name(x) + "}}" for x in sorted(api) if "/" not in x or x.split("/")[-1] not in api),
+                                        args=", ".join(end_props) if end_props else "", failures=failures, answers="\n".join("{{ff_ans_" + fn_name(x) + "}}" for x in sorted(api) if "/" not in x or x.split("/")[-1] not in api),
                                         end_hint=("The system then makes the closing call " + end["tool"] + " with these values." if end else "")),
             "tools": tools, "transitions": trans}
     if has_bye: nodes["goodbye"] = say_node("goodbye", str(spec["goodbye"]), "close" if end else "end")
