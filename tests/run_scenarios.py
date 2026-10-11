@@ -57,11 +57,14 @@ def simulate(agent_id, name, variables_by_persona, concurrency, max_seconds=420)
     sim_id = (sim.get("simulation") or sim)["id"]; it_id, settled = None, 0
     while True:
         time.sleep(10)
-        st = freya.api("GET", f"/api/v2/simulations/{sim_id}"); st = (st.get("simulation") or st).get("status")
-        if not it_id:
-            its = freya.api("GET", f"/api/v2/simulations/{sim_id}/iterations"); its = its.get("iterations") or its.get("items") or its
-            if its: it_id = its[0]["id"]
-        runs = freya.get_iteration(sim_id, it_id)["runs"] if it_id else []
+        try:                                                              # the platform answers 504 for minutes at a time when it is busy: keep waiting, the simulation goes on
+            st = freya.api("GET", f"/api/v2/simulations/{sim_id}"); st = (st.get("simulation") or st).get("status")
+            if not it_id:
+                its = freya.api("GET", f"/api/v2/simulations/{sim_id}/iterations"); its = its.get("iterations") or its.get("items") or its
+                if its: it_id = its[0]["id"]
+            runs = freya.get_iteration(sim_id, it_id)["runs"] if it_id else []
+        except Exception as e:
+            print("could not read the simulation's state, trying again:", str(e)[:120], flush=True); time.sleep(30); continue
         open_runs = [r for r in runs if r.get("outcome") in (None, "queued", "running", "analyzing", "pending")]
         if st in ("completed", "failed", "paused"): return sim_id, it_id, runs
         settled = settled + 1 if runs and len(runs) >= len(variables_by_persona) and not open_runs else 0
