@@ -3,7 +3,7 @@
     export FREYA_API_KEY=fak_...            # your workspace key
     export FREYA_API_URL=https://staging-app.freyavoice.ai   # default
 """
-import json, os, time, urllib.request, urllib.error, urllib.parse
+import http.client, json, os, time, urllib.request, urllib.error, urllib.parse
 
 URL = os.environ.get("FREYA_API_URL", "https://staging-app.freyavoice.ai")
 # Cloudflare rejects requests without a browser-like User-Agent (error 1010).
@@ -20,7 +20,7 @@ def api(method, path, body=None, **params):
         except urllib.error.HTTPError as e:
             if method == "GET" and e.code in (502, 503, 504) and attempt < 3: time.sleep(5 * (attempt + 1)); continue
             raise RuntimeError(f"{method} {path} -> {e.code}: {e.read().decode()[:1500]}") from None
-        except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
+        except (urllib.error.URLError, TimeoutError, ConnectionError, http.client.HTTPException, json.JSONDecodeError) as e:    # also a body cut off half way
             if method != "GET" or attempt == 3: raise
             time.sleep(5 * (attempt + 1))
     return out.get("data", {}).get("result", out) if isinstance(out, dict) else out

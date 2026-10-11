@@ -1,20 +1,21 @@
 {
- "experiment": "1011-031439-exp-2b--opening-limits-by-code--count-re",
- "tag": "exp 2b: opening limits by code, count restarts on an answer (spec v5, agent version 8)",
- "commit": "a34c053",
+ "experiment": "1011-033327-exp-2b-confirmation--changed-scenarios-a",
+ "tag": "exp 2b confirmation: changed scenarios and the opening guard set, twice more",
+ "commit": "d6fc0a8",
  "harness": "0e52309d",
  "slot": "ab",
- "only": null,
- "reps": 1,
+ "only": "A12,A40,X25,A15,A50,A01,A08,A11,A13,A14,A17,A45,A48,X02,X06,X11,X30,A09,A10,A16",
+ "reps": 2,
  "style": null,
- "passed": 99,
- "total": 100,
- "ledger": 99,
- "hung": 1,
+ "passed": 18,
+ "total": 20,
+ "ledger": 19,
+ "hung": 0,
  "stalls": 0,
- "seconds": 641,
- "result": "results/auto/1011-031439-exp-2b--opening-limits-by-code--count-re.json",
+ "seconds": 523,
+ "result": "results/auto/1011-033327-exp-2b-confirmation--changed-scenarios-a.json",
  "failed": {
-  "X25": "0/1"
+  "A08": "0/2",
+  "A17": "1/2"
  }
 }
