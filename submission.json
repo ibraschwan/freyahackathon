@@ -2,9 +2,11 @@
   "team": "ibracob",
   "members": [{ "name": "İbrahim Çoban", "email": "ben@ibracob.dev" }],
   "repo": "https://github.com/ibraschwan/freyahackathon",
-  "commit": "838a33903a3863455ce93645b2fcd139547f5ac4",
-  "run_command": "python3 builder/build.py {case_folder} {mock_url} --slot final",
-  "workflow": "submission/final.workflow.json",
+  "commit": "adef2467a72891326959151841753d4ea4afa665",
+  "run_command": "python3 builder/build.py {case_folder} {mock_url} --slot final && python3 builder/build.py {case_folder} {mock_url} --slot final-wd --spec out/final.spec.json",
+  "workflow": "submission/final-wd.workflow.json",
   "trace": "traces/final.log",
-  "mock_url": "https://freyahackathon.stajyer.app"
+  "trace_of_the_compile_run": "traces/final-wd.log",
+  "mock_url": "https://freya-bank-mock-final.coban-ibrahim.workers.dev",
+  "note": "The builder read the documents once (run 1, traces/final.log, all model calls) and wrote the policy submission/final.spec.json. Run 2 (traces/final-wd.log) is the same builder compiling that policy for the mock's workers.dev address. No hand edits."
 }
