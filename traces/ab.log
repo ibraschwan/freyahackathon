@@ -10,3 +10,5 @@
 ). Again in 10 s
 [  604.0s] CREATED ON FREYA: workflow d95fb457-c759-4afb-bb6c-f93407c3e7cf agent c45cae8b-a2c6-4a2c-8567-b3805823343c (updated in place, published version 9)
 [  605.7s] exported to submission/ab.workflow.json
+[  646.6s] chat test: the platform did not answer (RuntimeError: POST /api/v2/chat/message -> 502: error code: 502
+). Again in 10 s
