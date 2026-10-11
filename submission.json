@@ -1,0 +1,10 @@
+{
+  "team": "ibracob",
+  "members": [{ "name": "İbrahim Çoban", "email": "ben@ibracob.dev" }],
+  "repo": "https://github.com/ibraschwan/freyahackathon",
+  "commit": "838a33903a3863455ce93645b2fcd139547f5ac4",
+  "run_command": "python3 builder/build.py {case_folder} {mock_url} --slot final",
+  "workflow": "submission/final.workflow.json",
+  "trace": "traces/final.log",
+  "mock_url": "https://freyahackathon.stajyer.app"
+}
