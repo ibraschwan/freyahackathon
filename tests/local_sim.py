@@ -491,4 +491,10 @@ if __name__ == "__main__":
     check("each: hang up at the second read-back: the safety net closes as a promise, the second is not recorded", (s.summary()[:3], bank(s)), (("promise", None, [("p1", 300.0, "2026-10-15")]), [("create_promise", "p1"), ("close_call", None)]))
     s = each("PUB-13"); s.tool("set_promise", product_id="all", amount="full", date="2026-10-15"); s.tool("confirm")
     check("each: wrap_up as a promise while a read-back waits for its answer is refused", "not recorded yet" in refused(s.tool, "finish", outcome="promise"), True)
+    # a callback date in the past is a slip of the model, not the person's first try
+    c = PUB["PUB-02"]; s = Sim(golden.spec(True), pid(c["products"]), c["variables"]["now"], identity=c["identity"])
+    r = refused(s.callback, "2025-05-16", "11:30")
+    check("callback in the past: refused as a wrongly written date, not counted", ("in the past" in r, s.state.get("cb_bad") or 0), (True, 0))
+    r = refused(s.callback, "2026-10-17", "11:30")
+    check("the first day outside the window is still the first", "is OUTSIDE the callback window" in r and "again" not in r, True)
     print(f"\nall {n} checks passed")

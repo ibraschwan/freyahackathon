@@ -1157,6 +1157,9 @@ except Exception:
 if slots is not None:
     if dt is None:
         raise Exception('RULE: nothing was booked. Ask on which day the customer can be reached, then CALL schedule_callback with that day as YYYY-MM-DD.')
+    if dt < today:
+        # a day in the past is never what the person said: the date was written wrongly, so it does not use up the one new try
+        raise Exception('RULE: nothing was booked. ' + dt.isoformat() + ' is in the past, so the date was written wrongly. Today is ' + tag(today) + '. Allowed: ' + allowed_text() + '. Find the day the person named among these and CALL schedule_callback again with that date as YYYY-MM-DD.')
     day_ok = any(d == dt for d, a, c in slots)
     if day_ok and tm is None:
         raise Exception('RULE: nothing was booked. ' + say(dt) + ' is possible, but a clock time is missing. Ask at what time on that day, then CALL schedule_callback again with the time as HH:MM (24 hour).')
