@@ -1,0 +1,665 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Cedar nested tools",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "https://example.invalid/cedar/v3"
+    }
+  ],
+  "paths": {
+    "/verify_identity": {
+      "post": {
+        "operationId": "verify_identity",
+        "summary": "verify_identity; success ONLY when result.state equals ACCEPTED. All fields are inside request; member_token carries customer_id.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "member_token": {
+                    "type": "string",
+                    "description": "The call variable customer_id; identifies the synthetic session"
+                  },
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "challenge": {
+                        "type": "string",
+                        "enum": [
+                          "membership_word",
+                          "postal_code",
+                          "birth_year"
+                        ]
+                      },
+                      "response_text": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "challenge",
+                      "response_text"
+                    ]
+                  }
+                },
+                "required": [
+                  "member_token",
+                  "request"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Envelope. REJECTED means no mutation occurred. Identity failures are per challenge.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "type": "string",
+                          "enum": [
+                            "ACCEPTED",
+                            "REJECTED"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "state"
+                      ]
+                    },
+                    "payload": {
+                      "type": "object",
+                      "properties": {
+                        "challenge_passed": {
+                          "type": "boolean"
+                        },
+                        "fully_authenticated": {
+                          "type": "boolean"
+                        },
+                        "remaining_for_challenge": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "challenge_passed",
+                        "fully_authenticated",
+                        "remaining_for_challenge"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result",
+                    "payload"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get_account": {
+      "post": {
+        "operationId": "get_account",
+        "summary": "get_account; success ONLY when result.state equals ACCEPTED. All fields are inside request; member_token carries customer_id.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "member_token": {
+                    "type": "string",
+                    "description": "The call variable customer_id; identifies the synthetic session"
+                  },
+                  "request": {
+                    "type": "object",
+                    "properties": {},
+                    "required": []
+                  }
+                },
+                "required": [
+                  "member_token",
+                  "request"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Envelope. REJECTED means no mutation occurred. Identity failures are per challenge.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "type": "string",
+                          "enum": [
+                            "ACCEPTED",
+                            "REJECTED"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "state"
+                      ]
+                    },
+                    "payload": {
+                      "type": "object",
+                      "properties": {
+                        "facilities": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "facility_key": {
+                                "type": "string"
+                              },
+                              "kind": {
+                                "type": "string",
+                                "enum": [
+                                  "revolving",
+                                  "equipment"
+                                ]
+                              },
+                              "overdue_total": {
+                                "type": "number"
+                              },
+                              "late_days": {
+                                "type": "integer"
+                              },
+                              "urgency_rank": {
+                                "type": "integer"
+                              }
+                            },
+                            "required": [
+                              "facility_key",
+                              "kind",
+                              "overdue_total",
+                              "late_days",
+                              "urgency_rank"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "facilities"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result",
+                    "payload"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/create_promise": {
+      "post": {
+        "operationId": "create_promise",
+        "summary": "create_promise; success ONLY when result.state equals ACCEPTED. All fields are inside request; member_token carries customer_id.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "member_token": {
+                    "type": "string",
+                    "description": "The call variable customer_id; identifies the synthetic session"
+                  },
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "facility_key": {
+                        "type": "string"
+                      },
+                      "committed_sum": {
+                        "type": "number"
+                      },
+                      "due_on": {
+                        "type": "string",
+                        "format": "date"
+                      }
+                    },
+                    "required": [
+                      "facility_key",
+                      "committed_sum",
+                      "due_on"
+                    ]
+                  }
+                },
+                "required": [
+                  "member_token",
+                  "request"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Envelope. REJECTED means no mutation occurred. Identity failures are per challenge.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "type": "string",
+                          "enum": [
+                            "ACCEPTED",
+                            "REJECTED"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "state"
+                      ]
+                    },
+                    "payload": {
+                      "type": "object",
+                      "properties": {
+                        "commitment_key": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "commitment_key"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "result",
+                    "payload"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/add_note": {
+      "post": {
+        "operationId": "add_note",
+        "summary": "add_note; success ONLY when result.state equals ACCEPTED. All fields are inside request; member_token carries customer_id.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "member_token": {
+                    "type": "string",
+                    "description": "The call variable customer_id; identifies the synthetic session"
+                  },
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "facility_key": {
+                        "type": "string"
+                      },
+                      "note_code": {
+                        "type": "string",
+                        "enum": [
+                          "decline",
+                          "vulnerability",
+                          "ownership_question",
+                          "settled_claim",
+                          "write_failure"
+                        ]
+                      },
+                      "narrative": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "facility_key",
+                      "note_code"
+                    ]
+                  }
+                },
+                "required": [
+                  "member_token",
+                  "request"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Envelope. REJECTED means no mutation occurred. Identity failures are per challenge.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "type": "string",
+                          "enum": [
+                            "ACCEPTED",
+                            "REJECTED"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "state"
+                      ]
+                    },
+                    "payload": {
+                      "type": "object",
+                      "properties": {},
+                      "required": []
+                    }
+                  },
+                  "required": [
+                    "result",
+                    "payload"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/schedule_callback": {
+      "post": {
+        "operationId": "schedule_callback",
+        "summary": "schedule_callback; success ONLY when result.state equals ACCEPTED. All fields are inside request; member_token carries customer_id.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "member_token": {
+                    "type": "string",
+                    "description": "The call variable customer_id; identifies the synthetic session"
+                  },
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "return_day": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "return_time": {
+                        "type": "string",
+                        "description": "HH:MM"
+                      }
+                    },
+                    "required": [
+                      "return_day",
+                      "return_time"
+                    ]
+                  }
+                },
+                "required": [
+                  "member_token",
+                  "request"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Envelope. REJECTED means no mutation occurred. Identity failures are per challenge.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "type": "string",
+                          "enum": [
+                            "ACCEPTED",
+                            "REJECTED"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "state"
+                      ]
+                    },
+                    "payload": {
+                      "type": "object",
+                      "properties": {},
+                      "required": []
+                    }
+                  },
+                  "required": [
+                    "result",
+                    "payload"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transfer_to_agent": {
+      "post": {
+        "operationId": "transfer_to_agent",
+        "summary": "transfer_to_agent; success ONLY when result.state equals ACCEPTED. All fields are inside request; member_token carries customer_id.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "member_token": {
+                    "type": "string",
+                    "description": "The call variable customer_id; identifies the synthetic session"
+                  },
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "destination": {
+                        "type": "string",
+                        "enum": [
+                          "desk",
+                          "arrangements",
+                          "care"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "destination"
+                    ]
+                  }
+                },
+                "required": [
+                  "member_token",
+                  "request"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Envelope. REJECTED means no mutation occurred. Identity failures are per challenge.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "type": "string",
+                          "enum": [
+                            "ACCEPTED",
+                            "REJECTED"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "state"
+                      ]
+                    },
+                    "payload": {
+                      "type": "object",
+                      "properties": {},
+                      "required": []
+                    }
+                  },
+                  "required": [
+                    "result",
+                    "payload"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/close_call": {
+      "post": {
+        "operationId": "close_call",
+        "summary": "close_call; success ONLY when result.state equals ACCEPTED. All fields are inside request; member_token carries customer_id.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "member_token": {
+                    "type": "string",
+                    "description": "The call variable customer_id; identifies the synthetic session"
+                  },
+                  "request": {
+                    "type": "object",
+                    "properties": {
+                      "resolution": {
+                        "type": "string",
+                        "enum": [
+                          "saved",
+                          "settled",
+                          "escalated",
+                          "unresolved",
+                          "unverified",
+                          "unreachable"
+                        ]
+                      },
+                      "explanation": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "resolution"
+                    ]
+                  }
+                },
+                "required": [
+                  "member_token",
+                  "request"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Envelope. REJECTED means no mutation occurred. Identity failures are per challenge.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "type": "string",
+                          "enum": [
+                            "ACCEPTED",
+                            "REJECTED"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "state"
+                      ]
+                    },
+                    "payload": {
+                      "type": "object",
+                      "properties": {},
+                      "required": []
+                    }
+                  },
+                  "required": [
+                    "result",
+                    "payload"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
