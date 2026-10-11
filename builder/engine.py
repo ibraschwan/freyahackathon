@@ -15,14 +15,17 @@ import json, re
 from . import runtime
 
 SEVEN = ["verify_identity", "get_account", "create_promise", "add_note", "schedule_callback", "transfer_to_agent", "close_call"]
+OPTIONAL = ["add_note", "schedule_callback", "transfer_to_agent"]      # roles a bank may not have: tools.<role> is null in the spec
 
 # ------------------------------------------------------------------ the bank's tool API file
 def read_api(openapi):
-    """{tool: {url, props, required}} for the bank's tools, taken from the OpenAPI file."""
+    """{tool: {url, props, required}} for the bank's tools, taken from the OpenAPI file.
+    Every service is keyed by its full path without the leading slash, and also by its last segment when no other path ends the same
+    way; a shared last segment maps to {"ambiguous": [the paths]} so that nothing picks one of them silently."""
     base = ((openapi.get("servers") or [{}])[0].get("url") or "").rstrip("/")
     out = {}
     for path, item in (openapi.get("paths") or {}).items():
-        name = path.strip("/").split("/")[-1]
+        name = path.strip("/")
         op = item.get("post") or item.get("put") or next((v for v in item.values() if isinstance(v, dict)), {})
         schema = (((op.get("requestBody") or {}).get("content") or {}).get("application/json") or {}).get("schema") or {}
         schema = deref(openapi, schema)
@@ -30,7 +33,25 @@ def read_api(openapi):
         out[name] = {"url": base + "/" + path.strip("/"), "method": "POST" if "post" in item else "PUT" if "put" in item else "POST",
                      "props": {k: deref(openapi, v) for k, v in (schema.get("properties") or {}).items()}, "required": schema.get("required") or [],
                      "summary": op.get("summary") or "", "response": deref(openapi, resp).get("properties") or {}}
+    by_seg = {}
+    for full in out: by_seg.setdefault(full.split("/")[-1], []).append(full)
+    for seg, fulls in by_seg.items():
+        if seg not in out: out[seg] = out[fulls[0]] if len(fulls) == 1 else {"ambiguous": fulls}      # a segment that is itself a full path keeps that one
     return out
+
+def service(api, R, role):
+    """The name of the tool API service that plays `role`: the role's own name, unless tools.<role>.service names another one."""
+    name = str((R.get(role) or {}).get("service") or role)
+    if "ambiguous" in (api.get(name) or {}): raise ValueError(f"'{name}' is the last segment of several paths ({', '.join(api[name]['ambiguous'])}): tools.{role}.service must be the full path")
+    return name
+
+def roles(api, R, notes_enabled):
+    """{role: service name} for the roles the bank has: a role of OPTIONAL set to null in tools is left out, add_note also when notes are off.
+    Raises when a role that is on has no service in the tool API."""
+    on = {r: service(api, R, r) for r in SEVEN if not (r in OPTIONAL and r in R and R[r] is None) and not (r == "add_note" and not notes_enabled)}
+    missing = [r + (" (as " + s + ")" if s != r else "") for r, s in on.items() if s not in api]
+    if missing: raise ValueError("the tool API file lacks: " + ", ".join(missing))
+    return on
 
 def deref(openapi, node):
     while isinstance(node, dict) and "$ref" in node:
@@ -127,7 +148,7 @@ AN ANSWER GIVEN IN PARTS. Customers often say a security answer in pieces, over 
 - As soon as the pieces together make the complete answer, CALL verify_identity with the whole answer.
 
 Tools in this step: {tools}.
-{limits_hint}- wrap_up(outcome, reason) ends the call. Before the security check is passed the call can only end as one of: {before_pairs}.
+{limits_hint}{extra_hint}- wrap_up(outcome, reason) ends the call. Before the security check is passed the call can only end as one of: {before_pairs}.
 - Do not call a tool that is not listed for this step.
 
 CALL STATE (kept by the system, always current):
@@ -147,8 +168,7 @@ Your tools in this step: {tools}.
 {note_hint}- After check_terms, customer_refused{note_name} the system itself says the next sentence to the customer: the next offer, the question about the next product, or the read-back of everything agreed. So in the message in which you CALL one of them, write nothing, or one short acknowledgement such as "I understand." Never state an offer, a date, an amount or a read-back yourself, and never repeat an offer.
 - If one customer message settles several products (for example pays one and disputes another), CALL the tool for each of them in that same message.
 - customer_confirmed(): CALL it only after the customer gave a clear yes to the read-back. The system then records every agreed promise at the bank and tells the customer the result itself. If the customer changes the day or the amount instead, CALL check_terms again with the new value.
-- transfer_to_agent(queue): hands the call to a person. The system says goodbye and closes the call after it.
-- wrap_up(outcome, reason): ends the call when nothing is open any more. {finish_hint}
+{transfer_hint}{extra_hint}- wrap_up(outcome, reason): ends the call when nothing is open any more. {finish_hint}
 - A promise that is recorded cannot be changed or cancelled in this call. If the customer asks, say: "{change_later}"
 
 CALL STATE (kept by the system, always current):
@@ -164,14 +184,23 @@ def speaks(spec):
     return lang + ". Your instructions and the tool messages are written in English; everything you say to the customer is in " + lang + ", also when an instruction quotes English words for you to say: say their meaning in " + lang
 
 def build_workflow(spec, openapi):
-    api = read_api(openapi)
-    missing = [t for t in SEVEN if t not in api and not (t == "add_note" and not (spec.get("notes") or {}).get("enabled"))]
-    if missing: raise ValueError("the tool API file lacks: " + ", ".join(missing))
-    code = runtime.embed(spec)
-    call_vars = set(spec.get("call_variables") or ["customer_id"])
+    raw = read_api(openapi)
     R = spec.get("tools") or {}
     sen, out, notes = spec.get("sentences") or {}, spec.get("outcomes") or {}, spec.get("notes") or {}
+    on = roles(raw, R, bool(notes.get("enabled")))
+    api = dict({k: v for k, v in raw.items() if k not in SEVEN}, **{r: raw[s] for r, s in on.items()})    # the roles the bank has, under the role names
+    code = runtime.embed(spec)
+    call_vars = set(spec.get("call_variables") or ["customer_id"])
     notes_on = bool(notes.get("enabled")) and "add_note" in api
+    def extras(step):
+        """The services of the tool API that no role uses and extra_tools exposes in this step: the model calls them itself and sees the result unchanged."""
+        ts = []
+        for name, e in (spec.get("extra_tools") or {}).items():
+            if str((e or {}).get("step") or "both") not in (step, "both"): continue
+            t = bank_tool(raw, name, call_vars, str((e or {}).get("when") or "")); t["function"]["name"] = re.sub(r"\W", "_", name); ts.append(t)
+        return ts
+    def extra_hint(ts):
+        return "".join("- " + t["function"]["name"] + "(" + ", ".join(k for k in t["function"]["parameters"]["properties"]["body"]["properties"] if k not in call_vars) + "): " + t["function"]["description"] + "\n" for t in ts)
     prm = spec.get("prompts") or {}
     close_props = api["close_call"]["props"]
     f_out, f_reason = (R.get("close_call") or {}).get("outcome", "outcome"), (R.get("close_call") or {}).get("reason", "reason")
@@ -183,8 +212,8 @@ def build_workflow(spec, openapi):
     callback = bank_tool(api, "schedule_callback", call_vars,
         "Books a callback for the customer. CALL it as soon as someone else who answered names a day, with or without a clock time. It checks the day and the time against the allowed slots itself and tells you what to ask next.",
         extra_desc={(R.get("schedule_callback") or {}).get("time", "time"): "The clock time as HH:MM (24 hour). If no clock time was said yet, send \"unknown\"."},
-        pre=code["CALLBACK_PRE"], post=code["CALLBACK_POST"])
-    def transfer(desc): return bank_tool(api, "transfer_to_agent", call_vars, desc, pre=code["TRANSFER_PRE"], post=code["TRANSFER_POST"])
+        pre=code["CALLBACK_PRE"], post=code["CALLBACK_POST"]) if "schedule_callback" in api else None
+    def transfer(desc): return bank_tool(api, "transfer_to_agent", call_vars, desc, pre=code["TRANSFER_PRE"], post=code["TRANSFER_POST"]) if "transfer_to_agent" in api else None
     finish_props = {"outcome": leaf("outcome", close_props.get(f_out, {}), None), "reason": leaf("reason", close_props.get(f_reason, {}), None)}
     for p in finish_props.values(): p.pop("default", None)
     finish_props["reason"]["description"] = (finish_props["reason"].get("description", "") + " Leave it out when the outcome has no reason.").strip()
@@ -192,7 +221,7 @@ def build_workflow(spec, openapi):
                        code["FINISH"], finish_props, ["outcome"])
 
     # hooks write these variables themselves; the same values also sit in the tool result, which is tested as a second source
-    auto = to("goodbye", "a tool ended the conversation", eq_any([("auto_state", "go"), ("schedule_callback_response.data.auto_state", "go"), ("transfer_to_agent_response.data.auto_state", "go")]))
+    auto = to("goodbye", "a tool ended the conversation", eq_any([("auto_state", "go")] + [(r + "_response.data.auto_state", "go") for r in ("schedule_callback", "transfer_to_agent") if r in api]))
     fin = to("note_next", "wrap_up was called", eq("fin_state", "go"))
     before = [tuple(x) for x in (out.get("before_verification") or [])]
     after = [tuple(x) for x in (out.get("after_verification") or [])]
@@ -206,11 +235,13 @@ def build_workflow(spec, openapi):
                    "). The system counts. Its answer tells you exactly what to say next, or it ends the call. Never count these yourself, never repeat an explanation on your own, and do not CALL wrap_up for these cases. Small talk or an unfinished sentence is not such a case: just ask again. A message that CONTAINS an answer to your question is an answer, also when a question or a remark comes with it: send the answer with verify_identity and do not CALL no_answer for that message.\n") if limits else ""
     nodes = {}
     nodes["setup"] = code_node("setup", code["SETUP"], "opening")
+    op_extra = extras("opening")
+    op_tools = [t for t in (verify, callback, transfer("Hands the call to a person. CALL it only in the situations your step instructions name.")) if t] + ([no_answer] if limits else []) + op_extra + [finish]
     nodes["opening"] = {
         "name": "opening", "node_type": "conversation", "on_enter": {"type": "tts", "text": sen["opening"]}, "on_enter_first_entry_only": True, "max_node_turns": 60, "max_turn_transition": "note_next",
-        "task_message": OPENING.format(rules=prm["opening"].strip(), tools="verify_identity, schedule_callback, transfer_to_agent, " + ("no_answer, " if limits else "") + "wrap_up",
-                                       before_pairs=pairs_text(before), limits_hint=limits_hint),
-        "tools": [verify, callback, transfer("Hands the call to a person. CALL it only in the situations your step instructions name.")] + ([no_answer] if limits else []) + [finish],
+        "task_message": OPENING.format(rules=prm["opening"].strip(), tools=", ".join(t["function"]["name"] for t in op_tools),
+                                       before_pairs=pairs_text(before), limits_hint=limits_hint, extra_hint=extra_hint(op_extra)),
+        "tools": op_tools,
         "transitions": [
             to("get_account", "all security answers are verified", eq_any([("id_state", "verified"), ("verify_identity_response.data.id_state", "verified")])),
             to("goodbye", "the security check failed", eq_any([("id_state", "failed"), ("verify_identity_response.data.id_state", "failed")])),
@@ -233,7 +264,9 @@ def build_workflow(spec, openapi):
         tools.append(code_tool("skip_product", "Leaves a product out of the agreement, with the reason. It writes nothing to the bank. CALL it when the customer's answer settles a product without a promise for a reason other than a plain refusal.",
             code["SET_NOTE"], {"product_id": {"type": "string", "description": "The product_id from the FACTS (for example p2), or \"all\" for every open product."},
                                "reason": {"type": "string", "enum": list(reasons), "description": "One of: " + ", ".join(reasons) + "."}}, ["product_id", "reason"]))
-    tools += [transfer("Hands the call to a person. CALL it in the situations your step instructions name, with the queue they name."), finish]
+    ng_extra = extras("negotiation")
+    tools += [t for t in (transfer("Hands the call to a person. CALL it in the situations your step instructions name, with the queue they name."),) if t] + ng_extra + [finish]
+    transfer_hint = "- transfer_to_agent(queue): hands the call to a person. The system says goodbye and closes the call after it.\n" if "transfer_to_agent" in api else ""
     note_hint = "- skip_product(product_id, reason): CALL it when a product ends without a promise for a reason your rules name (not for a plain refusal: that is customer_refused). \"all\" settles every open product at once. The system writes the notes to the bank at the very end.\n" if notes_on else ""
     finish_hint = ("Give the outcome and reason that fit; the system checks them against what was recorded." if notes_on else
                    "Without a recorded promise the call can only end as one of: " + pairs_text(after) + ".")
@@ -243,7 +276,8 @@ def build_workflow(spec, openapi):
         # would leave the step without an assistant message, and the platform then suppresses routing on tool results.
         "on_enter": {"type": "tts", "text": "{{enter_line}}"}, "max_node_turns": 80, "max_turn_transition": "note_next",
         "task_message": NEGOTIATE.format(rules=prm["negotiation"].strip(), tools=", ".join(t["function"]["name"] for t in tools), all_hint=', or "all" for every open product on the same day',
-                                         note_hint=note_hint, note_name=(" or skip_product" if notes_on else ""), finish_hint=finish_hint, change_later=sen.get("change_later", "You can change it later.")),
+                                         note_hint=note_hint, note_name=(" or skip_product" if notes_on else ""), finish_hint=finish_hint, change_later=sen.get("change_later", "You can change it later."),
+                                         transfer_hint=transfer_hint, extra_hint=extra_hint(ng_extra)),
         "tools": tools,
         "transitions": [auto, fin, to("rec_next", "the customer confirmed the read-back", eq("commit_state", "go")), dirty,
                         # six customer messages since the system last spoke and no tool call: the conversation is stuck

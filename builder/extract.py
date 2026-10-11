@@ -9,7 +9,7 @@ Everything the model returns is checked against the tool API file before it is u
 """
 import asyncio, json, re
 from . import llm
-from .engine import read_api, SEVEN
+from .engine import read_api, SEVEN, OPTIONAL as OPTIONAL_ROLES, service, roles as role_services
 
 SYSTEM = ("You configure a phone-agent engine for a bank's collections calls. You are exact and literal. Every value comes from the brief and the tool API file you are given, "
           "never from other banks, other briefs or habit. If the material is several documents (a mail, a policy extract, a memo, a code list), read all of them: a later document "
@@ -37,6 +37,7 @@ NEGOTIATION step
 - customer_confirmed(): the customer said a clear yes to the read-back. The engine calls create_promise once per agreed product. A failed call is repeated once. Then it speaks `sentences.promise_recorded`. If a call failed twice it speaks `sentences.promise_failed`; when notes are enabled that product is noted with `notes.service_error_reason`, otherwise the call is closed with `outcomes.promise_service_error`.
 - The engine writes the notes with add_note at the very end of the call, and never when the call was transferred.
 - transfer_to_agent: after a successful transfer the engine speaks `sentences.after_transfer` and closes the call with `outcomes.transfer[<queue>]`. Promises agreed but not yet recorded are dropped. Recorded promises stay.
+- A bank tool whose "tools" entry is null does not exist for this bank: the engine builds no such tool, and the instructions must not mention it or the situation it serves (no callback without schedule_callback, no transfer without transfer_to_agent, no notes without add_note). A service listed in "extra_tools" is a tool of the dialogue model in the step named there, under the tool API's own name.
 - wrap_up(outcome, reason), or the automatic closing: the engine decides the final outcome and reason from the records, in this order: a transfer -> `outcomes.transfer[queue]`; a booked callback -> `outcomes.callback_booked`; before verification -> the model's pair if it is in `outcomes.before_verification`; at least one recorded promise -> `outcomes.promise_recorded`; notes enabled -> derived from the notes by `notes.close_from_notes`; otherwise the model's pair if it is in `outcomes.after_verification`. Then it speaks `closing_lines["<outcome>/<reason>"]` (or `closing_lines["<outcome>"]`) if there is one, then `sentences.goodbye`, and calls close_call exactly once, as the last tool call.
 """
 
@@ -91,6 +92,9 @@ SCHEMA = """THE CONFIGURATION. Return one JSON object with exactly these keys.
    "callback_outside_second": the second one is outside too. Name the wrap_up(outcome, reason) to call.}
 "tools": for each bank tool, the names of its body fields with these roles (take the names from the tool API file):
   {"verify_identity": {"question", "answer"}, "create_promise": {"product", "amount", "date"}, "add_note": {"product", "reason"}, "schedule_callback": {"date", "time"}, "transfer_to_agent": {"queue"}, "close_call": {"outcome", "reason"}}
+  When the tool API names the service that plays a role differently, add "service": its name in the tool API (the last segment of its path, or the whole path without the leading slash when several paths end the same way), for example "create_promise": {"service": "promise/create", "product": ..., "amount": ..., "date": ...}. The engine then calls that service; the dialogue model still sees the role name.
+  When the tool API has no service at all for add_note, schedule_callback or transfer_to_agent, set that key to null: the engine then builds the agent without that tool. The other four roles are always needed.
+"extra_tools": optional, only for services of the tool API that none of the seven roles covers and that the brief tells the agent to use: {<service name as in "service" above>: {"step": "opening" | "negotiation" | "both", "when": one or two sentences for the dialogue model: when to call it, with what, and what to say or do with the result}}. The model calls such a service itself, with the fields of the tool API, and sees the result as it comes. Leave the key out when there is no such service.
 "response": {"ok": the response field that is true when the bank carried the action out}.
 "transfer": {"before_verification": the queues that may be used before the customer is verified (a list; empty if the brief does not limit it)}.
 "outcomes": {
@@ -177,7 +181,7 @@ How to write the rules:
 - With notes enabled, a product that ends without a promise for a reason other than a plain refusal (already paid, dispute, hardship declined, ...) is settled with CALL skip_product(<product>, <reason>) and the call goes on with the other products by itself; skip_product("all", <reason>) settles every open product at once. Never add wrap_up after it: when the last product is settled with nothing agreed, the engine ends the call. Without notes, such a call ends with CALL wrap_up(<outcome>, <reason>) using the exact values of the policy.
 - The engine speaks these itself, so never tell the model to say them: the opening sentence, the debt statement and first question, every persuasion offer and the floor offer, the lead-in to the next product, the read-back, the sentence after a recorded promise, the sentence after a failed recording, the sentences after a transfer or a booked callback, the sentence after a failed security check, the `note_lines` sentences, the closing lines, the goodbye. Never tell the model to say goodbye or thank-you-goodbye.
 - Sentences that belong to a situation in the middle of a call and are not in that list (a sentence of sympathy, "I understand.", the question that offers the support team, the answer to a request for a human) the model says itself: put them in the rule, in quotes. In a message in which the model CALLs check_terms, customer_refused or skip_product it says nothing or one short acknowledgement.
-- Tools are written as: CALL verify_identity, CALL schedule_callback, CALL transfer_to_agent(queue <name>), CALL check_terms(...), CALL customer_refused(<product>, <kind>), CALL skip_product(<product>, <reason>), CALL customer_confirmed, CALL wrap_up(<outcome>, <reason>).
+- Tools are written as: CALL verify_identity, CALL schedule_callback, CALL transfer_to_agent(queue <name>), CALL check_terms(...), CALL customer_refused(<product>, <kind>), CALL skip_product(<product>, <reason>), CALL customer_confirmed, CALL wrap_up(<outcome>, <reason>). A tool whose "tools" entry in the configuration is null does not exist: never mention it, and write the rule for its situation without it (for example no callback is offered when there is no schedule_callback; leave out the {{callback_facts}} line too). A service of "extra_tools" is written as CALL <its name>(<its fields>), only in the step its entry names, with the words of its "when".
 - Call variables may be used in double braces (for example {{title}} {{last_name}}). Use no other double braces except {{callback_facts}}.
 - Cover every rule of the brief that concerns the conversation. Add nothing the brief does not say. Keep each rule short and literal."""
 
@@ -278,9 +282,25 @@ def check(spec, openapi):
     bad += ["missing key: " + k for k in need if k not in spec]
     if bad: return bad
     R, out = spec["tools"], spec["outcomes"]
+    for t, v in R.items():
+        if v is None and t not in OPTIONAL_ROLES: bad.append(f"tools.{t} is null, but the engine cannot work without this service")
+        try: s = service(api, R, t) if isinstance(v, dict) else t
+        except ValueError as e: bad.append(str(e)); continue
+        if isinstance(v, dict) and v.get("service") is not None and s not in api: bad.append(f"tools.{t}.service: the tool API has no service '{s}' (it has {sorted(k for k, x in api.items() if 'url' in x)})")
+    try: used = role_services(api, R, bool(spec["notes"].get("enabled")))
+    except ValueError as e: used = {}; bad += [str(e)] if str(e) not in bad else []
+    if spec["notes"].get("enabled") and "add_note" in R and R["add_note"] is None: bad.append("notes.enabled is true but tools.add_note is null")
+    for name, e in (spec.get("extra_tools") or {}).items():
+        if not isinstance(e, dict) or not str(e.get("when") or "").strip(): bad.append(f"extra_tools.{name}: needs a 'when' text"); continue
+        if e.get("step") not in (None, "opening", "negotiation", "both"): bad.append(f"extra_tools.{name}.step must be opening, negotiation or both")
+        if "url" not in (api.get(name) or {}): bad.append(f"extra_tools.{name}: the tool API has no service of that name" + (" (several paths end with it: use the full path)" if "ambiguous" in (api.get(name) or {}) else ""))
+        elif any(api[name] is api[s] for s in used.values()): bad.append(f"extra_tools.{name}: this service already plays one of the seven roles")
     def enum(tool, role, default):
-        f = (R.get(tool) or {}).get(role, default); p = (api.get(tool) or {}).get("props", {})
-        if tool in api and f not in p: bad.append(f"tools.{tool}.{role}: the tool API has no body field '{f}' (it has {sorted(p)})")
+        if tool in R and R[tool] is None: return None
+        try: s = service(api, R, tool)
+        except ValueError: return None
+        f = (R.get(tool) or {}).get(role, default); p = (api.get(s) or {}).get("props", {})
+        if s in api and f not in p: bad.append(f"tools.{tool}.{role}: the tool API has no body field '{f}' (it has {sorted(p)})")
         return (p.get(f) or {}).get("enum")
     for t, roles in (("verify_identity", ("question", "answer")), ("create_promise", ("product", "amount", "date")), ("schedule_callback", ("date", "time")), ("transfer_to_agent", ("queue",)), ("close_call", ("outcome", "reason"))):
         for r in roles: enum(t, r, {"question": "field", "product": "product_id"}.get(r, r))
@@ -319,7 +339,6 @@ def check(spec, openapi):
         if isinstance(L.get("close"), list) and L["close"] not in (out.get("before_verification") or []): bad.append(f"opening_limits.{k}.close must be one of outcomes.before_verification")
     n = spec["notes"]
     if n.get("enabled"):
-        if "add_note" not in api: bad.append("notes.enabled is true but the tool API has no add_note")
         e = enum("add_note", "reason", "reason") or []
         for x in n.get("reasons") or []:
             if e and x not in e: bad.append(f"notes.reasons: '{x}' is not in the tool API {e}")
@@ -377,9 +396,13 @@ def check_prompts(prm, spec):
         if not (prm.get(k) or "").strip(): bad.append(k + " is empty"); continue
         for v in re.findall(r"\{\{\s*([\w.]+)\s*\}\}", prm[k]):
             if v not in cv: bad.append(f"{k} uses {{{{{v}}}}}, which is not a call variable")
-    if "{{callback_facts}}" not in (prm.get("opening") or ""): bad.append("opening lacks the {{callback_facts}} placeholder")
+    off = [t for t in OPTIONAL_ROLES if t in (spec.get("tools") or {}) and spec["tools"][t] is None]
+    if "{{callback_facts}}" not in (prm.get("opening") or "") and "schedule_callback" not in off: bad.append("opening lacks the {{callback_facts}} placeholder")
     for tool, where in (("verify_identity", "opening"), ("schedule_callback", "opening"), ("wrap_up", "opening"), ("no_answer", "opening"), ("check_terms", "negotiation"), ("customer_refused", "negotiation"), ("customer_confirmed", "negotiation"), ("transfer_to_agent", "negotiation")):
-        if tool not in (prm.get(where) or ""): bad.append(f"{where} never mentions {tool}")
+        if tool not in (prm.get(where) or "") and tool not in off: bad.append(f"{where} never mentions {tool}")
+    for tool in off:
+        for where in ("opening", "negotiation"):
+            if tool in (prm.get(where) or ""): bad.append(f"{where} mentions {tool} although the bank has no such service (tools.{tool} is null)")
     if spec["notes"].get("enabled") and "skip_product" not in (prm.get("negotiation") or ""): bad.append("negotiation never mentions skip_product although notes are enabled")
     if not spec["notes"].get("enabled") and "skip_product" in (prm.get("negotiation") or ""): bad.append("negotiation mentions skip_product although notes are not enabled")
     return bad
