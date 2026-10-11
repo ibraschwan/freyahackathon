@@ -402,4 +402,93 @@ if __name__ == "__main__":
     s = opt(back_until, [card("p1", 100.0, 30.0, 4)], "2026-10-16T16:00")
     r = refused(s.tool, "set_promise", product_id="p1", amount="full", date="2026-10-17")
     check("the business day before it is closed already -> the earliest day", "2026-10-19" in r and "2026-10-16" not in r, True)
+    # product.confirm "each": every product is read back, confirmed and recorded on its own before the next one is discussed
+    def each(case, notes=True, **kw):
+        sp = copy.deepcopy(golden.spec(notes)); sp["product"]["confirm"] = "each"; c = PUB[case]
+        return Sim(sp, pid(c["products"]), c["variables"]["now"], identity=c["identity"], **kw).login()
+    def bank(s): return [(c["tool"], c["args"].get("product_id")) for c in s.ledger["calls"] if c["tool"] not in ("verify_identity", "get_account")]
+    OKL = "Your promise is recorded. You will receive a text message confirming this promise."
+    # 1. two products agreed one after the other
+    s = each("PUB-13"); k = len(s.said); s.tool("set_promise", product_id="p1", amount="full", date="2026-10-15")
+    check("each: the first agreed product is read back alone, at once, and nothing is recorded yet", (s.said[k:], bank(s)), (["To confirm: you will pay 300.00 for your credit card ending 6604 on Thursday 15 October 2026. Do you confirm?"], []))
+    check("each: CALL STATE names the product whose read-back is on the table", s.vars["live_state"].splitlines()[-1].startswith("The system has read back the agreement for the credit card ending 6604 [p1] alone."), True)
+    s.tool("confirm")
+    check("each: it is recorded before the next product is opened, with the lead-in and its attempt 1", (s.said[k + 1:], bank(s), s.state["prop"]),
+          ([OKL + " Now your personal loan. Could you pay the full amount of 900.00 for your personal loan by Friday 16 October 2026?"], [("create_promise", "p1")], {"p2": 1}))
+    s.tool("set_promise", product_id="p2", amount="full", date="2026-10-16"); s.tool("confirm"); s.tool("finish", outcome="promise")
+    check("each: two products, what was said", s.said[k + 2:], ["To confirm: you will pay 900.00 for your personal loan on Friday 16 October 2026. Do you confirm?", OKL, "Thank you, goodbye."])
+    check("each: two products, order of bank calls", bank(s), [("create_promise", "p1"), ("create_promise", "p2"), ("close_call", None)])
+    check("each: two products, records", s.summary(), ("promise", None, [("p1", 300.0, "2026-10-15"), ("p2", 900.0, "2026-10-16")], [], [], []))
+    # 2. "all" in one sentence, three products: still one read-back and one recording per product, in product order
+    s = each("PUB-12"); k = len(s.said); s.tool("set_promise", product_id="all", amount="full", date="2026-10-15")
+    check("each, all at once: only the first product is read back", (s.said[k:], bank(s)), (["To confirm: you will pay 510.00 for your credit card ending 9015 on Thursday 15 October 2026. Do you confirm?"], []))
+    s.tool("confirm")
+    check("each, all at once: one confirmation records one product, then the next is read back", (s.said[k + 1:], bank(s)),
+          ([OKL + " Now your personal loan. To confirm: you will pay 1320.00 for your personal loan on Thursday 15 October 2026. Do you confirm?"], [("create_promise", "p1")]))
+    s.tool("confirm")
+    check("each, all at once: the third", (s.said[k + 2:], bank(s)),
+          ([OKL + " Now your car loan. To confirm: you will pay 140.00 for your car loan on Thursday 15 October 2026. Do you confirm?"], [("create_promise", "p1"), ("create_promise", "p2")]))
+    s.tool("confirm"); check("each, all at once: after the last one only the result is said", s.said[k + 3:], [OKL])
+    s.tool("finish", outcome="promise")
+    check("each, all at once: order of bank calls", bank(s), [("create_promise", "p1"), ("create_promise", "p2"), ("create_promise", "p3"), ("close_call", None)])
+    check("each, all at once: records", s.summary(), ("promise", None, [("p1", 510.0, "2026-10-15"), ("p2", 1320.0, "2026-10-15"), ("p3", 140.0, "2026-10-15")], [], [], []))
+    check("each, all at once: what was said at the end", s.said[-2:], [OKL, "Thank you, goodbye."])
+    # 3. the customer refuses the read-back of the second product after the first was recorded
+    s = each("PUB-13"); k = len(s.said); s.tool("set_promise", product_id="p1", amount="full", date="2026-10-15"); s.tool("confirm"); s.tool("set_promise", product_id="p2", amount="full", date="2026-10-16")
+    s.tool("refusal", product_id="p2", kind="flat_refusal")
+    check("each: a no at the second read-back is a refusal as today: the next persuasion offer, nothing more recorded", (s.said[k + 2:], bank(s), s.state["plan"], s.state["prop"]),
+          (["To confirm: you will pay 900.00 for your personal loan on Friday 16 October 2026. Do you confirm?", "Could you pay the instalment amount of 300.00 for your personal loan by Friday 23 October 2026? The rest stays overdue."], [("create_promise", "p1")], {}, {"p2": 2}))
+    check("each: the recorded first promise cannot be changed", "already recorded" in refused(s.tool, "set_promise", product_id="p1", amount="full", date="2026-10-16"), True)
+    s.tool("refusal", product_id="p2", kind="flat_refusal"); check("each: attempts used up, the call stays open", (s.ended, s.said[-1]), (False, "Is there anything else?"))
+    s.tool("finish", outcome="promise")
+    check("each: refused second read-back, order of bank calls", bank(s), [("create_promise", "p1"), ("add_note", "p2"), ("close_call", None)])
+    check("each: refused second read-back, records", s.summary(), ("promise", None, [("p1", 300.0, "2026-10-15")], [("p2", "refused")], [], []))
+    s = each("PUB-13"); s.tool("set_promise", product_id="p1", amount="full", date="2026-10-15"); s.tool("confirm"); s.tool("set_promise", product_id="p2", amount="full", date="2026-10-16"); s.tool("set_promise", product_id="p2", amount="full", date="2026-10-20")
+    check("each: a changed day at the second read-back is read back again", s.said[-1], "To confirm: you will pay 900.00 for your personal loan on Tuesday 20 October 2026. Do you confirm?")
+    s.tool("confirm"); s.tool("finish", outcome="promise")
+    check("each: changed day, records and order", (s.summary()[2], bank(s)), ([("p1", 300.0, "2026-10-15"), ("p2", 900.0, "2026-10-20")], [("create_promise", "p1"), ("create_promise", "p2"), ("close_call", None)]))
+    # 4. create_promise fails for the first product (retry, then service error); the second is still recorded
+    s = each("PUB-13", fail_first={"create_promise": 2}); k = len(s.said); s.tool("set_promise", product_id="all", amount="full", date="2026-10-15"); s.tool("confirm")
+    check("each: two failures on the first product, the engine says so and goes on to the second", (s.said[k + 1:], bank(s), s.ended),
+          (["I am sorry, I could not record your promise. Now your personal loan. To confirm: you will pay 900.00 for your personal loan on Thursday 15 October 2026. Do you confirm?"], [("create_promise", "p1"), ("create_promise", "p1")], False))
+    s.tool("confirm"); s.tool("finish", outcome="promise")
+    check("each: failure on the first, order of bank calls", bank(s), [("create_promise", "p1"), ("create_promise", "p1"), ("create_promise", "p2"), ("add_note", "p1"), ("close_call", None)])
+    check("each: failure on the first, records", s.summary(), ("promise", None, [("p2", 900.0, "2026-10-15")], [("p1", "service_error")], [], []))
+    check("each: failure on the first, what was said at the end", s.said[-2:], [OKL, "Thank you, goodbye."])
+    s = each("PUB-13", fail_first={"create_promise": 1}); k = len(s.said); s.tool("set_promise", product_id="all", amount="full", date="2026-10-15"); s.tool("confirm")
+    check("each: one failure is retried for the same product before the next is read back", (bank(s), s.said[-1].startswith(OKL + " Now your personal loan. To confirm:")), ([("create_promise", "p1"), ("create_promise", "p1")], True))
+    s = each("PUB-13", notes=False, fail_first={"create_promise": 4}); s.tool("set_promise", product_id="all", amount="full", date="2026-10-15"); s.tool("confirm"); check("each: first failed, call still open", s.ended, False); s.tool("confirm")
+    check("each: every product failed, the call is closed as a service error", (s.summary()[:3], bank(s), s.said[-1]),
+          (("no_promise", "service_error", []), [("create_promise", "p1"), ("create_promise", "p1"), ("create_promise", "p2"), ("create_promise", "p2"), ("close_call", None)], "I am sorry, I could not record your promise. Thank you, goodbye."))
+    # 5. one product only: exactly today's behaviour
+    def one(mk_):
+        s = mk_("PUB-10", notes=False, fail_first={"create_promise": 1}); s.tool("refusal", product_id="p1", kind="flat_refusal"); s.tool("set_promise", product_id="p1", amount="full", date="2026-10-16"); s.tool("confirm"); s.tool("finish", outcome="promise")
+        return s.said, s.ledger["calls"], s.summary(), s.vars["st_json"], s.vars["live_state"]
+    a, b = one(lambda *x, **y: mk(*x, **y).login()), one(each)
+    check("each, one product: said, bank calls, records and state are those of a call without the setting", a == b, True)
+    check("each, one product: order of bank calls", [c["tool"] for c in b[1]][-3:], ["create_promise", "create_promise", "close_call"])
+    check("each, one product: records and what was said", (b[2][:3], b[0][-3:]), (("promise", None, [("p1", 365.0, "2026-10-16")]), ["To confirm: you will pay 365.00 for your credit card ending 7740 on Friday 16 October 2026. Do you confirm?", OKL, "Thank you, goodbye."]))
+    # the setting "together", like no setting, is today's behaviour
+    def tog(sp): sp["product"]["confirm"] = "together"
+    s = opt(tog, pid(PUB["PUB-13"]["products"]), "2026-10-14T11:00"); s.tool("set_promise", product_id="p1", amount="full", date="2026-10-15")
+    check("together: the next product is opened before any read-back", (s.said[-1].startswith("Now your personal loan."), "each" in s.state), (True, False))
+    # what stays as it is around a read-back of one product
+    s = each("PUB-12"); k = len(s.said); s.together(("set_promise", dict(product_id="p1", amount="full", date="2026-10-15")), ("refusal", dict(product_id="p2", kind="flat_refusal")))
+    check("each: pays one and refuses another in one message: the read-back comes first, the refusal is not counted", (s.said[-1].startswith("To confirm: you will pay 510.00 for your credit card ending 9015"), s.state["prop"]), (True, {}))
+    s.stall(); s.stall(); s.stall(); s.stall()
+    check("each: a conversation that does not move at the read-back says it again and uses up no attempt of another product", (s.said[-1].startswith("To confirm: you will pay 510.00"), s.state["prop"], s.state["pnotes"]), (True, {}, {}))
+    s.tool("confirm"); check("each: the refused product then gets its own turn", (s.said[-1], bank(s)), (OKL + " Now your personal loan. Could you pay the full amount of 1320.00 for your personal loan by Friday 16 October 2026?", [("create_promise", "p1")]))
+    s.tool("set_note", product_id="p2", reason="dispute"); check("each: after a note the next product is opened as today", s.said[-1], "Now your car loan. Could you pay the full amount of 140.00 for your car loan by Friday 16 October 2026?")
+    s.tool("refusal", product_id="p3", kind="flat_refusal"); check("each: its one attempt is used up, the call stays open", (s.said[-1], s.ended), ("Is there anything else?", False))
+    s.tool("finish", outcome="promise")
+    check("each: notes for the products without a promise, one close at the end", (s.summary(), bank(s)), (("promise", None, [("p1", 510.0, "2026-10-15")], [("p2", "dispute"), ("p3", "refused")], [], []), [("create_promise", "p1"), ("add_note", "p2"), ("add_note", "p3"), ("close_call", None)]))
+    s = each("PUB-13"); s.tool("set_promise", product_id="all", amount="full", date="2026-10-15"); s.tool("refusal", product_id="", kind="flat_refusal")
+    check("each: a no that names no product is about the read-back on the table; the other agreement is read back next", (s.state["plan"].keys() == {"p2"}, s.said[-1].startswith("To confirm: you will pay 900.00 for your personal loan")), (True, True))
+    s.tool("confirm"); check("each: then the product that lost its agreement gets its turn", (s.said[-1], bank(s)), (OKL + " Now your credit card ending 6604. Could you pay the full amount of 300.00 for your credit card ending 6604 by Friday 16 October 2026?", [("create_promise", "p2")]))
+    s = each("PUB-13"); s.tool("set_promise", product_id="all", amount="full", date="2026-10-15"); s.tool("confirm"); s.transfer("restructuring")
+    check("each: a transfer at the second read-back keeps the recorded promise and drops the other", (s.summary(), bank(s)), (("transferred", "restructuring", [("p1", 300.0, "2026-10-15")], [], [], ["restructuring"]), [("create_promise", "p1"), ("transfer_to_agent", None), ("close_call", None)]))
+    s = each("PUB-13"); s.tool("set_promise", product_id="all", amount="full", date="2026-10-15"); s.tool("confirm"); s.hang_up()
+    check("each: hang up at the second read-back: the safety net closes as a promise, the second is not recorded", (s.summary()[:3], bank(s)), (("promise", None, [("p1", 300.0, "2026-10-15")]), [("create_promise", "p1"), ("close_call", None)]))
+    s = each("PUB-13"); s.tool("set_promise", product_id="all", amount="full", date="2026-10-15"); s.tool("confirm")
+    check("each: wrap_up as a promise while a read-back waits for its answer is refused", "not recorded yet" in refused(s.tool, "finish", outcome="promise"), True)
     print(f"\nall {n} checks passed")
