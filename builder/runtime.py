@@ -916,6 +916,8 @@ if st['id'] == 'failed':
     raise Exception('RULE: the security check is over. Do not ask again.')
 if st['stage'] == 'verified':
     raise Exception('RULE: identity is already verified. Do not ask security questions again.')
+# an answer was given: the count of not-answered security questions starts again (it counts non-answers in a row)
+vars['na_security_question'] = 0
 try:
     A = (S.get('tools') or dict()).get('verify_identity') or dict()
     fq = A.get('question') or 'field'

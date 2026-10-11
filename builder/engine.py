@@ -191,7 +191,7 @@ def build_workflow(spec, openapi):
     no_answer = code_tool("no_answer", "Reports that the person on the line did not give the answer you asked for. The system counts these and tells you exactly what to say next, or ends the call when the limit of the bank is reached.",
         code["NO_ANSWER"], {"about": {"type": "string", "enum": [k for k in about if k in limits], "description": " ".join(k + ": " + v + "." for k, v in about.items() if k in limits)}}, ["about"])
     limits_hint = ("- no_answer(about): CALL it EVERY time the person does not give the answer you asked for (" + "; ".join(k + " = " + v for k, v in about.items() if k in limits) +
-                   "). The system counts. Its answer tells you exactly what to say next, or it ends the call. Never count these yourself, never repeat an explanation on your own, and do not CALL wrap_up for these cases. Small talk or an unfinished sentence is not such a case: just ask again.\n") if limits else ""
+                   "). The system counts. Its answer tells you exactly what to say next, or it ends the call. Never count these yourself, never repeat an explanation on your own, and do not CALL wrap_up for these cases. Small talk or an unfinished sentence is not such a case: just ask again. A message that CONTAINS an answer to your question is an answer, also when a question or a remark comes with it: send the answer with verify_identity and do not CALL no_answer for that message.\n") if limits else ""
     nodes = {}
     nodes["setup"] = code_node("setup", code["SETUP"], "opening")
     nodes["opening"] = {
