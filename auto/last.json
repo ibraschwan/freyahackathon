@@ -1,21 +1,20 @@
 {
- "experiment": "1011-025417-exp-2--opening-limits-counted-by-a-code",
- "tag": "exp 2: opening limits counted by a code tool (fresh build, spec v5)",
- "commit": "2fcf0dd",
+ "experiment": "1011-031439-exp-2b--opening-limits-by-code--count-re",
+ "tag": "exp 2b: opening limits by code, count restarts on an answer (spec v5, agent version 8)",
+ "commit": "a34c053",
  "harness": "0e52309d",
  "slot": "ab",
  "only": null,
  "reps": 1,
  "style": null,
- "passed": 98,
+ "passed": 99,
  "total": 100,
- "ledger": 98,
- "hung": 0,
+ "ledger": 99,
+ "hung": 1,
  "stalls": 0,
- "seconds": 1130,
- "result": "results/auto/1011-025417-exp-2--opening-limits-counted-by-a-code.json",
+ "seconds": 641,
+ "result": "results/auto/1011-031439-exp-2b--opening-limits-by-code--count-re.json",
  "failed": {
-  "A15": "0/1",
-  "A50": "0/1"
+  "X25": "0/1"
  }
 }

@@ -70,3 +70,11 @@ so the workspace is blocked until the status is set to `completed` by hand (`PUT
 Our own runner (`tests/run_scenarios.py`) takes `runs[].outcome` when it is `pass` or `fail`, and reads the verdict on the call otherwise.
 A call with no verdict at all stays failed. Both readings are logged for every test (`auto/tests.jsonl`, `auto/report.py`).
 We do not know which reading the final scoring uses.
+
+## A third thing: a call in which every code step failed
+
+Call `e6c9d54b-f817-4f85-a225-a6a32f5fafbc` (11 October 2026, about 00:19 UTC, practice customer id `c_4664a827-dd0`). After 41 seconds of normal conversation
+every `code_exec` step of the workflow answered `Sandbox did not return a parseable result (returncode=0). Stdout: __CODE_EXEC_RESULT__{"vars": ...`,
+35 times in a row, including the `pre_process_code` of the end-of-call tool. The same snippets had run without error earlier in the same call,
+and the same conversation replayed over `POST /api/v2/chat/message` ran through. The variables of the call were small (147 variables, about 12 kB of values).
+The customer had confirmed three promises; none was recorded and the call was not closed. We have seen this once in about 800 simulated calls.
