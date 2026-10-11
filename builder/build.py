@@ -117,6 +117,8 @@ def main(argv):
     for name, t in texts:
         if t is None: trace.log(f"brief file {name} holds no readable text and was left out")
     texts = [(n, t) for n, t in texts if t is not None]
+    from builder import freeform as _ff
+    _ff.FULL = list(texts)                       # the documents in full, for the build's own tests on example answers
     for i, (n, t) in enumerate(texts):
         if len(t) > LIMIT: trace.log(f"brief file {n} is {len(t)} characters long, the first {LIMIT} are read"); texts[i] = (n, t[:LIMIT])
     if not texts: sys.exit("no brief file could be read as text")

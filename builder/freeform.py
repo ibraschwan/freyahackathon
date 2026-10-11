@@ -62,8 +62,11 @@ Return one JSON object with exactly these keys:
   {"name": short English identifier, "goal": one sentence,
    "entry_sentence": for every step after the first: the sentence the agent says when this step begins (for example an acknowledgement that the previous step succeeded); "" for the first step (the opening is spoken instead),
    "tools": [service names from the tool API the model may call in this step, exactly as the paths are named],
-   "instructions": the complete instructions for the dialogue model in this step: explicit, ordered, literal; every sentence the documents prescribe for this step in the agent's language, in quotes; every rule of the documents that applies in this step; for every service: when exactly to CALL it and with what field values; what to say after each kind of result; what to do when the customer refuses, asks something else or gives no answer. Refer to dates only through the DATE TABLE the system shows. Write "CALL <service>(...)" for a tool call and "CALL wrap_up(...)" to end the call.
+   "instructions": the complete instructions for the dialogue model in this step (wherever a decision or a wording comes from a service answer that has a digest, tell the model to take it from "the DIGEST of <service>" shown under WHAT THE SERVICES HAVE ANSWERED, and do not ask it to count, compare or calculate itself): explicit, ordered, literal; every sentence the documents prescribe for this step in the agent's language, in quotes; every rule of the documents that applies in this step; for every service: when exactly to CALL it and with what field values; what to say after each kind of result; what to do when the customer refuses, asks something else or gives no answer. Refer to dates only through the DATE TABLE the system shows. Write "CALL <service>(...)" for a tool call and "CALL wrap_up(...)" to end the call.
    "next": null for the last step, otherwise {"to": the name of the next step, "when": {"tool": a service of this step, "field": a field of its response (a field inside an object of the response is written as a path with dots, outer field first), "equals": the value (as a string, for example "true") that means the step is done}}}
+"digests": {<service name>: Python source} for every service whose answer the instructions decide something from by counting, grouping, comparing numbers or dates, picking a case, or formatting a value for speech. The dialogue model is small: it copies well and counts, compares and calculates badly. A digest runs in code right after the service answered and hands the model the facts of that answer already worked out, so that the instructions only have to say "take it from the DIGEST". Leave a service out only when its answer needs no working out.
+  The source is the BODY of a Python function with the arguments `answer` (the JSON body the service returned, a dict; an error answer has other keys), `request` (a dict of the request fields that were sent) and `now` (the call's date and time as the text of the now variable). It must `return` one string: short lines in English that name each fact, with every value that is to be SAID written exactly as the agent says it in its language (amounts, dates, digits spoken one by one, names), and with the identifiers that are to be SENT to a service marked as such and copied unchanged. Work out everything the documents decide from this answer: how many items, which items share a name or other property and what tells them apart, which case of the documents' tables applies and the sentence for it with the values filled in, what is absent, what must never be said.
+  Rules for the source: plain Python 3; `json`, `re`, `datetime` and `math` are already imported, no other imports; no files, no network; it must never raise, so read every field with .get() and a default, and expect missing fields, empty texts, null, numbers given as text and error answers; it must not contain two opening or two closing braces in a row (build dictionaries with dict() and texts with + or str.format-free joining); keep it under 120 lines.
 "global_rules": rules that hold in every step, one per entry: what must never be said or offered, the answer to "are you a robot", honesty when a tool call failed, what to say when asked something the documents do not answer, how the call ends. Exact sentences in quotes.
 "end": null if no service must close every call; otherwise {"tool": the service that must be the last call of every conversation, "fields": {<body field the model sets when ending>: how to choose its value, naming the allowed values and the situation for each}, "default": {<body field>: value} for a call that breaks off (the customer hangs up) with nothing decided}.
 "goodbye": the closing sentence the system speaks before the closing call.
@@ -100,19 +103,22 @@ async def read(trace, briefs, openapi, api_text):
     spec = await ask_json(trace, "read the documents into a free-form call configuration (steps, services, instructions)", base + "Return the JSON object in one ```json block.")
     for attempt in range(2):
         bad = check(spec, openapi)
+        if not bad: bad = digest_problems(spec, read_api(openapi), trace)
         if not bad: break
         trace.log("free-form check found: " + "; ".join(bad))
         spec = await ask_json(trace, "repair the free-form configuration after the check against the tool API file",
                               base + "This configuration was produced:\n```json\n" + json.dumps(spec, indent=1, ensure_ascii=False) + "\n```\n\nA check found these problems:\n- " + "\n- ".join(bad) + "\n\nReturn the corrected configuration, complete, in one ```json block.")
     bad = check(spec, openapi)
     if bad: raise ValueError("the free-form configuration still fails the check: " + "; ".join(bad))
+    for b in digest_problems(spec, read_api(openapi)):                 # a digest that still raises on an example is taken out: the raw answer is shown instead
+        name = b.split(":")[0].replace("digests.", ""); spec.get("digests", {}).pop(name, None); trace.log("digest left out, it still fails: " + b[:300])
     review = await llm.ask(trace, "review the free-form configuration against the documents, rule by rule", SYSTEM,
                            base + "=== THE CONFIGURATION TO CHECK ===\n```json\n" + json.dumps(spec, indent=1, ensure_ascii=False) + "\n```\n\n" + REVIEW)
     changes = [l.strip() for l in review.splitlines() if l.strip().startswith("CHANGE:")]
     trace.log("review: " + (" | ".join(changes) or "no change lines")[:1500])
     try:
         new = llm.json_of(review)
-        if isinstance(new, dict) and not check(new, openapi): spec = new
+        if isinstance(new, dict) and not check(new, openapi) and not digest_problems(new, read_api(openapi)): spec = new
         else: trace.log("the reviewed configuration failed the check and was not used")
     except ValueError: trace.log("the review holds no readable JSON, the configuration before the review is used")
     trace.log("free-form configuration accepted: steps " + ", ".join(f"{s['name']} ({', '.join(s.get('tools') or [])})" for s in spec["steps"]) + "; end: " + json.dumps(spec.get("end"), ensure_ascii=False)[:300])
@@ -145,6 +151,13 @@ def check(spec, openapi):
         if "equals" not in w: bad.append(f"steps[{i}].next.when.equals is missing")
     cv = set(spec["call_variables"] or [])
     if spec["now_variable"] not in cv: bad.append("now_variable is not a call variable")
+    for name, src in (spec.get("digests") or {}).items():
+        if name not in api: bad.append(f"digests: the tool API has no service '{name}' (it has {sorted(api)})"); continue
+        if "{{" in str(src) or "}}" in str(src): bad.append(f"digests.{name}: the source holds two braces in a row; build dictionaries with dict() and never write two braces together"); continue
+        if re.search(r"^\s*(import|from)\s", str(src), flags=re.M): bad.append(f"digests.{name}: no import statements; json, re, datetime and math are already there"); continue
+        for what, sample in (("an empty answer", {}), ("an error answer", {"result": {"returnCode": "X", "code": "X", "message": "m", "type": "ERROR"}}), ("an answer with null fields", {"data": None, "result": None})):
+            try: run_digest(src, sample)
+            except Exception as e: bad.append(f"digests.{name}: raised on {what}: {type(e).__name__}: {str(e)[:200]}. It must never raise; read every field with .get() and a default"); break
     for f, v in (spec.get("variable_fields") or {}).items():
         if v not in cv: bad.append(f"variable_fields: '{v}' is not a call variable")
         if not any(f == pth[-1] for t in api.values() for pth, _ in leaves(t.get("props") or {})): bad.append(f"variable_fields: no service has a request field '{f}'")
@@ -210,6 +223,8 @@ vars['fin_state'] = 'go'
 '''
 
 TOOL_POST = r'''
+import re, datetime, math
+#DIGEST#
 try:
     # keep every value an answer gives for a field that is also a request field: a later request must carry it exactly so (see NEST_PRE)
     FIELDS = [f for f in json.loads(FIELDS_TEXT) if f not in json.loads(OWN_TEXT)]         # what this service was sent comes back as an echo, not as a new value
@@ -267,7 +282,21 @@ try:
     shown = json.dumps(body, ensure_ascii=False, separators=(',', ':')) if ok else 'FAILED (status ' + str(result.get('status_code') if isinstance(result, dict) else '') + '): ' + json.dumps(body, ensure_ascii=False, separators=(',', ':'))[:300]
     while chr(123) + chr(123) in shown or chr(125) + chr(125) in shown:
         shown = shown.replace(chr(123) + chr(123), chr(123) + ' ' + chr(123)).replace(chr(125) + chr(125), chr(125) + ' ' + chr(125))
-    line = '- ' + NAME + '(' + req + ') answered: ' + shown[:2600]
+    digest = ''
+    try:
+        if HAS_DIGEST:
+            try:
+                sent = json.loads(str(vars.get('ff_reqj_' + FN) or 'null')) or dict()
+            except Exception:
+                sent = dict()
+            digest = str(_digest(body if isinstance(body, dict) else dict(), sent, str(vars.get(NOW_VAR) or '')) or '').strip()
+            while chr(123) + chr(123) in digest or chr(125) + chr(125) in digest:
+                digest = digest.replace(chr(123) + chr(123), chr(123) + ' ' + chr(123)).replace(chr(125) + chr(125), chr(125) + ' ' + chr(125))
+    except Exception:
+        digest = ''
+    if digest and isinstance(body, dict):
+        body['DIGEST_from_the_system'] = digest[:3500]
+    line = '- ' + NAME + '(' + req + ') answered' + (', DIGEST (worked out by the system, use it as it is):\n' + digest[:3500] + '\n  the raw answer: ' + shown[:1400] if digest else ': ' + shown[:2600])
     try:
         kept = json.loads(str(vars.get('ff_mem_' + FN) or '[]'))
     except Exception:
@@ -347,6 +376,8 @@ STEP = """STEP {n} of {total}: {name}. Goal: {goal}
 Tools in this step: {tools}.
 - Call a tool only when the instructions say so, with the field values they name. Do not call a tool that is not listed for this step.
 - wrap_up({args}) ends the call. {end_hint}
+
+A DIGEST under an answer was worked out by the system's code from that answer: take counts, cases, groups and wordings from it as they are, and do not count, compare or calculate yourself.
 
 DATES (computed by the system; always current):
 {{{{date_facts}}}}
@@ -436,6 +467,7 @@ try:
         sent[k] = v
     config['body'] = out
     vars['ff_req_' + FN] = ', '.join(str(k) + ' ' + str(sent[k]) for k in sent if k in MODEL_FIELDS)
+    vars['ff_reqj_' + FN] = json.dumps(sent)
 except Exception:
     pass
 '''
@@ -480,6 +512,60 @@ def service_tool(api, name, spec, description, post=None, pre=None, baked=None, 
     if post: tool["post_process_code"] = post
     return tool
 
+def post_hook(api, name, spec):
+    """The code that runs after a service answered: keeps the answer and its values for the rest of the call, and runs the digest the reading wrote for this service."""
+    import textwrap
+    src = str((spec.get("digests") or {}).get(name) or "").strip("\n")
+    code = TOOL_POST.replace("#DIGEST#", ("def _digest(answer, request, now):\n" + textwrap.indent(textwrap.dedent(src), "    ") + "\n    return ''") if src.strip() else "")
+    return snippet(code, FN=fn_name(name), NAME=name, HAS_DIGEST=bool(src.strip()), NOW_VAR=str(spec.get("now_variable") or "now"),
+                   FIELDS_TEXT=json.dumps(sorted(set(pth[-1] for x in api.values() for pth, _ in leaves(x.get("props") or {})))),
+                   OWN_TEXT=json.dumps(sorted(set(pth[-1] for pth, _ in leaves(api[name].get("props") or {})))))
+
+FULL = []      # the documents in full, set by build.py: example answers are looked up here (the model sees long documents cut)
+
+def examples(api):
+    """{service: [example answers]} found in the documents that are JSON: under a key that is the service's name, every object
+    that looks like an answer of that service (it has keys of the answer and no others than those and the usual error key)."""
+    out = {}
+    for _, text in FULL:
+        try: doc = json.loads(text)
+        except Exception: continue
+        def walk(x, svc, depth):
+            if depth > 12: return
+            if isinstance(x, dict):
+                if svc and x and (set(x) <= set(api[svc]["response"]) | {"result", "error"}) and (set(x) & (set(api[svc]["response"]) | {"result"})):
+                    if len(out.setdefault(svc, [])) < 400: out[svc].append(x)
+                    return
+                for k, v in x.items(): walk(v, k if k in api and "ambiguous" not in api[k] else svc, depth + 1)
+            elif isinstance(x, list):
+                for v in x: walk(v, svc, depth + 1)
+        walk(doc, None, 0)
+    return out
+
+def digest_problems(spec, api, trace=None):
+    """Runs every digest on the example answers the documents hold for its service. Returns what raised."""
+    bad, ex = [], examples(api)
+    for name, src in (spec.get("digests") or {}).items():
+        if name not in api: continue
+        ran, shown = 0, ""
+        for a in ex.get(name) or []:
+            try:
+                out = run_digest(src, json.loads(json.dumps(a))); ran += 1
+                if len(out) > len(shown) and len(shown) < 200: shown = out
+            except Exception as e:
+                bad.append(f"digests.{name}: raised on an example answer from the documents: {type(e).__name__}: {str(e)[:200]}. The answer was: {json.dumps(a, ensure_ascii=False)[:500]}"); break
+        if trace: trace.log(f"digest of {name}: ran on {ran} of {len(ex.get(name) or [])} example answers found in the documents" + (". One result: " + " / ".join(shown.splitlines())[:600] if shown else ""))
+    return bad
+
+def run_digest(src, answer, request=None, now="2026-01-05T10:00:00+03:00"):
+    """Runs a digest outside a call, as the build's own test does. Returns its text; raises what it raises."""
+    import textwrap, re as _re, datetime as _dt, math as _math
+    env = {"json": json, "re": _re, "datetime": _dt, "math": _math}
+    exec("def _digest(answer, request, now):\n" + textwrap.indent(textwrap.dedent(str(src).strip("\n")), "    ") + "\n    return ''", env)
+    out = env["_digest"](answer, request or {}, now)
+    if not isinstance(out, str): raise TypeError("the digest returned " + type(out).__name__ + ", not a string")
+    return out
+
 def fn_name(service):
     """The name under which the dialogue model calls a service: the service's name with everything but letters, digits and _ turned into _."""
     return re.sub(r"\W", "_", str(service))
@@ -520,8 +606,7 @@ def build_workflow(spec, openapi):
         tools = []
         for name in s.get("tools") or []:
             t = api[name]
-            tools.append(service_tool(api, name, spec, (t["summary"] + ". " if t["summary"] else "") + "CALL it when the step instructions say so, with the field values they name.", post=snippet(TOOL_POST, FN=fn_name(name), NAME=name, FIELDS_TEXT=json.dumps(sorted(set(pth[-1] for x in api.values() for pth, _ in leaves(x.get("props") or {})))),
-                                                                     OWN_TEXT=json.dumps(sorted(set(pth[-1] for pth, _ in leaves(t.get("props") or {})))))))
+            tools.append(service_tool(api, name, spec, (t["summary"] + ". " if t["summary"] else "") + "CALL it when the step instructions say so, with the field values they name.", post=post_hook(api, name, spec)))
         tools.append(wrap_up)
         trans = []
         if s.get("next"):
