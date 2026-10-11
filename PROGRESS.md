@@ -1,73 +1,99 @@
 # Progress: Build the Builder (Freya hackathon)
 
-State as of Sunday 11 October 2026, 15:05 Istanbul. Hidden briefs open at 20:00, submission closes at 23:00.
+State as of Sunday 11 October 2026, 18:30 Istanbul. Hidden briefs open at 20:00, submission closes at 23:00.
 
 ## Where we are
 
-- **The builder is frozen at the code of experiment 4** plus plumbing that makes builds and test runs survive a busy
-  platform. Nothing that changes what the phone agent does will be added without a strong reason.
-- **Best measured result of the agent the builder makes by itself** (Brief A+B, agent version 9, rules extracted in
-  build 5): **100 of 100 scenarios passed, bank records right on 100 of 100, no call ended by the customer**, one
-  run, at 03:49. This is a single run. The final asks for three of three.
-- **Not measured yet:** three runs of all 100, the 12 held-out scenarios on other call days, the kit's five talking
-  styles. The confirmation run of experiment 4 was started at 14:15 and is crawling: since about 14:00 the platform
-  answers every second API request with a timeout or a 504, and simulated calls are retried for many minutes.
-- **Model spend of the builder since the loop started:** 3.53 USD of 30.
+- **The builder that will be used at 20:00 is commit `3d61767`** (branch `ibraschwan/freyavoice-hackathon`, pushed).
+  It is the candidate of the afternoon (experiment 4) plus what a second, independent audit and the talking-style
+  runs found today. 162 local checks pass; `auto/check_generic.py` passes.
+- **Measured on the agent this builder makes from Brief A+B** (slot `x5-final`, agent `46b306a6`, version 2):
+  one full run of the 100 scenarios, **96 passed, bank records right on 97**. More runs are under way (see below).
+- **Measured on the afternoon's candidate** (agent version 9, the builder before today's additions): three full runs
+  100 / 94 / 96, the 12 held-out scenarios 12 of 12 in three runs.
+- **Model spend of the builder so far:** about 20 USD of 30 (the loop 3.5, the second audit about 4.3, today's
+  rebuilds about 12). Two final builds cost about 3.5.
 
-## How the score moved (agent built by the builder, 100 scenarios, one run each)
+## What changed in the builder today, and why
 
-| Step | Passed | Records right | What changed |
-|---|---|---|---|
-| first build | 92 | 96 | |
-| after fixes to the instruction writing and the engine | 97 | 100 | repeated questions capped, callback day checked first, required sentences in every branch |
-| loop baseline | 98 | 100 | stall step in two stages |
-| experiment 1 | 96 | 98 | discarded: nothing fixed by the 3-of-3 rule, records wrong in 3 of 54 calls |
-| experiment 2 | 98 | 98 | not kept: the new counting tool closed a call it should not and swallowed a third wrong answer |
-| experiment 2b | 99 | 99 | discarded: one scenario regressed (a question asked together with an answer was never answered) |
-| experiment 4 | 100 | 100 | experiments 2 and 2b plus: a question that comes with an answer is answered in the same message |
+| Change | Why | Evidence |
+|---|---|---|
+| Model calls run with every tool switched off and are made again when they fail; unreadable JSON is asked for again | On a brief the builder had not seen, a model call reached for a tool and the build died with no workflow (two of the second audit's three builds) | Reproduced with a one-line prompt; with `tools=[]` it answers in one turn |
+| Six optional settings in the policy: floor as the greatest or least of several amounts (with rounding), order of the products, a time of day after which today is closed, the business day before a day that is not one, one read-back and recording per product, the brief's own limit on wrong security answers | The second audit's brief had these rules; the engine could not express them and approximated them silently | Without the settings nothing changes (the 104 old local checks pass unchanged, 58 new ones); the re-read A+B policy uses none of them except the limit of three wrong answers, which equals the bank's count; on the audit's brief all six are filled correctly; three live conversations on that agent (order, cut-off, one-by-one recording, two wrong answers end the check with no disclosure) |
+| A security answer given in parts is joined in the order said; only the rest is asked for | With the kit's style `pieces` the candidate repeated the whole question after two digits and sent the parts in the wrong order or not at all (4 real failures of 100) | Subset of 20 in `pieces`: every identity step with parts now verifies |
+| A callback date in the past does not use up the one new try | The second audit saw the model write a date in a wrong year and lose the customer's only correction | local check |
+| The build command takes a folder, tells the tool API file by its content, leaves out files that are not text | A raw-material brief may come as several documents, a code list may be `.json` | tried on a made-up folder |
+| What a reading could not express is written to the trace; a failed run ends its trace with the reason | The readings' own warnings were thrown away; a failed build left a trace without an end | `traces/` of the last builds |
 
-Every experiment, with its commit, harness version, agent version and the reason for the decision, is in
-`auto/results.tsv`. Every single test is in `auto/tests.jsonl`.
+A malformed optional setting is taken out after two repairs instead of ending the build.
 
-## What the three-run repeats have shown so far
+## Results of today, in the order measured
 
-Same agent, same scenario, three runs (judge's verdict on the call):
+Same 100 scenarios unless said otherwise. "Passed" is the judge's verdict on the call with the bank records right.
 
-- Baseline: of 7 scenarios that had failed at least once, 4 passed 3 of 3; A12 failed 3 of 3; A20 and B10 passed 2 of 3.
-- Experiment 2b, 20 scenarios: 17 passed 3 of 3 (A12 among them); A08 1 of 3; A17 and X25 2 of 3.
-- Experiment 4: not repeated yet.
+| When | Agent | Run | Passed | What failed |
+|---|---|---|---|---|
+| 03:49 | candidate v9 | plain | 100 / 100 | |
+| 15:26 | candidate v9 | plain | 94 / 100 | 3 calls the customer ended while the agent's model was silent for 53 to 56 s, 2 without a verdict (one call never took place), B10 one persuasion offer too many |
+| 15:59 | candidate v9 | plain | 96 / 100 | 3 calls cut the same way, A17 the simulated customer left its script |
+| 16:22 | candidate v9 | held-out 12, three runs, 10 calls at once | 12 / 5 / 8 | all 11 failures: the customer's first sentence was never answered for 60 s |
+| 16:36 | candidate v9 | held-out 12, three runs, 5 calls at once | 12 / 12 / 12 | |
+| 16:54 | candidate v9 | style `pieces` | 91 / 100 | 4 real (number in two parts at the security question), 4 bank or sandbox failures, 1 judge reading |
+| 17:17 | new builder, first A+B build | plain (two agent versions mixed) | 96 / 100 | 4 calls the customer ended |
+| 17:31 | new builder | `pieces`, 20 identity scenarios | 14 / 20 | no failure at the security questions any more; 6 calls in which `create_promise` failed twice at the bank |
+| 17:48 | new builder | `in_words`, 25 scenarios | 25 / 25 | |
+| 17:59 | **final builder, slot `x5-final`** | plain | **96 / 100** | X13 sandbox returned nothing; A45 the platform played the call a second time on the same bank session; B02 the simulated customer mixed up its two products; X09 the model reported a date after the deadline as a refusal (the only one owned by the agent) |
+| 18:13 | final builder | `pieces`, 20 identity scenarios | 13 / 20 | all 7: the call stopped answering around 18:15 and even the closing request got a Cloudflare 530 from the platform |
 
-So a single run of 100 out of 100 does not mean 100 scenarios at three of three.
+Three runs of all 100 on the candidate: 90 scenarios passed in every run by the call verdict, 82 by the run outcome
+the kit's script reads. Of the 10 that did not: 6 platform silence, 2 no verdict, 1 simulated customer, 1 agent (B10).
 
-## Known weak points of the candidate
+The platform was degraded for much of the afternoon (about 14:00 to 15:06, again around 16:20, 17:20 and 18:15).
+A run in such a window says little about the agent; `docs/run-outcome-vs-call-verdict.md` has the measurements that
+tell a silent platform from a wrong agent (answer times, calls ended by the customer, calls with no verdict).
 
-1. **A counter-offer can be lost** when the model reports a too-low amount and something else in one message (B14,
-   X25: records wrong once each in three runs, before experiment 4). A fix exists outside the tree
-   (`.context/exp3n`, 116 local checks pass): the engine itself words the counter-offer. It needs the brief to be
-   read again and has never run in a real call, so it is not in the candidate.
-2. **Persuasion attempts on several products** can come out one too many (B10: 2 of 3 at the baseline).
-3. **One call lost its code environment** (every code step failed 35 times in a row; nothing was recorded). Seen once
-   in about 800 calls, not reproduced. Nothing in the workflow can rescue such a call.
-4. **Judge noise:** a call the judge passes can read "inconclusive" on the run. Our runner settles those with the
-   verdict stored on the call and logs both readings. The kit's script reads only the run.
+## What the second audit found (branch `ibraschwan/second-view`, `second-view/REPORT.md`)
 
-## What we noticed about the platform
+An independent session wrote two banks of its own before reading the builder, built from them and talked to the
+result. Its findings, and what became of them:
 
-`docs/run-outcome-vs-call-verdict.md` has the ids for the organisers: run outcome against call verdict, a simulation
-that stays "running" and blocks the workspace, and the call with the broken code environment. Not sent to anyone yet.
+| Finding | State |
+|---|---|
+| The build dies when a model call reaches for a tool; no end in the trace | fixed |
+| Floor as "the greater of", rounded up | fixed |
+| Order of the products, one confirmation per product | fixed |
+| Cut-off time for today; the business day before | fixed |
+| The brief's limit on wrong answers is lower than the bank's: the agent asked a third time and disclosed the debt | fixed, checked in a live conversation |
+| The readings' warnings about rules they cannot express were thrown away | now in the trace |
+| An invented callback date uses up the customer's correction | a date in the past no longer does |
+| **Notes are not written when a transfer follows** (a brief that wants both) | open |
+| **A tool API with nested request and response bodies cannot be built** | open; the build ends with a clear error |
+| A note that cannot be written twice does not change the closing reason | open, rare |
+| A close request repeated by the platform | open, cause unclear |
+
+## Known weak points
+
+1. **A hidden brief whose structure the engine does not have**: nested tool bodies, notes together with a transfer,
+   anything else outside the settings above. The trace now says so in the reading's own words.
+2. **"I cannot pay that"** after the full amount is asked: the model sometimes reports it as "too much", the engine
+   then offers the floor once as the brief says, and a judge can count one offer too many (B10, 1 of 3 runs).
+3. **A date after the deadline demanded as an instruction** can be reported as a refusal (X09, 1 of 4 runs).
+4. **The platform**: a call in which the agent's model, the sandbox or the bank does not answer fails whatever the
+   agent is. Seen in every run since 15:00.
 
 ## At 20:00
 
 ```bash
 cd /Users/ibrahim/conductor/workspaces/freyahackathon/port-of-spain
 source env.sh && source .venv/bin/activate
-python3 builder/build.py <brief file(s) of hidden brief 1> <its tool API .json> --slot hidden-1
-python3 builder/build.py <brief file(s) of hidden brief 2> <its tool API .json> --slot hidden-2
+python3 builder/build.py <brief file(s) or folder of hidden brief 1> <its tool API .json> --slot hidden-1
+python3 builder/build.py <brief file(s) or folder of hidden brief 2> <its tool API .json> --slot hidden-2
 ```
 
-Each run reads the brief (about four minutes, four or five model calls), deploys, exports and writes:
-`submission/hidden-N.workflow.json`, `traces/hidden-N.log`, `out/hidden-N.spec.json`. With the platform as slow as it
-is now the deploy alone took ten minutes at 14:50; the limit per brief is thirty.
+Each run takes five to eight minutes and five or six model calls, deploys, exports and writes
+`submission/hidden-N.workflow.json`, `traces/hidden-N.log`, `out/hidden-N.spec.json`. The limit per brief is thirty
+minutes. Read the trace afterwards: the lines "could not express" name the rules of that brief the agent only has in
+its instructions.
 
 Then commit `submission/` and `traces/`, push, and submit with:
 
