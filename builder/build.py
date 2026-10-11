@@ -39,6 +39,7 @@ def selftest(spec, openapi, trace):
         for p in st["products"]: assert p["deadline"] and p["floor"] <= p["full"], "a product has no deadline or a floor above the full amount"
         d = min(p["deadline"] for p in st["products"])
         s.tool("set_promise", product_id="all" if n > 1 else st["products"][0]["id"], amount="full", date=d); s.tool("confirm")
+        for _ in range(n - 1 if P.get("confirm") == "each" else 0): s.tool("confirm")        # one read-back and one yes per product
         s.tool("finish", outcome=spec["outcomes"]["promise_recorded"][0])
         assert s.ledger["outcome"] == spec["outcomes"]["promise_recorded"][0] and len(s.ledger["promises"]) == n, "a simple promise call did not end as a promise"
         assert [c["tool"] for c in s.ledger["calls"]][-1] == "close_call" and [c["tool"] for c in s.ledger["calls"]].count("close_call") == 1, "the call was not closed exactly once at the end"

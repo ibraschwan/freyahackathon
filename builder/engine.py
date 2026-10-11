@@ -120,6 +120,12 @@ OPENING = """STEP: opening and security check.
 
 {rules}
 
+AN ANSWER GIVEN IN PARTS. Customers often say a security answer in pieces, over two or more messages: two digits now and two digits in the next message, or the day and the month now and the year next.
+- A piece is the beginning of an answer. It is not a wrong answer, not a refusal and not a non-answer: do not call verify_identity with a piece alone, and do not call no_answer for it.
+- After a piece do NOT repeat the question. Ask only for the rest, in a few words, for example: "And the rest, please?"
+- Join the pieces in the order the customer said them: the first piece first. Example: first "44", then "71" makes 4471, never 7144.
+- As soon as the pieces together make the complete answer, CALL verify_identity with the whole answer.
+
 Tools in this step: {tools}.
 {limits_hint}- wrap_up(outcome, reason) ends the call. Before the security check is passed the call can only end as one of: {before_pairs}.
 - Do not call a tool that is not listed for this step.
