@@ -124,7 +124,13 @@ def main(argv):
     if api is not None: openapi = json.loads(api.read_text())
     elif opt.get("--spec") and (ROOT / "out" / (slot + ".openapi.json")).exists(): openapi = json.loads((ROOT / "out" / (slot + ".openapi.json")).read_text())
     else: openapi = llm.run(extract.tool_api(trace, texts))
-    if url: openapi["servers"] = [{"url": url.rstrip("/")}]          # the tools call the bank's services at the address given on the command line
+    if url:
+        # the tools call the bank's services at the address given on the command line; a path the documents put under the bank's own base
+        # address (for example /api/v2) is kept, unless the address given already has a path
+        import urllib.parse
+        doc = urllib.parse.urlparse(str(((openapi.get("servers") or [{}])[0] or {}).get("url") or "")); given_url = urllib.parse.urlparse(url)
+        base = url.rstrip("/") + (doc.path.rstrip("/") if given_url.path.strip("/") == "" else "")
+        openapi["servers"] = [{"url": base}]; trace.log("the tools call the bank's services at " + base)
     api_text = json.dumps(openapi, indent=1)
     (ROOT / "out").mkdir(exist_ok=True); (ROOT / "out" / (slot + ".openapi.json")).write_text(api_text)
     (ROOT / "out").mkdir(exist_ok=True)
