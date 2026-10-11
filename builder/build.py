@@ -140,11 +140,18 @@ def main(argv):
         else:
             # the engine first: its services may carry other names than its roles (tools.<role>.service). Only when the reading finds no service
             # for a role the engine cannot do without, or cannot be made to pass the check, the free-form way runs
-            trace.log("WAY: engine, " + ("the tool API has a service under the name of every role the engine needs" if named else
-                      "tried first although the tool API names its services differently: the reading maps the engine's roles to them"))
-            try: spec = llm.run(extract.extract(trace, texts, openapi, api_text))
-            except Exception as e:                 # a reading that fails is not the end of the run: the free-form way still makes an agent
-                free = True; trace.log("WAY: free-form, the engine's reading did not fit these services: " + type(e).__name__ + ": " + " ".join(str(e).split())[:500])
+            if not named:
+                # other names than the engine's roles: one short question to the model settles whether these services are the engine's kind of call at all
+                try: played = llm.run(freeform.roles_played(trace, openapi))
+                except Exception as e: played = {}; trace.log("the question which services play the engine's roles got no usable answer: " + str(e)[:200])
+                lacking = [r for r in freeform.ROLES if not played.get(r)]
+                if lacking: free = True; trace.log("WAY: free-form, no service of the tool API plays the engine's role(s) " + ", ".join(lacking))
+            if not free:
+                trace.log("WAY: engine, " + ("the tool API has a service under the name of every role the engine needs" if named else
+                          "the tool API names its services differently, the reading maps the engine's roles to them: " + json.dumps(played)))
+                try: spec = llm.run(extract.extract(trace, texts, openapi, api_text))
+                except Exception as e:                 # a reading that fails is not the end of the run: the free-form way still makes an agent
+                    free = True; trace.log("WAY: free-form, the engine's reading did not fit these services: " + type(e).__name__ + ": " + " ".join(str(e).split())[:500])
         if free: spec = llm.run(freeform.read(trace, texts, openapi, api_text))
         (ROOT / "out" / (slot + ".spec.json")).write_text(json.dumps(spec, indent=1))
         trace.log(f"spec written to out/{slot}.spec.json")

@@ -27,6 +27,18 @@ def fits_engine(openapi):
     api = read_api(openapi)
     return all(r in api for r in ROLES)
 
+async def roles_played(trace, openapi):
+    """{role: the service of the tool API that plays it, or None}, asked from the model when the names do not tell."""
+    api = read_api(openapi)
+    listing = "\n".join(f"- {name}: {t.get('summary') or ''} | request fields: {', '.join(t['props']) or 'none'} | response fields: {', '.join(t['response']) or 'none'}" for name, t in sorted(api.items()))
+    return await ask_json(trace, "say which services of the tool API play the engine's four roles, if any",
+        "A phone agent engine handles one kind of call: it checks the customer's identity with security questions, reads the customer's overdue debts, records a promise to pay "
+        "(product, amount, date) and closes the call with an outcome. It needs one service for each of these roles:\n"
+        "- verify_identity: checks one answer to a security question\n- get_account: returns the customer's late products and amounts\n"
+        "- create_promise: records that the customer will pay an amount on a date\n- close_call: records how the call ended\n\n"
+        "These are the services of a bank's tool API:\n" + listing + "\n\nFor each role, name the service that does exactly that job, or null when no service does. "
+        "Do not stretch a service to a role it was not made for. Return one JSON object with the four roles as keys, in one ```json block.")
+
 # ------------------------------------------------------------------ reading the documents
 SYSTEM = ("You configure a phone agent for a bank from the bank's documents. You are exact and literal. Every value, name and sentence comes from the "
           "documents and the tool API file you are given, never from other banks or habit. If the material is several documents, read all of them: a later "
