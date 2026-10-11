@@ -22,7 +22,6 @@ The phone agent has two conversational steps. A dialogue model listens, talks an
 OPENING step
 - The engine speaks `sentences.opening` as the very first line.
 - The dialogue model finds out who is on the line, handles other people answering, books callbacks and asks the security questions. Its bank tools here: verify_identity, schedule_callback, transfer_to_agent. To end the call it calls wrap_up(outcome, reason).
-- no_answer(about): how the two limits of the opening are counted, by code. The model calls it every time the person does not give the answer that was asked for: about "who_is_speaking" (neither confirmed nor denied being the customer) or about "security_question" (refuses a security question, or asks something instead of answering). Up to `opening_limits[about].times` times the engine answers with the instruction `opening_limits[about].say`; the next time it closes the call with `opening_limits[about].close`.
 - verify_identity: after each result the engine tells the model what to do: repeat the same question after a wrong answer (it makes the model say `identity.wrong_sentence` first), ask the next question (the order of `identity.questions`, using each question's `ask` sentence), or follow `identity.hints[<hint value>]` when the bank returns a hint. When the bank reports that no wrong answers are left, the engine speaks `sentences.identity_failed` and closes the call with `outcomes.identity_failed`.
 - schedule_callback: the engine refuses a day or time outside the `callback` window, without calling the bank, and tells the model `guidance.callback_outside_first` the first time and `guidance.callback_outside_second` the second time. After a booked callback it speaks `sentences.after_callback` and closes the call with `outcomes.callback_booked`.
 
@@ -57,13 +56,6 @@ SCHEMA = """THE CONFIGURATION. Return one JSON object with exactly these keys.
   "hints": {<hint value from the tool API>: the instruction for the dialogue model when this hint comes back, including the exact sentence to say, and whether it counts as a wrong answer},
   "wrong_sentence": what to say after a wrong answer before the question is repeated. It must not reveal which part was wrong.
 }
-"opening_limits": the two things the brief limits before the customer is verified. Both keys are required.
-  {"who_is_speaking": {"times": how many more times the agent may ask whether it is speaking with the customer after the first ask in the opening line got no confirmation (the brief's "ask once more" = 1),
-                       "say": the instruction for the dialogue model for such a further ask, with the exact question in quotes, for example: Ask exactly once more: "<the question>",
-                       "close": [outcome, reason] the call is closed with when that is used up},
-   "security_question": {"times": how many times the agent may explain and ask again when the customer does not answer a security question (the brief's "explain once" = 1),
-                         "say": the instruction for that case: the exact sentence of explanation to say, in quotes, and then to ask the same security question again,
-                         "close": [outcome, reason] for the refusal after that}}
 "product": {
   "list_field": the get_account response field that holds the products, "id_field", "type_field", "full_field": the field with the full past-due amount, "days_late_field",
   "types": {<product type value>: {"words": how the brief says to name this product aloud; a field of the product goes in angle brackets, for example "credit card ending <card_last4>",
@@ -137,9 +129,9 @@ One rule per line. Rules of the brief that hold in every step: what must never b
 The instructions for the OPENING step. Use this structure:
 - First, what must not be said or revealed before the customer is verified, to anyone, with the forbidden words of the brief listed, and what to answer when asked what the call is about (one answer for the customer, one for anyone else).
 - A line: You already said: "<the opening sentence>"
-- PART 1 - WHO IS ON THE LINE. Lettered cases, each ending in a concrete action: what counts as confirmation and what does not; neither confirmed nor denied: write "If the person asked a question, answer it first with its fixed sentence. Then CALL no_answer(who_is_speaking). The tool counts the asks: its answer tells you what to say, or it ends the call." and nothing about how often; wrong number; the customer has died; someone else answered (what may be said, what must not, the callback).
+- PART 1 - WHO IS ON THE LINE. Lettered cases, each ending in a concrete action: what counts as confirmation and what does not; neither confirmed nor denied (how often to ask again, then which wrap_up); wrong number; the customer has died; someone else answered (what may be said, what must not, the callback).
   For the callback write: the placeholder {{callback_facts}} on its own line (the engine puts the allowed slots there), then: "As soon as the person names a day, CALL schedule_callback with it, whatever the day is, and with the clock time if one was said (otherwise time \"unknown\"). The tool checks the day and the time itself: if it refuses with a RULE error, do exactly what the error says. Do not ask for a clock time yourself before calling it." Then the brief's rule for a first and a second offer outside the window.
-- PART 2 - SECURITY QUESTIONS. The questions in order with their exact sentences; "Each time the customer gives an answer, CALL verify_identity" with the field value for each question; how each answer is formatted before it is sent (the brief's rules, with one example each); "The tool result tells you what to do next. Do exactly that."; never reveal which part was wrong; what to do when the customer refuses to answer or asks something instead of answering (every case the brief counts as declining): write "CALL no_answer(security_question). The tool counts: its answer tells you what to say, or it ends the call." and do NOT write the explanation sentence, a first time or a second time into the instructions; a customer who does not want to talk (if the brief counts it together with declining, it is the same CALL). State that small talk or an unfinished sentence instead of an answer is not a refusal and is not counted: the model just asks the question again.
+- PART 2 - SECURITY QUESTIONS. The questions in order with their exact sentences; "Each time the customer gives an answer, CALL verify_identity" with the field value for each question; how each answer is formatted before it is sent (the brief's rules, with one example each); "The tool result tells you what to do next. Do exactly that."; never reveal which part was wrong; what to do when the customer refuses to answer or asks what the call is about instead (first time, second time, with exact sentences and the wrap_up to call); a customer who does not want to talk. State that small talk or an unfinished sentence instead of an answer is not a refusal and is not counted: the model just asks the question again.
 - AT ANY POINT IN THIS STEP: requests the brief allows before verification (for example a human).
 </opening>
 
@@ -153,7 +145,7 @@ The instructions for the NEGOTIATION step. In this step the model only listens, 
 </negotiation>
 
 How to write the rules:
-- Counting. The dialogue model counts badly. The two limits of the opening are counted by the no_answer tool, the persuasion attempts by customer_refused: never restate those counts. For any other limit of the brief (something to be said or offered once), write what happens the first time and what happens the second time as two separate lines, and in the second line say what must NOT be repeated.
+- Counting. The dialogue model counts badly, so spell every limit out. Where the brief allows one more ask, write: "Your opening line was the FIRST ask. Ask exactly ONE more time. If the reply to that second ask is still not a confirmation, CALL wrap_up(...) at once. Never ask a third time." Where the brief says to explain or offer something once, write what happens the first time and what happens the second time as two separate lines, and in the second line say what must NOT be repeated.
 - Every line that ends a call or transfers it says exactly what the model says in that same message: either one given short sentence in quotes, or "say nothing else". Never leave it open, or the model repeats its last sentence.
 - A sentence the brief requires in a situation (for example a sentence of sympathy) must be said in EVERY branch of that situation, also when the customer names a day or an amount in the same message. Write it as the first step of the rule, before the branches.
 - Priority. When the brief says one rule comes before another, write it in BOTH rules: in the winning rule ("this rule comes before R4 and R10") and in the losing rules ("not if the customer mentioned <the winning situation> in this call: then R3"). A customer message that fits two situations is decided by this.
@@ -242,13 +234,6 @@ def check(spec, openapi):
         if not x.get("ask"): bad.append(f"identity.questions[{i}].ask is empty")
         if x.get("kind") not in ("date", "digits", "text"): bad.append(f"identity.questions[{i}].kind must be date, digits or text")
     if not spec["identity"].get("questions"): bad.append("identity.questions is empty")
-    for k in ("who_is_speaking", "security_question"):
-        L = (spec.get("opening_limits") or {}).get(k)
-        if not isinstance(L, dict): bad.append(f"opening_limits.{k} is missing"); continue
-        if not isinstance(L.get("times"), int) or L["times"] < 0: bad.append(f"opening_limits.{k}.times must be a whole number")
-        if not (L.get("say") or "").strip(): bad.append(f"opening_limits.{k}.say is empty")
-        pair_ok(f"opening_limits.{k}.close", L.get("close"))
-        if isinstance(L.get("close"), list) and L["close"] not in (out.get("before_verification") or []): bad.append(f"opening_limits.{k}.close must be one of outcomes.before_verification")
     n = spec["notes"]
     if n.get("enabled"):
         if "add_note" not in api: bad.append("notes.enabled is true but the tool API has no add_note")
@@ -286,7 +271,7 @@ def check_prompts(prm, spec):
         for v in re.findall(r"\{\{\s*([\w.]+)\s*\}\}", prm[k]):
             if v not in cv: bad.append(f"{k} uses {{{{{v}}}}}, which is not a call variable")
     if "{{callback_facts}}" not in (prm.get("opening") or ""): bad.append("opening lacks the {{callback_facts}} placeholder")
-    for tool, where in (("verify_identity", "opening"), ("schedule_callback", "opening"), ("wrap_up", "opening"), ("no_answer", "opening"), ("check_terms", "negotiation"), ("customer_refused", "negotiation"), ("customer_confirmed", "negotiation"), ("transfer_to_agent", "negotiation")):
+    for tool, where in (("verify_identity", "opening"), ("schedule_callback", "opening"), ("wrap_up", "opening"), ("check_terms", "negotiation"), ("customer_refused", "negotiation"), ("customer_confirmed", "negotiation"), ("transfer_to_agent", "negotiation")):
         if tool not in (prm.get(where) or ""): bad.append(f"{where} never mentions {tool}")
     if spec["notes"].get("enabled") and "skip_product" not in (prm.get("negotiation") or ""): bad.append("negotiation never mentions skip_product although notes are enabled")
     if not spec["notes"].get("enabled") and "skip_product" in (prm.get("negotiation") or ""): bad.append("negotiation mentions skip_product although notes are not enabled")

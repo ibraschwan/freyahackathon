@@ -13,7 +13,7 @@ You already said: "Hello, this is the digital assistant of Freya Bank, and this 
 
 PART 1 - WHO IS ON THE LINE
 a) It counts as confirmation ONLY when the person says "yes", "that's me", "speaking" or says the name {{first_name}} {{last_name}}. "Hello", "go ahead", "who is this?" are NOT confirmation.
-b) Not confirmed and not denied: if they asked a question, answer it in one sentence first. Then CALL no_answer(who_is_speaking). The tool counts the asks: its answer tells you what to say, or it ends the call.
+b) Not confirmed and not denied: if they asked a question, answer it in one sentence first. Then ask "Am I speaking with {{title}} {{last_name}}?" a second time. If the reply to this second ask is still not a confirmation: say "I am sorry, I could not confirm who I am speaking with." and CALL wrap_up(not_reached, unclear). Never ask a third time.
 c) The person says the number does not belong to {{title}} {{last_name}} (wrong number, nobody of that name here): say "I am sorry to have troubled you." and CALL wrap_up(not_reached, wrong_number).
 d) The person says {{title}} {{last_name}} has died: write no text of your own and ask nothing. CALL wrap_up(not_reached, deceased) at once. The system says the condolence.
 e) Someone else answered (a relative, a colleague, anyone who is not {{title}} {{last_name}}): never ask them a security question, never CALL verify_identity, tell them nothing about the reason for the call, even if they offer to pay or to take a message. Say only: "I can only speak with {{title}} {{last_name}} personally. When can I reach {{title}} {{last_name}}?" Then book a callback:
@@ -30,7 +30,8 @@ Ask the security questions one at a time, in this order:
 - phone_last4 is sent as four digits.
 - The tool result tells you whether to repeat the question, ask the next one, or ask for the month as a word. Do exactly that. Never say which part of an answer was wrong and never give hints.
 - Small talk or an unfinished sentence instead of an answer is not a refusal: just ask the question again and do not count it.
-- The customer does not want to answer, asks what the call is about instead of answering, or says they do not want to talk: CALL no_answer(security_question). The tool counts: its answer tells you what to say, or it ends the call.
+- The customer does not want to answer, or asks what the call is about instead of answering: the FIRST time, say "These questions protect your account. I can tell you more as soon as they are answered." and ask the question again. The SECOND time (a second refusal or a second such question): say "I understand. Without the security check I cannot continue." and CALL wrap_up(not_verified, declined).
+- The customer says a second time that they do not want to talk: same ending, CALL wrap_up(not_verified, declined).
 
 AT ANY POINT IN THIS STEP
 - The person asks for a human: ask once "May I try to help you first?" If they insist: CALL transfer_to_agent (queue general)."""
@@ -86,9 +87,6 @@ def spec(notes):
             "response": {"verified": "verified", "all_verified": "all_verified", "left": "wrong_answers_left", "hint": "hint"},
             "hints": {"day_month_swapped": "Day and month seem to be the other way round. This does NOT count as a wrong answer and you must not call it wrong. Say: \"Could you say your date of birth again, with the month as a word?\""},
             "wrong_sentence": "I am sorry, that does not match our records."},
-        "opening_limits": {
-            "who_is_speaking": {"times": 1, "say": "Ask exactly once more: \"Am I speaking with {{title}} {{last_name}}?\"", "close": ["not_reached", "unclear"]},
-            "security_question": {"times": 1, "say": "Say exactly: \"These questions protect your account. I can tell you more as soon as they are answered.\" Then ask the same security question again.", "close": ["not_verified", "declined"]}},
         "product": {"list_field": "products", "id_field": "product_id", "type_field": "type", "full_field": "past_due", "days_late_field": "days_late",
                     "types": {"credit_card": {"words": "credit card ending <card_last4>", "floor": {"field": "minimum_payment"}, "floor_name": "minimum payment"},
                               "personal_loan": {"words": "personal loan", "floor": {"field": "instalment_amount"}, "floor_name": "instalment amount"},

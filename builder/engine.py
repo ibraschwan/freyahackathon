@@ -121,7 +121,7 @@ OPENING = """STEP: opening and security check.
 {rules}
 
 Tools in this step: {tools}.
-{limits_hint}- wrap_up(outcome, reason) ends the call. Before the security check is passed the call can only end as one of: {before_pairs}.
+- wrap_up(outcome, reason) ends the call. Before the security check is passed the call can only end as one of: {before_pairs}.
 - Do not call a tool that is not listed for this step.
 
 CALL STATE (kept by the system, always current):
@@ -185,20 +185,12 @@ def build_workflow(spec, openapi):
     before = [tuple(x) for x in (out.get("before_verification") or [])]
     after = [tuple(x) for x in (out.get("after_verification") or [])]
 
-    # how often the person may fail to say who they are, or to answer a security question, is counted by code
-    limits = spec.get("opening_limits") or {}
-    about = {"who_is_speaking": "the person has neither confirmed nor denied being the customer", "security_question": "the customer does not answer a security question: refuses, or asks something instead of answering"}
-    no_answer = code_tool("no_answer", "Reports that the person on the line did not give the answer you asked for. The system counts these and tells you exactly what to say next, or ends the call when the limit of the bank is reached.",
-        code["NO_ANSWER"], {"about": {"type": "string", "enum": [k for k in about if k in limits], "description": " ".join(k + ": " + v + "." for k, v in about.items() if k in limits)}}, ["about"])
-    limits_hint = ("- no_answer(about): CALL it EVERY time the person does not give the answer you asked for (" + "; ".join(k + " = " + v for k, v in about.items() if k in limits) +
-                   "). The system counts. Its answer tells you exactly what to say next, or it ends the call. Never count these yourself, never repeat an explanation on your own, and do not CALL wrap_up for these cases. Small talk or an unfinished sentence is not such a case: just ask again. A message that CONTAINS an answer to your question is an answer, also when a question or a remark comes with it: send the answer with verify_identity and do not CALL no_answer for that message.\n") if limits else ""
     nodes = {}
     nodes["setup"] = code_node("setup", code["SETUP"], "opening")
     nodes["opening"] = {
         "name": "opening", "node_type": "conversation", "on_enter": {"type": "tts", "text": sen["opening"]}, "on_enter_first_entry_only": True, "max_node_turns": 60, "max_turn_transition": "note_next",
-        "task_message": OPENING.format(rules=prm["opening"].strip(), tools="verify_identity, schedule_callback, transfer_to_agent, " + ("no_answer, " if limits else "") + "wrap_up",
-                                       before_pairs=pairs_text(before), limits_hint=limits_hint),
-        "tools": [verify, callback, transfer("Hands the call to a person. CALL it only in the situations your step instructions name.")] + ([no_answer] if limits else []) + [finish],
+        "task_message": OPENING.format(rules=prm["opening"].strip(), tools="verify_identity, schedule_callback, transfer_to_agent, wrap_up", before_pairs=pairs_text(before)),
+        "tools": [verify, callback, transfer("Hands the call to a person. CALL it only in the situations your step instructions name."), finish],
         "transitions": [
             to("get_account", "all security answers are verified", eq_any([("id_state", "verified"), ("verify_identity_response.data.id_state", "verified")])),
             to("goodbye", "the security check failed", eq_any([("id_state", "failed"), ("verify_identity_response.data.id_state", "failed")])),
