@@ -181,10 +181,21 @@ def material(briefs, api_text):
     if len(briefs) > 1: parts.append("(These files belong together. A later file adds to or replaces rules of an earlier one.)")
     return "\n\n".join(parts) + "\n\n=== TOOL API FILE (OpenAPI) ===\n" + api_text
 
+async def ask_json(trace, purpose, prompt, tries=3):
+    """A model call whose answer must hold one JSON object. An answer that cannot be read is asked for again."""
+    for attempt in range(1, tries + 1):
+        text = await llm.ask(trace, purpose, SYSTEM, prompt)
+        try:
+            obj = llm.json_of(text)
+            if isinstance(obj, dict): return obj
+            why = "the JSON is not an object"
+        except ValueError as e: why = str(e)[:120]
+        trace.log(f"the answer to '{purpose}' holds no readable JSON object ({why}), try {attempt} of {tries}")
+    raise ValueError(f"no readable JSON object in {tries} answers to '{purpose}'")
+
 async def policy_once(trace, n, mat):
-    text = await llm.ask(trace, f"read the brief and the tool API file into the policy configuration (independent reading {n})", SYSTEM,
-                         ENGINE + "\n" + SCHEMA + "\n\n" + mat + "\n\nReturn the JSON object in one ```json block. Before it, in a few lines, note any rule of the brief you could not express in this configuration.")
-    return llm.json_of(text)
+    return await ask_json(trace, f"read the brief and the tool API file into the policy configuration (independent reading {n})",
+                          ENGINE + "\n" + SCHEMA + "\n\n" + mat + "\n\nReturn the JSON object in one ```json block. Before it, in a few lines, note any rule of the brief you could not express in this configuration.")
 
 def differences(a, b, path=""):
     """Paths at which two policies differ. Sentences are compared too: a different sentence is a difference to settle."""
@@ -200,11 +211,28 @@ def differences(a, b, path=""):
 
 async def settle(trace, mat, a, b, diffs):
     listing = "\n".join(f"- {p}\n    reading 1: {json.dumps(x)}\n    reading 2: {json.dumps(y)}" for p, x, y in diffs)
-    text = await llm.ask(trace, f"settle {len(diffs)} differences between the two readings of the brief", SYSTEM,
+    return await ask_json(trace, f"settle {len(diffs)} differences between the two readings of the brief",
                          ENGINE + "\n" + SCHEMA + "\n\n" + mat + "\n\nTwo independent readings of this material produced configurations that differ at these places:\n" + listing +
                          "\n\nReading 1 in full:\n```json\n" + json.dumps(a, indent=1) + "\n```\n\nFor each difference decide from the brief which value is right (it may be neither). "
                          "Differences in wording between two sentences that mean the same: keep the one closer to the brief's own words. Return the final configuration, complete, in one ```json block.")
-    return llm.json_of(text)
+
+OPTIONAL = "optional setting: "
+
+def floor_ok(f, depth=3):
+    if not isinstance(f, dict): return False
+    many = f.get("greatest_of") or f.get("least_of")
+    if many is not None: return depth > 0 and isinstance(many, list) and len(many) >= 1 and all(floor_ok(x, depth - 1) for x in many)
+    return bool(f.get("field")) or isinstance(f.get("percent_of_full"), (int, float)) or isinstance(f.get("amount"), (int, float))
+
+def without_optional(spec):
+    """Takes out every optional setting whose form the engine could not use. A floor that cannot be read is taken out too: the engine then records the full amount only."""
+    if spec["calendar"].get("non_business_day") not in (None, "previous", "next"): spec["calendar"].pop("non_business_day")
+    d = spec.get("dates") or {}
+    if d.get("today_until") is not None and not re.match(r"^\d{1,2}:\d{2}$", str(d["today_until"])): d.pop("today_until")
+    o = (spec.get("product") or {}).get("order")
+    if o is not None and not (isinstance(o, dict) and o.get("field") and o.get("direction") in ("ascending", "descending")): spec["product"].pop("order")
+    for v in (((spec.get("product") or {}).get("types")) or {}).values():
+        if isinstance(v, dict) and v.get("floor") is not None and not floor_ok(v["floor"]): v.pop("floor")
 
 def check(spec, openapi):
     """Problems in a policy that can be seen without a model: missing keys, values the tool API does not know."""
@@ -273,18 +301,14 @@ def check(spec, openapi):
         if a.get("date") not in ("last_business_day_of_week", "deadline", "next_business_day", "today", "", None): bad.append(f"attempt_offers[{i}].date is not one of the allowed kinds")
     for h in spec["calendar"].get("holidays") or []:
         if not re.match(r"^\d{4}-\d{2}-\d{2}$", str(h)): bad.append(f"calendar.holidays: '{h}' is not YYYY-MM-DD")
-    if spec["calendar"].get("non_business_day") not in (None, "previous", "next"): bad.append('calendar.non_business_day must be "previous" or left out')
+    if spec["calendar"].get("non_business_day") not in (None, "previous", "next"): bad.append(OPTIONAL + 'calendar.non_business_day must be "previous" or left out')
     until = (spec.get("dates") or {}).get("today_until")
-    if until is not None and not re.match(r"^\d{1,2}:\d{2}$", str(until)): bad.append("dates.today_until must be HH:MM or left out")
+    if until is not None and not re.match(r"^\d{1,2}:\d{2}$", str(until)): bad.append(OPTIONAL + "dates.today_until must be HH:MM or left out")
     order = (spec.get("product") or {}).get("order")
-    if order is not None and not (isinstance(order, dict) and order.get("field") and order.get("direction") in ("ascending", "descending")): bad.append('product.order needs "field" and "direction" ("ascending" or "descending"), or is left out')
-    def floor_ok(f, deep=True):
-        if not isinstance(f, dict): return False
-        many = f.get("greatest_of") or f.get("least_of")
-        if many is not None: return deep and isinstance(many, list) and len(many) >= 2 and all(floor_ok(x, False) for x in many)
-        return bool(f.get("field")) or isinstance(f.get("percent_of_full"), (int, float)) or isinstance(f.get("amount"), (int, float))
+    if order is not None and not (isinstance(order, dict) and order.get("field") and order.get("direction") in ("ascending", "descending")): bad.append(OPTIONAL + 'product.order needs "field" and "direction" ("ascending" or "descending"), or is left out')
     for t, v in (((spec.get("product") or {}).get("types")) or {}).items():
-        if isinstance(v, dict) and v.get("floor") is not None and not floor_ok(v["floor"]): bad.append(f"product.types.{t}.floor is not one of the allowed forms")
+        if isinstance(v, dict) and v.get("floor") is not None and not floor_ok(v["floor"]):
+            bad.append(OPTIONAL + f'product.types.{t}.floor is not one of the allowed forms: {{"field": ...}}, {{"percent_of_full": number, optional "round"}}, {{"amount": number}}, or {{"greatest_of": [several of these]}} / {{"least_of": [...]}}')
     for k in ("opening", "identity_failed", "after_callback", "after_transfer", "verified_ack", "debt_intro", "product_statement", "first_ask_single", "confirm_question", "promise_recorded", "promise_failed", "change_later", "goodbye"):
         if not (spec["sentences"].get(k) or "").strip(): bad.append("sentences." + k + " is empty")
     cv = set(spec["call_variables"])
@@ -328,11 +352,13 @@ async def extract(trace, briefs, openapi, api_text):
         bad = check(spec, openapi)
         if not bad: break
         trace.log("policy check found: " + "; ".join(bad))
-        text = await llm.ask(trace, "repair the policy configuration after the check against the tool API file", SYSTEM,
+        spec = await ask_json(trace, "repair the policy configuration after the check against the tool API file",
                              ENGINE + "\n" + SCHEMA + "\n\n" + mat + "\n\nThis configuration was produced:\n```json\n" + json.dumps(spec, indent=1) + "\n```\n\nA check found these problems:\n- " +
                              "\n- ".join(bad) + "\n\nReturn the corrected configuration, complete, in one ```json block.")
-        spec = llm.json_of(text)
     bad = check(spec, openapi)
+    soft = [x for x in bad if x.startswith(OPTIONAL)]
+    if soft:                                   # an optional setting that still has the wrong form is taken out: the engine then does what it does without it
+        without_optional(spec); trace.log("optional settings left out, the engine's standard behaviour applies: " + "; ".join(soft)); bad = check(spec, openapi)
     if bad: raise ValueError("the policy still fails the check: " + "; ".join(bad))
     trace.log("policy accepted: " + json.dumps({k: spec[k] for k in ("calendar", "callback", "bands", "attempt_offers", "notes")})[:1500])
 
