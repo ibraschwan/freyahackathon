@@ -87,7 +87,7 @@ result. Its findings, and what became of them:
 ## At 20:00
 
 ```bash
-cd /Users/ibrahim/conductor/workspaces/freyahackathon/port-of-spain
+cd <this repository>
 source env.sh && source .venv/bin/activate
 python3 builder/build.py <brief file(s) or folder of hidden brief 1> <its tool API .json> --slot hidden-1
 python3 builder/build.py <brief file(s) or folder of hidden brief 2> <its tool API .json> --slot hidden-2
