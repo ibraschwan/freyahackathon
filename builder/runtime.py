@@ -20,6 +20,10 @@ WK = set(CAL.get('weekend_days') if CAL.get('weekend_days') is not None else [5,
 SEN = S.get('sentences') or dict()
 OUT = S.get('outcomes') or dict()
 NOTES = S.get('notes') or dict()
+PH = S.get('phrases') or dict()
+def ph(k, dflt):
+    x = PH.get(k)
+    return str(x) if x not in (None, '') else dflt
 LB = chr(123) * 2
 RB = chr(125) * 2
 def isbd(d):
@@ -56,7 +60,13 @@ def addbd(d, n):
     return d
 #@core
 def say(d):
-    return WD[d.weekday()] + ' ' + str(d.day) + ' ' + MO[d.month - 1] + ' ' + str(d.year)
+    wd = PH.get('weekdays')
+    mo = PH.get('months')
+    w = wd[d.weekday()] if isinstance(wd, list) and len(wd) == 7 else WD[d.weekday()]
+    m = mo[d.month - 1] if isinstance(mo, list) and len(mo) == 12 else MO[d.month - 1]
+    return ph('date', '<weekday> <day> <month> <year>').replace('<weekday>', str(w)).replace('<day>', str(d.day)).replace('<month>', str(m)).replace('<year>', str(d.year))
+def amt(x):
+    return ph('amount', '<n>').replace('<n>', money(x).replace('.', ',') if PH.get('decimal_comma') else money(x))
 def tag(d):
     return say(d) + ' [' + d.isoformat() + ']'
 def why(d):
@@ -311,12 +321,16 @@ def offer_line(st, p, k):
     o = p['offers'][k]
     kind = o['amount']
     if kind == 'floor' or (kind == 'full_or_floor' and p['id'] in st['toomuch']):
-        am = 'the ' + p['floor_name'] + ' of ' + money(p['floor'])
+        am = ph('floor_amount', 'the <floor_name> of <amount>').replace('<floor_name>', p['floor_name']).replace('<amount>', amt(p['floor']))
         extra = (' ' + SEN.get('rest_overdue')) if SEN.get('rest_overdue') else ''
     else:
-        am = 'the full amount of ' + money(p['full'])
+        am = ph('full_amount', 'the full amount of <amount>').replace('<amount>', amt(p['full']))
         extra = ''
-    return 'Could you pay ' + am + ' for your ' + p['words'] + (' by ' + say(iso(o['date'])) if o['date'] else '') + '?' + extra
+    if o['date']:
+        line = ph('offer', 'Could you pay <what> for your <product> by <date>?').replace('<date>', say(iso(o['date'])))
+    else:
+        line = ph('offer_no_date', 'Could you pay <what> for your <product>?')
+    return line.replace('<what>', am).replace('<product>', p['words']) + extra
 #@live
 def each_id(st):
     """Only with product.confirm "each" and several products: the one agreed product that is read back and recorded
@@ -331,8 +345,8 @@ def readback(st, only=None):
     for p in st['products']:
         x = st['plan'].get(p['id'])
         if x and p['id'] not in st['promises'] and (only is None or p['id'] == only):
-            parts.append(money(x['amount']) + ' for your ' + p['words'] + ' on ' + say(iso(x['date'])) + (' (the latest possible date for this product)' if x.get('capped') else ''))
-    return 'To confirm: you will pay ' + ', and '.join(parts) + '. ' + (SEN.get('confirm_question') or 'Do you confirm?')
+            parts.append(ph('readback_item', '<amount> for your <product> on <date>').replace('<amount>', amt(x['amount'])).replace('<product>', p['words']).replace('<date>', say(iso(x['date']))) + (ph('capped', ' (the latest possible date for this product)') if x.get('capped') else ''))
+    return ph('readback', 'To confirm: you will pay <items>.').replace('<items>', ph('and', ', and ').join(parts)) + ' ' + (SEN.get('confirm_question') or 'Do you confirm?')
 def live(st):
     L = []
     if st['stage'] != 'verified':
@@ -549,7 +563,7 @@ def _run(vars):
     vars['account_facts'] = '\n'.join(L)
     def stmt(p):
         s = SEN.get('product_statement') or 'Your <product> has a past-due amount of <amount> and is <days_late> <days> late.'
-        return s.replace('<product>', p['words']).replace('<amount>', money(p['full'])).replace('<days_late>', str(p['late'])).replace('<days>', 'day' if p['late'] == 1 else 'days')
+        return s.replace('<product>', p['words']).replace('<amount>', amt(p['full'])).replace('<days_late>', str(p['late'])).replace('<days>', ph('day', 'day') if p['late'] == 1 else ph('days', 'days'))
     line = [SEN.get('verified_ack') or '', SEN.get('debt_intro') or '']
     line += [stmt(p) for p in ps]
     line.append((SEN.get('first_ask_multi') if many else SEN.get('first_ask_single')) or '')
@@ -603,7 +617,7 @@ def _run(vars):
                 st['toomuch'].append(i)
             if i not in st['floored'] and p['floor'] < p['full'] - 0.005:
                 st['floored'].append(i)
-                line = str(G.get('too_much') or 'You could pay the <floor_name> of <floor>.').replace('<floor_name>', p['floor_name']).replace('<floor>', money(p['floor'])).replace('<product>', p['words'])
+                line = str(G.get('too_much') or 'You could pay the <floor_name> of <floor>.').replace('<floor_name>', p['floor_name']).replace('<floor>', amt(p['floor'])).replace('<product>', p['words'])
                 continue
         used = int(st['prop'].get(i) or 0)
         if used < len(p['offers']):
@@ -659,7 +673,7 @@ try:
 except Exception as e:
     vars['dirty'] = '0'
     vars['sync_state'] = 'talk'
-    vars['enter_line'] = 'I am sorry, could you say that again?'
+    vars['enter_line'] = SEN.get('say_again') or ph('say_again', 'I am sorry, could you say that again?')
 '''
 
 # the payment step got several customer messages in a row and no tool was called: the engine treats the last one as a non-answer
@@ -761,7 +775,7 @@ try:
             vars['enter_line'] = fill(vars, ok_line)
             vars['rec_state'] = 'talk'
         elif done:
-            vars['enter_line'] = fill(vars, ok_line + ' ' + bad_line + ' This concerns your ' + ' and your '.join(names.get(i, i) for i in failed) + '.')
+            vars['enter_line'] = fill(vars, ok_line + ' ' + bad_line + ' ' + ph('concerns', 'This concerns your <products>.').replace('<products>', ph('and_your', ' and your ').join(names.get(i, i) for i in failed)))
             vars['rec_state'] = 'talk'
         elif failed and open_ids(st):
             vars['enter_line'] = fill(vars, bad_line)
@@ -780,7 +794,7 @@ try:
 except Exception as e:
     vars['rec_state'] = 'talk'
     vars['commit_state'] = 'idle'
-    vars['enter_line'] = 'Thank you.'
+    vars['enter_line'] = ph('thanks', 'Thank you.')
 '''
 
 # decides how the call ends (once), then writes the notes one by one
@@ -1129,7 +1143,7 @@ try:
         d['what_to_do_next'] = str((I.get('hints') or dict()).get(hint)) + ' Then CALL verify_identity with the new answer.'
     elif flag('verified', 'verified'):
         d['id_state'] = 'open'
-        d['what_to_do_next'] = 'Correct (do not say so). Say "Thank you." and ask the next security question: "' + ask_of(todo[0] if todo else '') + '"'
+        d['what_to_do_next'] = 'Correct (do not say so). Say "' + ph('thanks', 'Thank you.') + '" and ask the next security question: "' + ask_of(todo[0] if todo else '') + '"'
     elif d.get(R.get('verified') or 'verified') is not None and str(left) == '0':
         st['id'] = 'failed'
         d['id_state'] = 'failed'
@@ -1363,7 +1377,7 @@ else:
     b.pop(fr, None)
 '''
 
-CORE_KEYS = ["now_variable", "calendar", "sentences", "closing_lines", "outcomes", "notes", "response", "tools"]
+CORE_KEYS = ["now_variable", "calendar", "sentences", "closing_lines", "outcomes", "notes", "response", "tools", "phrases"]
 # snippet: (source, helper sections besides core, spec keys besides CORE_KEYS)
 ALL = dict(
     SETUP=(SETUP, ["cal", "live"], ["callback"]), PREPARE=(PREPARE, ["cal", "terms", "live"], ["product", "bands", "attempt_offers", "dates"]),

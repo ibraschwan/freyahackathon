@@ -1,9 +1,11 @@
 """Build a phone agent from a bank's brief. One command, no manual step.
 
-    python3 builder/build.py <brief file> [more brief files] <tool API file> [--slot NAME] [--no-deploy] [--spec FILE]
+    python3 builder/build.py <brief file or folder> [more brief files] [<tool API file>] [<address of the bank's services>] [--slot NAME] [--no-deploy] [--spec FILE]
 
 The tool API file is the .json file that holds an OpenAPI description; every other file is brief material (a brief that
-builds on another: pass both, base first). A folder stands for all files in it. What it does:
+builds on another: pass both, base first). A folder stands for all files in it: Markdown and other text, Word, PDF, Excel.
+Without a tool API file the builder writes one from the service description in the documents. An address (https://...)
+is where the phone agent's tools reach the bank's services. What it does:
   1. reads the brief and the tool API file into a policy spec (model calls, see extract.py)
   2. compiles the spec into a workflow (engine.py), with no model involved
   3. checks the workflow and runs its in-call code against a fake bank
@@ -49,45 +51,81 @@ def selftest(spec, openapi, trace):
     trace.log("SELF-TEST against a fake bank passed: " + "; ".join(ran))
 
 def inputs(args):
-    """(brief files, tool API file) from the arguments. Folders are opened; the tool API file is recognised by what is in it,
-    so a code list that comes as .json stays brief material."""
+    """(brief files, tool API file or None, address of the bank's services or None) from the arguments. Folders are opened;
+    the tool API file is recognised by what is in it, so a code list that comes as .json stays brief material."""
+    url = next((a for a in args if a.lower().startswith(("http://", "https://"))), None)
     files = []
     for a in args:
+        if a == url: continue
         p = pathlib.Path(a)
-        files += sorted(x for x in p.rglob("*") if x.is_file() and not x.name.startswith(".")) if p.is_dir() else [p]
+        files += sorted(x for x in p.rglob("*") if x.is_file() and not x.name.startswith((".", "~$"))) if p.is_dir() else [p]
     def is_api(f):
         try: d = json.loads(f.read_text())
         except Exception: return False
         return isinstance(d, dict) and isinstance(d.get("paths"), dict)
-    js = [f for f in files if f.suffix.lower() == ".json"]
-    apis = [f for f in js if is_api(f)] or js[-1:]
+    apis = [f for f in files if f.suffix.lower() == ".json" and is_api(f)]
     api = apis[-1] if apis else None
-    return [f for f in files if f != api], api
+    return [f for f in files if f != api], api, url
+
+LIMIT = 120000          # characters of one document that go to the model
 
 def read_text(f):
-    """A brief file as text; None for a file that is not text (it is named in the trace and left out)."""
-    raw = f.read_bytes()
-    if b"\x00" in raw[:4096]: return None
-    try: return raw.decode("utf-8")
-    except UnicodeDecodeError: return raw.decode("latin-1")
+    """A brief document as text: Markdown and other text as it is, Word, PDF and Excel through their readers.
+    None for a file that holds no readable text (it is named in the trace and left out)."""
+    kind = f.suffix.lower()
+    try:
+        if kind == ".docx":
+            import docx
+            d = docx.Document(str(f)); out = [p.text for p in d.paragraphs]
+            for t in d.tables:
+                out.append("")
+                for row in t.rows: out.append(" | ".join(c.text.strip() for c in row.cells))
+            text = "\n".join(out)
+        elif kind == ".pdf":
+            import pypdf
+            text = "\n\n".join((pg.extract_text() or "") for pg in pypdf.PdfReader(str(f)).pages)
+        elif kind in (".xlsx", ".xlsm"):
+            import openpyxl
+            wb = openpyxl.load_workbook(str(f), data_only=True, read_only=True); out = []
+            for ws in wb.worksheets:
+                out.append(f"--- sheet: {ws.title}")
+                for row in ws.iter_rows(values_only=True):
+                    if any(c is not None and str(c).strip() for c in row): out.append(" | ".join("" if c is None else str(c) for c in row))
+            text = "\n".join(out)
+        else:
+            raw = f.read_bytes()
+            if b"\x00" in raw[:4096]: return None
+            try: text = raw.decode("utf-8")
+            except UnicodeDecodeError: text = raw.decode("latin-1")
+    except Exception as e:
+        return None
+    return text if text.strip() else None
 
 def main(argv):
     args = [a for a in argv if not a.startswith("--")]
     opt = {a.split("=")[0]: (a.split("=", 1)[1] if "=" in a else True) for a in argv if a.startswith("--")}
     for i, a in enumerate(argv):                                   # "--slot NAME" as well as "--slot=NAME"
         if a in ("--slot", "--spec") and i + 1 < len(argv): opt[a] = argv[i + 1]; args.remove(argv[i + 1])
-    briefs, api = inputs(args)
-    if api is None or not briefs: sys.exit(__doc__)
-    slot = opt.get("--slot") or pathlib.Path([a for a in args if pathlib.Path(a) != api][-1]).stem      # the last brief file, or the folder
+    briefs, api, url = inputs(args)
+    if not briefs: sys.exit(__doc__)
+    slot = opt.get("--slot") or pathlib.Path([a for a in args if a != url and pathlib.Path(a) != api][-1]).stem      # the last brief file, or the folder
     global TRACE
     trace = TRACE = llm.Trace(str(ROOT / "traces" / (slot + ".log")))
-    trace.log(f"builder run for slot '{slot}' | briefs: {', '.join(str(b) for b in briefs)} | tool API: {api} | builder model: {llm.MODEL}")
-    api_text = api.read_text(); openapi = json.loads(api_text)
+    trace.log(f"builder run for slot '{slot}' | briefs: {', '.join(str(b) for b in briefs)} | tool API: {api or 'none given, taken from the documents'}" + (f" | bank services at: {url}" if url else "") + f" | builder model: {llm.MODEL}")
     texts = [(b.name, read_text(b)) for b in briefs]
     for name, t in texts:
-        if t is None: trace.log(f"brief file {name} is not text and was left out")
+        if t is None: trace.log(f"brief file {name} holds no readable text and was left out")
     texts = [(n, t) for n, t in texts if t is not None]
+    for i, (n, t) in enumerate(texts):
+        if len(t) > LIMIT: trace.log(f"brief file {n} is {len(t)} characters long, the first {LIMIT} are read"); texts[i] = (n, t[:LIMIT])
     if not texts: sys.exit("no brief file could be read as text")
+    trace.log("documents read: " + ", ".join(f"{n} ({len(t)} characters)" for n, t in texts))
+    if api is not None: openapi = json.loads(api.read_text())
+    elif opt.get("--spec") and (ROOT / "out" / (slot + ".openapi.json")).exists(): openapi = json.loads((ROOT / "out" / (slot + ".openapi.json")).read_text())
+    else: openapi = llm.run(extract.tool_api(trace, texts))
+    if url: openapi["servers"] = [{"url": url.rstrip("/")}]          # the tools call the bank's services at the address given on the command line
+    api_text = json.dumps(openapi, indent=1)
+    (ROOT / "out").mkdir(exist_ok=True); (ROOT / "out" / (slot + ".openapi.json")).write_text(api_text)
     (ROOT / "out").mkdir(exist_ok=True)
     if opt.get("--spec"):
         spec = json.load(open(opt["--spec"])); trace.log("spec read from " + str(opt["--spec"]) + " (no model call)")

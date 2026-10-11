@@ -157,6 +157,12 @@ CALL STATE (kept by the system, always current):
 # ------------------------------------------------------------------ the workflow
 def pairs_text(pairs): return "; ".join(str(o) + (" / " + str(r) if r else "") for o, r in pairs)
 
+def speaks(spec):
+    """The language for the system prompt. For a language other than English: the instructions and tool messages stay English, what is said does not."""
+    lang = str(spec.get("language") or "English").strip()
+    if lang.lower() in ("english", "en"): return lang
+    return lang + ". Your instructions and the tool messages are written in English; everything you say to the customer is in " + lang + ", also when an instruction quotes English words for you to say: say their meaning in " + lang
+
 def build_workflow(spec, openapi):
     api = read_api(openapi)
     missing = [t for t in SEVEN if t not in api and not (t == "add_note" and not (spec.get("notes") or {}).get("enabled"))]
@@ -267,7 +273,7 @@ def build_workflow(spec, openapi):
     fallback["function"]["name"] = "close_call_at_end"
     globals_ = "\n".join("- " + str(x).strip() for x in (prm.get("global_rules") or []))
     return {"initial_node": "setup",
-            "system_prompt": SYSTEM.format(bank=spec.get("bank_name", "the bank"), language=spec.get("language", "English"), address=spec.get("address", "the customer"), global_rules=globals_),
+            "system_prompt": SYSTEM.format(bank=spec.get("bank_name", "the bank"), language=speaks(spec), address=spec.get("address", "the customer"), global_rules=globals_),
             "nodes": nodes, "global_nodes": {}, "tools": [fallback],
             "test_variables": dict({v: "" for v in call_vars}, **(spec.get("test_variables") or {}))}
 

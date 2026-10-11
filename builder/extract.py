@@ -124,7 +124,16 @@ SCHEMA = """THE CONFIGURATION. Return one JSON object with exactly these keys.
    "first_ask_single": the first question after the debt is stated, for one product, "first_ask_multi": the same for several products,
    "confirm_question": the question that ends the read-back, "promise_recorded": what to say once the promise is recorded, including any sentence the brief requires after a recorded promise,
    "promise_failed": what to say when it could not be recorded, "change_later": what to say when the customer wants to change or cancel a recorded promise,
-   "account_error": what to say when the account cannot be read, "rest_overdue": the sentence the brief wants added whenever less than the full amount is offered (empty if none), "next_product": a short lead-in when the engine moves on to the next product, with the token <product>, for example "Now your <product>.", "anything_else": a short neutral question for after a recorded promise when nothing else is open, "goodbye": the thanks and goodbye that end every call}
+   "account_error": what to say when the account cannot be read, "rest_overdue": the sentence the brief wants added whenever less than the full amount is offered (empty if none), "next_product": a short lead-in when the engine moves on to the next product, with the token <product>, for example "Now your <product>.", "ask_product": a short question that asks when the customer can pay the product just named, "anything_else": a short neutral question for after a recorded promise when nothing else is open, "goodbye": the thanks and goodbye that end every call}
+"phrases": ONLY when the agent speaks a language other than English; leave the key out for English. The engine's own sentence patterns, written in the agent's language, natural and polite as the brief's own examples sound. Keep every token in angle brackets exactly as it is; put it where it belongs in that language's word order.
+  {"weekdays": the seven day names, Monday first, "months": the twelve month names, January first,
+   "date": how a date is said, with the tokens <weekday> <day> <month> <year>, for example "<day> <month> <year> <weekday>",
+   "amount": how an amount of money is said, with the token <n> for the number and the currency as the brief names it, "decimal_comma": true when the language writes 1250,50, "day" and "days": the word for one day and for several days,
+   "full_amount": "the full amount of <amount>" in that language, "floor_amount": "the <floor_name> of <amount>" in that language,
+   "offer": the question "Could you pay <what> for your <product> by <date>?" in that language, "offer_no_date": "Could you pay <what> for your <product>?",
+   "readback_item": "<amount> for your <product> on <date>", "readback": "To confirm: you will pay <items>." (the confirm question follows it), "and": what joins two items, with its spaces, for example " and ",
+   "capped": " (the latest possible date for this product)" with a leading space, "concerns": "This concerns your <products>.", "and_your": what joins two products there, with its spaces,
+   "thanks": "Thank you.", "say_again": "I am sorry, could you say that again?"}
 "note_lines": {<note reason>: the sentence the brief requires the agent to say when a product is settled without a promise for that reason} (only when notes are enabled; only reasons for which the brief prescribes a sentence; the engine says it, once per call).
 "closing_lines": {"<outcome>/<reason>" or "<outcome>": a sentence the brief requires at the very end of a call with that outcome, spoken by the engine before the goodbye}. Only where the brief prescribes a sentence that is the last thing said. Usually one or two entries, often none.
 
@@ -182,6 +191,23 @@ def material(briefs, api_text):
     parts = [f"=== BRIEF FILE {i + 1}: {name} ===\n{text}" for i, (name, text) in enumerate(briefs)]
     if len(briefs) > 1: parts.append("(These files belong together. A later file adds to or replaces rules of an earlier one.)")
     return "\n\n".join(parts) + "\n\n=== TOOL API FILE (OpenAPI) ===\n" + api_text
+
+API_TASK = """The documents below describe a bank's services that a phone agent calls (a service contract, an interface description or the like).
+Write the OpenAPI 3 description of exactly these services as one JSON object, and nothing that the documents do not say:
+- "servers": [{"url": the base address if the documents give one, otherwise ""}]
+- "paths": one entry per service, "/<name of the service as the documents write it>", each with a "post" (or the method the documents give) that has
+  "summary", "requestBody" -> "content" -> "application/json" -> "schema" (type object, "properties" with type, "enum" where the documents list the allowed values, "description"; "required"),
+  and "responses" -> "200" -> "content" -> "application/json" -> "schema" with the response "properties" (for a list of objects: type array with "items" and their "properties").
+- Field names, service names and allowed values exactly as written in the documents, including their spelling and case. No "$ref".
+Return the JSON object in one ```json block."""
+
+async def tool_api(trace, briefs):
+    """The tool API as OpenAPI, written from the documents when no OpenAPI file came with them."""
+    mat = "\n\n".join(f"=== DOCUMENT {i + 1}: {name} ===\n{text}" for i, (name, text) in enumerate(briefs))
+    api = await ask_json(trace, "write the tool API (OpenAPI) from the service description in the documents", API_TASK + "\n\n" + mat)
+    if not isinstance(api.get("paths"), dict) or not api["paths"]: raise ValueError("the documents gave no service description the builder could turn into a tool API")
+    trace.log("tool API written from the documents: " + ", ".join(sorted(api["paths"])))
+    return api
 
 async def ask_json(trace, purpose, prompt, tries=3, notes=None):
     """A model call whose answer must hold one JSON object. An answer that cannot be read is asked for again."""
@@ -317,6 +343,20 @@ def check(spec, openapi):
     if until is not None and not re.match(r"^\d{1,2}:\d{2}$", str(until)): bad.append(OPTIONAL + "dates.today_until must be HH:MM or left out")
     order = (spec.get("product") or {}).get("order")
     if order is not None and not (isinstance(order, dict) and order.get("field") and order.get("direction") in ("ascending", "descending")): bad.append(OPTIONAL + 'product.order needs "field" and "direction" ("ascending" or "descending"), or is left out')
+    lang = str(spec.get("language") or "English").strip().lower()
+    phr = spec.get("phrases")
+    if lang not in ("english", "en", "") and not isinstance(phr, dict): bad.append('phrases: the agent speaks ' + str(spec.get("language")) + ', so the key "phrases" is required with every pattern in that language')
+    if isinstance(phr, dict):
+        need_tokens = {"date": ["<day>", "<month>"], "amount": ["<n>"], "full_amount": ["<amount>"], "floor_amount": ["<floor_name>", "<amount>"], "offer": ["<what>", "<product>", "<date>"], "offer_no_date": ["<what>", "<product>"],
+                       "readback_item": ["<amount>", "<product>", "<date>"], "readback": ["<items>"], "concerns": ["<products>"]}
+        for k, toks in need_tokens.items():
+            if not isinstance(phr.get(k), str) or [t for t in toks if t not in phr[k]]: bad.append(f"phrases.{k} must be a sentence pattern that holds {' '.join(toks)}")
+        if not (isinstance(phr.get("weekdays"), list) and len(phr["weekdays"]) == 7): bad.append("phrases.weekdays must list seven day names, Monday first")
+        for k in ("day", "days", "and", "thanks", "say_again"):
+            if not isinstance(phr.get(k), str) or not phr[k].strip(): bad.append(f"phrases.{k} is missing")
+        for k in ("next_product", "ask_product", "anything_else", "account_error"):
+            if not str((spec.get("sentences") or {}).get(k) or "").strip(): bad.append(f"sentences.{k} is required when the agent does not speak English (the engine's own wording is English)")
+        if not (isinstance(phr.get("months"), list) and len(phr["months"]) == 12): bad.append("phrases.months must list twelve month names, January first")
     if (spec.get("identity") or {}).get("max_wrong") is not None and not cap_ok(spec["identity"]["max_wrong"]): bad.append(OPTIONAL + 'identity.max_wrong must be {"total": whole number} or {"per_question": whole number}, or left out')
     if (spec.get("product") or {}).get("confirm") not in (None, "each", "together"): bad.append(OPTIONAL + 'product.confirm must be "each" or left out')
     for t, v in (((spec.get("product") or {}).get("types")) or {}).items():
