@@ -1,0 +1,45 @@
+{
+  "case": "SV1-01",
+  "slot": "sv-one-b",
+  "workflow_id": "fc696bd6-e957-4890-9a66-5ba29138d0c8",
+  "agent_id": "58b2c2b3-0668-4e83-9f17-cdaf0dcabc9b",
+  "version": 1,
+  "variables": {
+    "customer_id": "c_ce415e65-890",
+    "first_name": "Daniel",
+    "last_name": "Reyes",
+    "title": "Mr",
+    "now": "2026-10-14T11:00"
+  },
+  "turns": [
+    {
+      "user": "Hello?",
+      "elapsed_s": 1.235,
+      "response": {
+        "response": "Hello, I am Alder Mutual's automated assistant. This call is recorded. Am I speaking with Daniel Reyes?",
+        "callId": "d70dd62d-2224-4b77-acad-36e9a6ea6e31",
+        "messageId": "msg_4_1791728279944"
+      }
+    },
+    {
+      "user": "Yes, Daniel Reyes speaking.",
+      "elapsed_s": 1.903,
+      "response": {
+        "response": "What are the last four digits of your phone number?",
+        "callId": "d70dd62d-2224-4b77-acad-36e9a6ea6e31",
+        "messageId": "msg_4_1791728301589"
+      }
+    },
+    {
+      "user": "4471",
+      "elapsed_s": 4.041,
+      "response": {
+        "response": "Thank you. What is your date of birth?",
+        "callId": "d70dd62d-2224-4b77-acad-36e9a6ea6e31",
+        "messageId": "msg_7_1791728373080"
+      }
+    }
+  ],
+  "started_at": "2026-10-11T17:17:59+0300",
+  "call_id": "d70dd62d-2224-4b77-acad-36e9a6ea6e31"
+}

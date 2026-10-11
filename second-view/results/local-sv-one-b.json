@@ -1,0 +1,1746 @@
+{
+  "spec": "out/sv-one-b.spec.json",
+  "builder_commit": "de4f07e",
+  "results": [
+    {
+      "probe": "O3 wrong answer cutoff",
+      "expected": "After exactly two wrong answers: ended, not_verified/failed, no DOB",
+      "actual": {
+        "state": {
+          "stage": "opening",
+          "id": "open",
+          "idv": [],
+          "products": [],
+          "plan": {},
+          "pnotes": {},
+          "promises": {},
+          "tries": {},
+          "perr": [],
+          "notes": {},
+          "ntries": {},
+          "transfer": "",
+          "callback": "",
+          "closed": "",
+          "pend": "",
+          "npend": "",
+          "prop": {},
+          "toomuch": [],
+          "floored": [],
+          "given": [],
+          "said": [],
+          "mo": "",
+          "mr": "",
+          "fin": ""
+        },
+        "said": [],
+        "ledger": {
+          "promises": [],
+          "notes": [],
+          "callbacks": [],
+          "transfers": [],
+          "outcome": null,
+          "reason": null,
+          "calls": [
+            {
+              "tool": "verify_identity",
+              "args": {
+                "field": "phone_last4",
+                "answer": "0000"
+              },
+              "status": 200,
+              "result": {
+                "ok": true,
+                "verified": false,
+                "wrong_answers_left": 2,
+                "all_verified": false,
+                "id_state": "open",
+                "what_to_do_next": "That answer is WRONG. Do not go on to the next question. Say: \"That does not match our records.\" and ask the SAME question once more: \"What are the last four digits of your phone number?\" Never say which part was wrong. Wrong answers left: 2."
+              }
+            },
+            {
+              "tool": "verify_identity",
+              "args": {
+                "field": "phone_last4",
+                "answer": "1111"
+              },
+              "status": 200,
+              "result": {
+                "ok": true,
+                "verified": false,
+                "wrong_answers_left": 1,
+                "all_verified": false,
+                "id_state": "open",
+                "what_to_do_next": "That answer is WRONG. Do not go on to the next question. Say: \"That does not match our records.\" and ask the SAME question once more: \"What are the last four digits of your phone number?\" Never say which part was wrong. Wrong answers left: 1."
+              }
+            }
+          ]
+        },
+        "ended": false
+      }
+    },
+    {
+      "probe": "O8 max and half-cent rounding",
+      "expected": {
+        "floor": 200.51
+      },
+      "actual": {
+        "id": "p1",
+        "type": "credit_card",
+        "words": "credit card ending 9012",
+        "full": 401.01,
+        "floor": 200.5,
+        "floor_name": "minimum acceptable amount",
+        "late": 8,
+        "band": "6-15",
+        "deadline": "2026-10-21",
+        "attempts": 1,
+        "offers": [
+          {
+            "amount": "full_or_floor",
+            "date": "2026-10-21",
+            "text": "Only an explicit refusal to pay uses up an offer. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+          }
+        ]
+      }
+    },
+    {
+      "probe": "O8 max selects larger service floor",
+      "expected": {
+        "floor": 300.0
+      },
+      "actual": {
+        "id": "p1",
+        "type": "credit_card",
+        "words": "credit card ending 9012",
+        "full": 401.01,
+        "floor": 200.5,
+        "floor_name": "minimum acceptable amount",
+        "late": 8,
+        "band": "6-15",
+        "deadline": "2026-10-21",
+        "attempts": 1,
+        "offers": [
+          {
+            "amount": "full_or_floor",
+            "date": "2026-10-21",
+            "text": "Only an explicit refusal to pay uses up an offer. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+          }
+        ]
+      }
+    },
+    {
+      "probe": "O4 cutoff today",
+      "expected": "Reject 2026-10-15 at 15:00; offer 2026-10-17",
+      "actual": {
+        "response": "ACCEPTED",
+        "state": {
+          "stage": "verified",
+          "id": "verified",
+          "idv": [
+            "phone_last4",
+            "date_of_birth"
+          ],
+          "products": [
+            {
+              "id": "p1",
+              "type": "credit_card",
+              "words": "credit card ending 9012",
+              "full": 401.01,
+              "floor": 200.5,
+              "floor_name": "minimum acceptable amount",
+              "late": 8,
+              "band": "6-15",
+              "deadline": "2026-10-22",
+              "attempts": 1,
+              "offers": [
+                {
+                  "amount": "full_or_floor",
+                  "date": "2026-10-22",
+                  "text": "Only an explicit refusal to pay uses up an offer. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+                }
+              ]
+            }
+          ],
+          "plan": {
+            "p1": {
+              "amount": 401.01,
+              "date": "2026-10-15",
+              "capped": 0
+            }
+          },
+          "pnotes": {},
+          "promises": {},
+          "tries": {},
+          "perr": [],
+          "notes": {},
+          "ntries": {},
+          "transfer": "",
+          "callback": "",
+          "closed": "",
+          "pend": "",
+          "npend": "",
+          "prop": {},
+          "toomuch": [],
+          "floored": [],
+          "given": [],
+          "said": [],
+          "mo": "",
+          "mr": "",
+          "fin": "",
+          "stall": 0
+        },
+        "said": [
+          "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your credit card ending 9012 has arrears of 401.01 and is 8 days late. Can you pay the full arrears today, or on the next working day if payment today is no longer possible?",
+          "To confirm: you will pay 401.01 for your credit card ending 9012 on Thursday 15 October 2026. May I record that commitment?"
+        ],
+        "ledger": {
+          "promises": [],
+          "notes": [],
+          "callbacks": [],
+          "transfers": [],
+          "outcome": null,
+          "reason": null,
+          "calls": [
+            {
+              "tool": "verify_identity",
+              "args": {
+                "field": "phone_last4",
+                "answer": "7319"
+              },
+              "status": 200,
+              "result": {
+                "ok": true,
+                "verified": true,
+                "wrong_answers_left": 3,
+                "all_verified": false,
+                "id_state": "open",
+                "what_to_do_next": "Correct (do not say so). Say \"Thank you.\" and ask the next security question: \"What is your date of birth?\""
+              }
+            },
+            {
+              "tool": "verify_identity",
+              "args": {
+                "field": "date_of_birth",
+                "answer": "1985-04-23"
+              },
+              "status": 200,
+              "result": {
+                "ok": true,
+                "verified": true,
+                "wrong_answers_left": 3,
+                "all_verified": true,
+                "id_state": "verified",
+                "what_to_do_next": "All security answers are correct. Identity is verified. Say nothing about it yet."
+              }
+            },
+            {
+              "tool": "get_account",
+              "args": {},
+              "status": 200,
+              "result": {
+                "ok": true,
+                "products": [
+                  {
+                    "product_id": "p1",
+                    "type": "credit_card",
+                    "card_last4": "9012",
+                    "past_due": 401.01,
+                    "minimum_payment": 80.0,
+                    "days_late": 8
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "ended": false
+      }
+    },
+    {
+      "probe": "O4 preceding holiday adjustment",
+      "expected": "Offer 2026-10-15 for holiday 2026-10-16",
+      "actual": {
+        "response": "RULE: Friday 16 October 2026 is a bank holiday, not a business day. Nothing was noted. That day is not a working day. Do not move it forward to Saturday 17 October 2026: propose the working day before it, or the earliest permitted date if that would be earlier, explain the change and get the customer's consent. If the customer accepts, CALL check_terms with 2026-10-17.",
+        "state": {
+          "stage": "verified",
+          "id": "verified",
+          "idv": [
+            "phone_last4",
+            "date_of_birth"
+          ],
+          "products": [
+            {
+              "id": "p1",
+              "type": "credit_card",
+              "words": "credit card ending 9012",
+              "full": 401.01,
+              "floor": 200.5,
+              "floor_name": "minimum acceptable amount",
+              "late": 8,
+              "band": "6-15",
+              "deadline": "2026-10-21",
+              "attempts": 1,
+              "offers": [
+                {
+                  "amount": "full_or_floor",
+                  "date": "2026-10-21",
+                  "text": "Only an explicit refusal to pay uses up an offer. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+                }
+              ]
+            }
+          ],
+          "plan": {},
+          "pnotes": {},
+          "promises": {},
+          "tries": {},
+          "perr": [],
+          "notes": {},
+          "ntries": {},
+          "transfer": "",
+          "callback": "",
+          "closed": "",
+          "pend": "",
+          "npend": "",
+          "prop": {},
+          "toomuch": [],
+          "floored": [],
+          "given": [],
+          "said": [],
+          "mo": "",
+          "mr": "",
+          "fin": ""
+        },
+        "said": [
+          "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your credit card ending 9012 has arrears of 401.01 and is 8 days late. Can you pay the full arrears today, or on the next working day if payment today is no longer possible?"
+        ],
+        "ledger": {
+          "promises": [],
+          "notes": [],
+          "callbacks": [],
+          "transfers": [],
+          "outcome": null,
+          "reason": null,
+          "calls": [
+            {
+              "tool": "verify_identity",
+              "args": {
+                "field": "phone_last4",
+                "answer": "7319"
+              },
+              "status": 200,
+              "result": {
+                "ok": true,
+                "verified": true,
+                "wrong_answers_left": 3,
+                "all_verified": false,
+                "id_state": "open",
+                "what_to_do_next": "Correct (do not say so). Say \"Thank you.\" and ask the next security question: \"What is your date of birth?\""
+              }
+            },
+            {
+              "tool": "verify_identity",
+              "args": {
+                "field": "date_of_birth",
+                "answer": "1985-04-23"
+              },
+              "status": 200,
+              "result": {
+                "ok": true,
+                "verified": true,
+                "wrong_answers_left": 3,
+                "all_verified": true,
+                "id_state": "verified",
+                "what_to_do_next": "All security answers are correct. Identity is verified. Say nothing about it yet."
+              }
+            },
+            {
+              "tool": "get_account",
+              "args": {},
+              "status": 200,
+              "result": {
+                "ok": true,
+                "products": [
+                  {
+                    "product_id": "p1",
+                    "type": "credit_card",
+                    "card_last4": "9012",
+                    "past_due": 401.01,
+                    "minimum_payment": 80.0,
+                    "days_late": 8
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "ended": false
+      }
+    },
+    {
+      "probe": "O4 Saturday is working",
+      "expected": "ACCEPTED",
+      "actual": {
+        "response": "ACCEPTED",
+        "state": {
+          "stage": "verified",
+          "id": "verified",
+          "idv": [
+            "phone_last4",
+            "date_of_birth"
+          ],
+          "products": [
+            {
+              "id": "p1",
+              "type": "credit_card",
+              "words": "credit card ending 9012",
+              "full": 401.01,
+              "floor": 200.5,
+              "floor_name": "minimum acceptable amount",
+              "late": 8,
+              "band": "6-15",
+              "deadline": "2026-10-21",
+              "attempts": 1,
+              "offers": [
+                {
+                  "amount": "full_or_floor",
+                  "date": "2026-10-21",
+                  "text": "Only an explicit refusal to pay uses up an offer. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+                }
+              ]
+            }
+          ],
+          "plan": {
+            "p1": {
+              "amount": 401.01,
+              "date": "2026-10-17",
+              "capped": 0
+            }
+          },
+          "pnotes": {},
+          "promises": {},
+          "tries": {},
+          "perr": [],
+          "notes": {},
+          "ntries": {},
+          "transfer": "",
+          "callback": "",
+          "closed": "",
+          "pend": "",
+          "npend": "",
+          "prop": {},
+          "toomuch": [],
+          "floored": [],
+          "given": [],
+          "said": [],
+          "mo": "",
+          "mr": "",
+          "fin": "",
+          "stall": 0
+        },
+        "said": [
+          "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your credit card ending 9012 has arrears of 401.01 and is 8 days late. Can you pay the full arrears today, or on the next working day if payment today is no longer possible?",
+          "To confirm: you will pay 401.01 for your credit card ending 9012 on Saturday 17 October 2026. May I record that commitment?"
+        ],
+        "ledger": {
+          "promises": [],
+          "notes": [],
+          "callbacks": [],
+          "transfers": [],
+          "outcome": null,
+          "reason": null,
+          "calls": [
+            {
+              "tool": "verify_identity",
+              "args": {
+                "field": "phone_last4",
+                "answer": "7319"
+              },
+              "status": 200,
+              "result": {
+                "ok": true,
+                "verified": true,
+                "wrong_answers_left": 3,
+                "all_verified": false,
+                "id_state": "open",
+                "what_to_do_next": "Correct (do not say so). Say \"Thank you.\" and ask the next security question: \"What is your date of birth?\""
+              }
+            },
+            {
+              "tool": "verify_identity",
+              "args": {
+                "field": "date_of_birth",
+                "answer": "1985-04-23"
+              },
+              "status": 200,
+              "result": {
+                "ok": true,
+                "verified": true,
+                "wrong_answers_left": 3,
+                "all_verified": true,
+                "id_state": "verified",
+                "what_to_do_next": "All security answers are correct. Identity is verified. Say nothing about it yet."
+              }
+            },
+            {
+              "tool": "get_account",
+              "args": {},
+              "status": 200,
+              "result": {
+                "ok": true,
+                "products": [
+                  {
+                    "product_id": "p1",
+                    "type": "credit_card",
+                    "card_last4": "9012",
+                    "past_due": 401.01,
+                    "minimum_payment": 80.0,
+                    "days_late": 8
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "ended": false
+      }
+    },
+    {
+      "probe": "O8 reject half-cent under floor",
+      "expected": "Reject 200.50, floor 200.51",
+      "actual": {
+        "response": "ACCEPTED",
+        "state": {
+          "stage": "verified",
+          "id": "verified",
+          "idv": [
+            "phone_last4",
+            "date_of_birth"
+          ],
+          "products": [
+            {
+              "id": "p1",
+              "type": "credit_card",
+              "words": "credit card ending 9012",
+              "full": 401.01,
+              "floor": 200.5,
+              "floor_name": "minimum acceptable amount",
+              "late": 8,
+              "band": "6-15",
+              "deadline": "2026-10-21",
+              "attempts": 1,
+              "offers": [
+                {
+                  "amount": "full_or_floor",
+                  "date": "2026-10-21",
+                  "text": "Only an explicit refusal to pay uses up an offer. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+                }
+              ]
+            }
+          ],
+          "plan": {
+            "p1": {
+              "amount": 200.5,
+              "date": "2026-10-14",
+              "capped": 0
+            }
+          },
+          "pnotes": {},
+          "promises": {},
+          "tries": {},
+          "perr": [],
+          "notes": {},
+          "ntries": {},
+          "transfer": "",
+          "callback": "",
+          "closed": "",
+          "pend": "",
+          "npend": "",
+          "prop": {},
+          "toomuch": [],
+          "floored": [],
+          "given": [],
+          "said": [],
+          "mo": "",
+          "mr": "",
+          "fin": "",
+          "stall": 0
+        },
+        "said": [
+          "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your credit card ending 9012 has arrears of 401.01 and is 8 days late. Can you pay the full arrears today, or on the next working day if payment today is no longer possible?",
+          "To confirm: you will pay 200.50 for your credit card ending 9012 on Wednesday 14 October 2026. May I record that commitment?"
+        ],
+        "ledger": {
+          "promises": [],
+          "notes": [],
+          "callbacks": [],
+          "transfers": [],
+          "outcome": null,
+          "reason": null,
+          "calls": [
+            {
+              "tool": "verify_identity",
+              "args": {
+                "field": "phone_last4",
+                "answer": "7319"
+              },
+              "status": 200,
+              "result": {
+                "ok": true,
+                "verified": true,
+                "wrong_answers_left": 3,
+                "all_verified": false,
+                "id_state": "open",
+                "what_to_do_next": "Correct (do not say so). Say \"Thank you.\" and ask the next security question: \"What is your date of birth?\""
+              }
+            },
+            {
+              "tool": "verify_identity",
+              "args": {
+                "field": "date_of_birth",
+                "answer": "1985-04-23"
+              },
+              "status": 200,
+              "result": {
+                "ok": true,
+                "verified": true,
+                "wrong_answers_left": 3,
+                "all_verified": true,
+                "id_state": "verified",
+                "what_to_do_next": "All security answers are correct. Identity is verified. Say nothing about it yet."
+              }
+            },
+            {
+              "tool": "get_account",
+              "args": {},
+              "status": 200,
+              "result": {
+                "ok": true,
+                "products": [
+                  {
+                    "product_id": "p1",
+                    "type": "credit_card",
+                    "card_last4": "9012",
+                    "past_due": 401.01,
+                    "minimum_payment": 80.0,
+                    "days_late": 8
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "ended": false
+      }
+    },
+    {
+      "probe": "O7 zero extra offers",
+      "expected": "Immediately note p1 refused and close no_promise/refused",
+      "actual": {
+        "state": {
+          "stage": "verified",
+          "id": "verified",
+          "idv": [
+            "phone_last4",
+            "date_of_birth"
+          ],
+          "products": [
+            {
+              "id": "p1",
+              "type": "credit_card",
+              "words": "credit card ending 9012",
+              "full": 401.01,
+              "floor": 200.5,
+              "floor_name": "minimum acceptable amount",
+              "late": 22,
+              "band": "16+",
+              "deadline": "2026-10-17",
+              "attempts": 0,
+              "offers": []
+            }
+          ],
+          "plan": {},
+          "pnotes": {
+            "p1": "refused"
+          },
+          "promises": {},
+          "tries": {},
+          "perr": [],
+          "notes": {
+            "p1": "refused"
+          },
+          "ntries": {},
+          "transfer": "",
+          "callback": "",
+          "closed": "yes",
+          "pend": "",
+          "npend": "",
+          "prop": {},
+          "toomuch": [],
+          "floored": [],
+          "given": [],
+          "said": [],
+          "mo": "",
+          "mr": "",
+          "fin": "set",
+          "stall": 0
+        },
+        "said": [
+          "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your credit card ending 9012 has arrears of 401.01 and is 22 days late. Can you pay the full arrears today, or on the next working day if payment today is no longer possible?",
+          "Thank you for your time. Goodbye."
+        ],
+        "ledger": {
+          "promises": [],
+          "notes": [
+            {
+              "product_id": "p1",
+              "reason": "refused"
+            }
+          ],
+          "callbacks": [],
+          "transfers": [],
+          "outcome": "no_promise",
+          "reason": "refused",
+          "calls": [
+            {
+              "tool": "verify_identity",
+              "args": {
+                "field": "phone_last4",
+                "answer": "7319"
+              },
+              "status": 200,
+              "result": {
+                "ok": true,
+                "verified": true,
+                "wrong_answers_left": 3,
+                "all_verified": false,
+                "id_state": "open",
+                "what_to_do_next": "Correct (do not say so). Say \"Thank you.\" and ask the next security question: \"What is your date of birth?\""
+              }
+            },
+            {
+              "tool": "verify_identity",
+              "args": {
+                "field": "date_of_birth",
+                "answer": "1985-04-23"
+              },
+              "status": 200,
+              "result": {
+                "ok": true,
+                "verified": true,
+                "wrong_answers_left": 3,
+                "all_verified": true,
+                "id_state": "verified",
+                "what_to_do_next": "All security answers are correct. Identity is verified. Say nothing about it yet."
+              }
+            },
+            {
+              "tool": "get_account",
+              "args": {},
+              "status": 200,
+              "result": {
+                "ok": true,
+                "products": [
+                  {
+                    "product_id": "p1",
+                    "type": "credit_card",
+                    "card_last4": "9012",
+                    "past_due": 401.01,
+                    "minimum_payment": 80.0,
+                    "days_late": 22
+                  }
+                ]
+              }
+            },
+            {
+              "tool": "add_note",
+              "args": {
+                "product_id": "p1",
+                "reason": "refused"
+              },
+              "status": 200,
+              "result": {
+                "ok": true
+              }
+            },
+            {
+              "tool": "close_call",
+              "args": {
+                "outcome": "no_promise",
+                "reason": "refused"
+              },
+              "status": 200,
+              "result": {
+                "ok": true
+              }
+            }
+          ]
+        },
+        "ended": true
+      }
+    },
+    {
+      "probe": "O3 first security refusal",
+      "expected": "Immediately close not_verified/declined",
+      "actual": {
+        "state": {
+          "stage": "opening",
+          "id": "open",
+          "idv": [],
+          "products": [],
+          "plan": {},
+          "pnotes": {},
+          "promises": {},
+          "tries": {},
+          "perr": [],
+          "notes": {},
+          "ntries": {},
+          "transfer": "",
+          "callback": "",
+          "closed": "yes",
+          "pend": "",
+          "npend": "",
+          "prop": {},
+          "toomuch": [],
+          "floored": [],
+          "given": [],
+          "said": [],
+          "mo": "not_verified",
+          "mr": "declined",
+          "fin": "set"
+        },
+        "said": [
+          "Thank you for your time. Goodbye."
+        ],
+        "ledger": {
+          "promises": [],
+          "notes": [],
+          "callbacks": [],
+          "transfers": [],
+          "outcome": "not_verified",
+          "reason": "declined",
+          "calls": [
+            {
+              "tool": "close_call",
+              "args": {
+                "outcome": "not_verified",
+                "reason": "declined"
+              },
+              "status": 200,
+              "result": {
+                "ok": true
+              }
+            }
+          ]
+        },
+        "ended": true
+      }
+    },
+    {
+      "probe": "O5 callback next two working days",
+      "expected": "Callback 2026-10-17 11:30, not_reached/callback",
+      "actual": {
+        "state": {
+          "stage": "opening",
+          "id": "open",
+          "idv": [],
+          "products": [],
+          "plan": {},
+          "pnotes": {},
+          "promises": {},
+          "tries": {},
+          "perr": [],
+          "notes": {},
+          "ntries": {},
+          "transfer": "",
+          "callback": "booked",
+          "closed": "yes",
+          "pend": "",
+          "npend": "",
+          "prop": {},
+          "toomuch": [],
+          "floored": [],
+          "given": [],
+          "said": [],
+          "mo": "",
+          "mr": "",
+          "fin": ""
+        },
+        "said": [
+          "The callback is booked. Thank you for your time. Goodbye."
+        ],
+        "ledger": {
+          "promises": [],
+          "notes": [],
+          "callbacks": [
+            {
+              "date": "2026-10-17",
+              "time": "11:30"
+            }
+          ],
+          "transfers": [],
+          "outcome": "not_reached",
+          "reason": "callback",
+          "calls": [
+            {
+              "tool": "schedule_callback",
+              "args": {
+                "date": "2026-10-17",
+                "time": "11:30"
+              },
+              "status": 200,
+              "result": {
+                "ok": true,
+                "auto_state": "go",
+                "final_outcome": "not_reached",
+                "final_reason": "callback",
+                "final_line": "The callback is booked. Thank you for your time. Goodbye.",
+                "what_to_do_next": "The callback is booked. Say nothing more."
+              }
+            },
+            {
+              "tool": "close_call",
+              "args": {
+                "outcome": "not_reached",
+                "reason": "callback"
+              },
+              "status": 200,
+              "result": {
+                "ok": true
+              }
+            }
+          ]
+        },
+        "ended": true
+      }
+    },
+    {
+      "probe": "O6 product sort",
+      "expected": "p2 then p1",
+      "actual": [
+        {
+          "id": "p1",
+          "type": "credit_card",
+          "words": "credit card ending 9012",
+          "full": 401.01,
+          "floor": 200.5,
+          "floor_name": "minimum acceptable amount",
+          "late": 4,
+          "band": "1-5",
+          "deadline": "2026-10-23",
+          "attempts": 2,
+          "offers": [
+            {
+              "amount": "full_or_floor",
+              "date": "2026-10-23",
+              "text": "Only an explicit refusal to pay uses up an offer. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+            },
+            {
+              "amount": "floor",
+              "date": "2026-10-23",
+              "text": "This is the last offer for this product. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+            }
+          ]
+        },
+        {
+          "id": "p2",
+          "type": "personal_loan",
+          "words": "personal loan",
+          "full": 600.0,
+          "floor": 100.0,
+          "floor_name": "minimum acceptable amount",
+          "late": 22,
+          "band": "16+",
+          "deadline": "2026-10-17",
+          "attempts": 0,
+          "offers": []
+        }
+      ]
+    },
+    {
+      "probe": "O6 individual readback before next product",
+      "expected": "Read back p2 600 today and await assent, without an offer for p1",
+      "actual": {
+        "state": {
+          "stage": "verified",
+          "id": "verified",
+          "idv": [
+            "phone_last4",
+            "date_of_birth"
+          ],
+          "products": [
+            {
+              "id": "p1",
+              "type": "credit_card",
+              "words": "credit card ending 9012",
+              "full": 401.01,
+              "floor": 200.5,
+              "floor_name": "minimum acceptable amount",
+              "late": 4,
+              "band": "1-5",
+              "deadline": "2026-10-23",
+              "attempts": 2,
+              "offers": [
+                {
+                  "amount": "full_or_floor",
+                  "date": "2026-10-23",
+                  "text": "Only an explicit refusal to pay uses up an offer. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+                },
+                {
+                  "amount": "floor",
+                  "date": "2026-10-23",
+                  "text": "This is the last offer for this product. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+                }
+              ]
+            },
+            {
+              "id": "p2",
+              "type": "personal_loan",
+              "words": "personal loan",
+              "full": 600.0,
+              "floor": 100.0,
+              "floor_name": "minimum acceptable amount",
+              "late": 22,
+              "band": "16+",
+              "deadline": "2026-10-17",
+              "attempts": 0,
+              "offers": []
+            }
+          ],
+          "plan": {
+            "p2": {
+              "amount": 600.0,
+              "date": "2026-10-14",
+              "capped": 0
+            }
+          },
+          "pnotes": {},
+          "promises": {},
+          "tries": {},
+          "perr": [],
+          "notes": {},
+          "ntries": {},
+          "transfer": "",
+          "callback": "",
+          "closed": "",
+          "pend": "",
+          "npend": "",
+          "prop": {
+            "p1": 1
+          },
+          "toomuch": [],
+          "floored": [],
+          "given": [],
+          "said": [],
+          "mo": "",
+          "mr": "",
+          "fin": "",
+          "stall": 0
+        },
+        "said": [
+          "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your credit card ending 9012 has arrears of 401.01 and is 4 days late. Your personal loan has arrears of 600.00 and is 22 days late. Let us take these one at a time, starting with the first one I mentioned. Can you pay its full arrears today, or on the next working day if payment today is no longer possible?",
+          "Now your credit card ending 9012. Could you pay the full amount of 401.01 for your credit card ending 9012 by Friday 23 October 2026?"
+        ],
+        "ledger": {
+          "promises": [],
+          "notes": [],
+          "callbacks": [],
+          "transfers": [],
+          "outcome": null,
+          "reason": null,
+          "calls": [
+            {
+              "tool": "verify_identity",
+              "args": {
+                "field": "phone_last4",
+                "answer": "7319"
+              },
+              "status": 200,
+              "result": {
+                "ok": true,
+                "verified": true,
+                "wrong_answers_left": 3,
+                "all_verified": false,
+                "id_state": "open",
+                "what_to_do_next": "Correct (do not say so). Say \"Thank you.\" and ask the next security question: \"What is your date of birth?\""
+              }
+            },
+            {
+              "tool": "verify_identity",
+              "args": {
+                "field": "date_of_birth",
+                "answer": "1985-04-23"
+              },
+              "status": 200,
+              "result": {
+                "ok": true,
+                "verified": true,
+                "wrong_answers_left": 3,
+                "all_verified": true,
+                "id_state": "verified",
+                "what_to_do_next": "All security answers are correct. Identity is verified. Say nothing about it yet."
+              }
+            },
+            {
+              "tool": "get_account",
+              "args": {},
+              "status": 200,
+              "result": {
+                "ok": true,
+                "products": [
+                  {
+                    "product_id": "p1",
+                    "type": "credit_card",
+                    "card_last4": "9012",
+                    "past_due": 401.01,
+                    "minimum_payment": 80.0,
+                    "days_late": 4
+                  },
+                  {
+                    "product_id": "p2",
+                    "type": "personal_loan",
+                    "past_due": 600.0,
+                    "instalment_amount": 100.0,
+                    "days_late": 22
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "ended": false
+      }
+    },
+    {
+      "probe": "O12/O15 notes survive transfer",
+      "expected": "p1 dispute note and p2 refused note, transfer general, transferred/human",
+      "actual": {
+        "state": {
+          "stage": "verified",
+          "id": "verified",
+          "idv": [
+            "phone_last4",
+            "date_of_birth"
+          ],
+          "products": [
+            {
+              "id": "p1",
+              "type": "credit_card",
+              "words": "credit card ending 9012",
+              "full": 401.01,
+              "floor": 200.5,
+              "floor_name": "minimum acceptable amount",
+              "late": 4,
+              "band": "1-5",
+              "deadline": "2026-10-23",
+              "attempts": 2,
+              "offers": [
+                {
+                  "amount": "full_or_floor",
+                  "date": "2026-10-23",
+                  "text": "Only an explicit refusal to pay uses up an offer. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+                },
+                {
+                  "amount": "floor",
+                  "date": "2026-10-23",
+                  "text": "This is the last offer for this product. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+                }
+              ]
+            },
+            {
+              "id": "p2",
+              "type": "personal_loan",
+              "words": "personal loan",
+              "full": 600.0,
+              "floor": 100.0,
+              "floor_name": "minimum acceptable amount",
+              "late": 22,
+              "band": "16+",
+              "deadline": "2026-10-17",
+              "attempts": 0,
+              "offers": []
+            }
+          ],
+          "plan": {},
+          "pnotes": {
+            "p1": "dispute"
+          },
+          "promises": {},
+          "tries": {},
+          "perr": [],
+          "notes": {},
+          "ntries": {},
+          "transfer": "general",
+          "callback": "",
+          "closed": "yes",
+          "pend": "",
+          "npend": "",
+          "prop": {},
+          "toomuch": [],
+          "floored": [],
+          "given": [],
+          "said": [],
+          "mo": "",
+          "mr": "",
+          "fin": "",
+          "stall": 0
+        },
+        "said": [
+          "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your credit card ending 9012 has arrears of 401.01 and is 4 days late. Your personal loan has arrears of 600.00 and is 22 days late. Let us take these one at a time, starting with the first one I mentioned. Can you pay its full arrears today, or on the next working day if payment today is no longer possible?",
+          "Now your personal loan. When can you pay it?",
+          "I am transferring you to a colleague now. Thank you for your time. Goodbye."
+        ],
+        "ledger": {
+          "promises": [],
+          "notes": [],
+          "callbacks": [],
+          "transfers": [
+            {
+              "queue": "general"
+            }
+          ],
+          "outcome": "transferred",
+          "reason": "human",
+          "calls": [
+            {
+              "tool": "verify_identity",
+              "args": {
+                "field": "phone_last4",
+                "answer": "7319"
+              },
+              "status": 200,
+              "result": {
+                "ok": true,
+                "verified": true,
+                "wrong_answers_left": 3,
+                "all_verified": false,
+                "id_state": "open",
+                "what_to_do_next": "Correct (do not say so). Say \"Thank you.\" and ask the next security question: \"What is your date of birth?\""
+              }
+            },
+            {
+              "tool": "verify_identity",
+              "args": {
+                "field": "date_of_birth",
+                "answer": "1985-04-23"
+              },
+              "status": 200,
+              "result": {
+                "ok": true,
+                "verified": true,
+                "wrong_answers_left": 3,
+                "all_verified": true,
+                "id_state": "verified",
+                "what_to_do_next": "All security answers are correct. Identity is verified. Say nothing about it yet."
+              }
+            },
+            {
+              "tool": "get_account",
+              "args": {},
+              "status": 200,
+              "result": {
+                "ok": true,
+                "products": [
+                  {
+                    "product_id": "p1",
+                    "type": "credit_card",
+                    "card_last4": "9012",
+                    "past_due": 401.01,
+                    "minimum_payment": 80.0,
+                    "days_late": 4
+                  },
+                  {
+                    "product_id": "p2",
+                    "type": "personal_loan",
+                    "past_due": 600.0,
+                    "instalment_amount": 100.0,
+                    "days_late": 22
+                  }
+                ]
+              }
+            },
+            {
+              "tool": "transfer_to_agent",
+              "args": {
+                "queue": "general"
+              },
+              "status": 200,
+              "result": {
+                "ok": true,
+                "auto_state": "go",
+                "final_outcome": "transferred",
+                "final_reason": "human",
+                "final_line": "I am transferring you to a colleague now. Thank you for your time. Goodbye.",
+                "what_to_do_next": "The transfer is arranged. Say nothing more."
+              }
+            },
+            {
+              "tool": "close_call",
+              "args": {
+                "outcome": "transferred",
+                "reason": "human"
+              },
+              "status": 200,
+              "result": {
+                "ok": true
+              }
+            }
+          ]
+        },
+        "ended": true
+      }
+    },
+    {
+      "probe": "O12 singleton dispute must transfer",
+      "expected": "note dispute, transfer general, transferred/human",
+      "actual": {
+        "state": {
+          "stage": "verified",
+          "id": "verified",
+          "idv": [
+            "phone_last4",
+            "date_of_birth"
+          ],
+          "products": [
+            {
+              "id": "p1",
+              "type": "credit_card",
+              "words": "credit card ending 9012",
+              "full": 401.01,
+              "floor": 200.5,
+              "floor_name": "minimum acceptable amount",
+              "late": 8,
+              "band": "6-15",
+              "deadline": "2026-10-21",
+              "attempts": 1,
+              "offers": [
+                {
+                  "amount": "full_or_floor",
+                  "date": "2026-10-21",
+                  "text": "Only an explicit refusal to pay uses up an offer. Never offer a waiver, a discount, a new instalment plan or an amount above the arrears."
+                }
+              ]
+            }
+          ],
+          "plan": {},
+          "pnotes": {
+            "p1": "dispute"
+          },
+          "promises": {},
+          "tries": {},
+          "perr": [],
+          "notes": {
+            "p1": "dispute"
+          },
+          "ntries": {},
+          "transfer": "",
+          "callback": "",
+          "closed": "yes",
+          "pend": "",
+          "npend": "",
+          "prop": {},
+          "toomuch": [],
+          "floored": [],
+          "given": [],
+          "said": [],
+          "mo": "",
+          "mr": "",
+          "fin": "set",
+          "stall": 0
+        },
+        "said": [
+          "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your credit card ending 9012 has arrears of 401.01 and is 8 days late. Can you pay the full arrears today, or on the next working day if payment today is no longer possible?",
+          "Thank you for your time. Goodbye."
+        ],
+        "ledger": {
+          "promises": [],
+          "notes": [
+            {
+              "product_id": "p1",
+              "reason": "dispute"
+            }
+          ],
+          "callbacks": [],
+          "transfers": [],
+          "outcome": "no_promise",
+          "reason": "dispute",
+          "calls": [
+            {
+              "tool": "verify_identity",
+              "args": {
+                "field": "phone_last4",
+                "answer": "7319"
+              },
+              "status": 200,
+              "result": {
+                "ok": true,
+                "verified": true,
+                "wrong_answers_left": 3,
+                "all_verified": false,
+                "id_state": "open",
+                "what_to_do_next": "Correct (do not say so). Say \"Thank you.\" and ask the next security question: \"What is your date of birth?\""
+              }
+            },
+            {
+              "tool": "verify_identity",
+              "args": {
+                "field": "date_of_birth",
+                "answer": "1985-04-23"
+              },
+              "status": 200,
+              "result": {
+                "ok": true,
+                "verified": true,
+                "wrong_answers_left": 3,
+                "all_verified": true,
+                "id_state": "verified",
+                "what_to_do_next": "All security answers are correct. Identity is verified. Say nothing about it yet."
+              }
+            },
+            {
+              "tool": "get_account",
+              "args": {},
+              "status": 200,
+              "result": {
+                "ok": true,
+                "products": [
+                  {
+                    "product_id": "p1",
+                    "type": "credit_card",
+                    "card_last4": "9012",
+                    "past_due": 401.01,
+                    "minimum_payment": 80.0,
+                    "days_late": 8
+                  }
+                ]
+              }
+            },
+            {
+              "tool": "add_note",
+              "args": {
+                "product_id": "p1",
+                "reason": "dispute"
+              },
+              "status": 200,
+              "result": {
+                "ok": true
+              }
+            },
+            {
+              "tool": "close_call",
+              "args": {
+                "outcome": "no_promise",
+                "reason": "dispute"
+              },
+              "status": 200,
+              "result": {
+                "ok": true
+              }
+            }
+          ]
+        },
+        "ended": true
+      }
+    },
+    {
+      "probe": "O9 non-answer not refusal",
+      "expected": "Two stall events must not consume a refusal budget or close as refused",
+      "actual": {
+        "state": {
+          "stage": "verified",
+          "id": "verified",
+          "idv": [
+            "phone_last4",
+            "date_of_birth"
+          ],
+          "products": [
+            {
+              "id": "p1",
+              "type": "credit_card",
+              "words": "credit card ending 9012",
+              "full": 401.01,
+              "floor": 200.5,
+              "floor_name": "minimum acceptable amount",
+              "late": 22,
+              "band": "16+",
+              "deadline": "2026-10-17",
+              "attempts": 0,
+              "offers": []
+            }
+          ],
+          "plan": {},
+          "pnotes": {
+            "p1": "refused"
+          },
+          "promises": {},
+          "tries": {},
+          "perr": [],
+          "notes": {
+            "p1": "refused"
+          },
+          "ntries": {},
+          "transfer": "",
+          "callback": "",
+          "closed": "yes",
+          "pend": "",
+          "npend": "",
+          "prop": {},
+          "toomuch": [],
+          "floored": [],
+          "given": [],
+          "said": [],
+          "mo": "",
+          "mr": "",
+          "fin": "set",
+          "stall": 0
+        },
+        "said": [
+          "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your credit card ending 9012 has arrears of 401.01 and is 22 days late. Can you pay the full arrears today, or on the next working day if payment today is no longer possible?",
+          "Can you pay the full arrears today, or on the next working day if payment today is no longer possible?",
+          "Thank you for your time. Goodbye."
+        ],
+        "ledger": {
+          "promises": [],
+          "notes": [
+            {
+              "product_id": "p1",
+              "reason": "refused"
+            }
+          ],
+          "callbacks": [],
+          "transfers": [],
+          "outcome": "no_promise",
+          "reason": "refused",
+          "calls": [
+            {
+              "tool": "verify_identity",
+              "args": {
+                "field": "phone_last4",
+                "answer": "7319"
+              },
+              "status": 200,
+              "result": {
+                "ok": true,
+                "verified": true,
+                "wrong_answers_left": 3,
+                "all_verified": false,
+                "id_state": "open",
+                "what_to_do_next": "Correct (do not say so). Say \"Thank you.\" and ask the next security question: \"What is your date of birth?\""
+              }
+            },
+            {
+              "tool": "verify_identity",
+              "args": {
+                "field": "date_of_birth",
+                "answer": "1985-04-23"
+              },
+              "status": 200,
+              "result": {
+                "ok": true,
+                "verified": true,
+                "wrong_answers_left": 3,
+                "all_verified": true,
+                "id_state": "verified",
+                "what_to_do_next": "All security answers are correct. Identity is verified. Say nothing about it yet."
+              }
+            },
+            {
+              "tool": "get_account",
+              "args": {},
+              "status": 200,
+              "result": {
+                "ok": true,
+                "products": [
+                  {
+                    "product_id": "p1",
+                    "type": "credit_card",
+                    "card_last4": "9012",
+                    "past_due": 401.01,
+                    "minimum_payment": 80.0,
+                    "days_late": 22
+                  }
+                ]
+              }
+            },
+            {
+              "tool": "add_note",
+              "args": {
+                "product_id": "p1",
+                "reason": "refused"
+              },
+              "status": 200,
+              "result": {
+                "ok": true
+              }
+            },
+            {
+              "tool": "close_call",
+              "args": {
+                "outcome": "no_promise",
+                "reason": "refused"
+              },
+              "status": 200,
+              "result": {
+                "ok": true
+              }
+            }
+          ]
+        },
+        "ended": true
+      }
+    },
+    {
+      "probe": "O14 note write failure",
+      "expected": "After two failed notes, close no_promise/service_error",
+      "actual": {
+        "state": {
+          "stage": "verified",
+          "id": "verified",
+          "idv": [
+            "phone_last4",
+            "date_of_birth"
+          ],
+          "products": [
+            {
+              "id": "p1",
+              "type": "credit_card",
+              "words": "credit card ending 9012",
+              "full": 401.01,
+              "floor": 200.5,
+              "floor_name": "minimum acceptable amount",
+              "late": 22,
+              "band": "16+",
+              "deadline": "2026-10-17",
+              "attempts": 0,
+              "offers": []
+            }
+          ],
+          "plan": {},
+          "pnotes": {
+            "p1": "refused"
+          },
+          "promises": {},
+          "tries": {},
+          "perr": [],
+          "notes": {},
+          "ntries": {
+            "p1": 2
+          },
+          "transfer": "",
+          "callback": "",
+          "closed": "yes",
+          "pend": "",
+          "npend": "",
+          "prop": {},
+          "toomuch": [],
+          "floored": [],
+          "given": [],
+          "said": [],
+          "mo": "",
+          "mr": "",
+          "fin": "set",
+          "stall": 0
+        },
+        "said": [
+          "Thank you, your identity is verified. I am calling from Alder Mutual about arrears on your account. Your credit card ending 9012 has arrears of 401.01 and is 22 days late. Can you pay the full arrears today, or on the next working day if payment today is no longer possible?",
+          "Thank you for your time. Goodbye."
+        ],
+        "ledger": {
+          "promises": [],
+          "notes": [],
+          "callbacks": [],
+          "transfers": [],
+          "outcome": "no_promise",
+          "reason": "refused",
+          "calls": [
+            {
+              "tool": "verify_identity",
+              "args": {
+                "field": "phone_last4",
+                "answer": "7319"
+              },
+              "status": 200,
+              "result": {
+                "ok": true,
+                "verified": true,
+                "wrong_answers_left": 3,
+                "all_verified": false,
+                "id_state": "open",
+                "what_to_do_next": "Correct (do not say so). Say \"Thank you.\" and ask the next security question: \"What is your date of birth?\""
+              }
+            },
+            {
+              "tool": "verify_identity",
+              "args": {
+                "field": "date_of_birth",
+                "answer": "1985-04-23"
+              },
+              "status": 200,
+              "result": {
+                "ok": true,
+                "verified": true,
+                "wrong_answers_left": 3,
+                "all_verified": true,
+                "id_state": "verified",
+                "what_to_do_next": "All security answers are correct. Identity is verified. Say nothing about it yet."
+              }
+            },
+            {
+              "tool": "get_account",
+              "args": {},
+              "status": 200,
+              "result": {
+                "ok": true,
+                "products": [
+                  {
+                    "product_id": "p1",
+                    "type": "credit_card",
+                    "card_last4": "9012",
+                    "past_due": 401.01,
+                    "minimum_payment": 80.0,
+                    "days_late": 22
+                  }
+                ]
+              }
+            },
+            {
+              "tool": "add_note",
+              "args": {
+                "product_id": "p1",
+                "reason": "refused"
+              },
+              "status": 500,
+              "result": {
+                "ok": false,
+                "error": "service unavailable, nothing was recorded"
+              }
+            },
+            {
+              "tool": "add_note",
+              "args": {
+                "product_id": "p1",
+                "reason": "refused"
+              },
+              "status": 500,
+              "result": {
+                "ok": false,
+                "error": "service unavailable, nothing was recorded"
+              }
+            },
+            {
+              "tool": "close_call",
+              "args": {
+                "outcome": "no_promise",
+                "reason": "refused"
+              },
+              "status": 200,
+              "result": {
+                "ok": true
+              }
+            }
+          ]
+        },
+        "ended": true
+      }
+    }
+  ]
+}
