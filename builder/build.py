@@ -127,17 +127,24 @@ def main(argv):
     api_text = json.dumps(openapi, indent=1)
     (ROOT / "out").mkdir(exist_ok=True); (ROOT / "out" / (slot + ".openapi.json")).write_text(api_text)
     (ROOT / "out").mkdir(exist_ok=True)
+    # the engine handles one kind of call and needs services for four roles; for any other set of services the free-form way runs (freeform.py)
+    from builder import freeform
+    free = bool(opt.get("--freeform")) or not freeform.fits_engine(openapi)
+    trace.log("WAY: free-form (--freeform given)" if opt.get("--freeform") else
+              f"WAY: free-form, the tool API lacks a service for {', '.join(r for r in freeform.ROLES if r not in engine.read_api(openapi))}" if free else "WAY: engine, the tool API has every service the engine needs")
     if opt.get("--spec"):
         spec = json.load(open(opt["--spec"])); trace.log("spec read from " + str(opt["--spec"]) + " (no model call)")
     else:
-        spec = llm.run(extract.extract(trace, texts, openapi, api_text))
+        spec = llm.run(freeform.read(trace, texts, openapi, api_text) if free else extract.extract(trace, texts, openapi, api_text))
         (ROOT / "out" / (slot + ".spec.json")).write_text(json.dumps(spec, indent=1))
         trace.log(f"spec written to out/{slot}.spec.json")
-    wf = engine.lint(engine.build_workflow(spec, openapi))
+    wf = freeform.build_workflow(spec, openapi) if free else engine.lint(engine.build_workflow(spec, openapi))
     (ROOT / "out" / (slot + ".workflow.json")).write_text(json.dumps(wf, indent=1))
     trace.log(f"workflow compiled: {len(wf['nodes'])} steps, {len(json.dumps(wf))} bytes, checks passed")
-    try: selftest(spec, openapi, trace)
-    except Exception as e: trace.log("SELF-TEST against a fake bank FAILED (the agent is still deployed): " + type(e).__name__ + ": " + str(e)[:400])
+    if free: trace.log("SELF-TEST skipped: it tests the engine's in-call code, which the free-form workflow does not use")
+    else:
+        try: selftest(spec, openapi, trace)
+        except Exception as e: trace.log("SELF-TEST against a fake bank FAILED (the agent is still deployed): " + type(e).__name__ + ": " + str(e)[:400])
     if opt.get("--no-deploy"): trace.end("not deployed"); return
     import freya
     from builder import deploy
