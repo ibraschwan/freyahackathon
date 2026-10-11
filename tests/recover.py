@@ -26,7 +26,8 @@ for run in sorted(runs, key=lambda r: r.get("personaName", "")):
     ledger_ok = not failed
     ok, why, source = verdict(run)
     if not ok: failed.append(f"conversation ({source}): " + " ".join(str(why or "no verdict").split())[:700])
-    rows.append({"id": sid, "family": s["family"], "pass": not failed, "ledger_ok": ledger_ok, "failed": failed, "call_id": run["callId"], "ended": call.get("endedReason"), "duration": call.get("duration")})
+    rows.append({"id": sid, "family": s["family"], "pass": not failed, "ledger_ok": ledger_ok, "failed": failed, "call_id": run["callId"], "ended": call.get("endedReason"), "duration": call.get("duration"),
+                 "run_outcome": run.get("outcome"), "judge_source": source, "pass_by_run_outcome": ledger_ok and run.get("outcome") == "pass"})   # the run outcome as it reads NOW, not when the run ended
     print(("PASS" if not failed else "FAIL"), sid, f"{s['family']:<14}", "|", " > ".join(c["tool"].replace("verify_identity", "verify").replace("create_promise", "promise") for c in led.get("calls", [])), "|", call.get("endedReason"))
     for f in failed: print("       -", f[:330])
     if failed: (tdir / f"{sid}.txt").write_text("\n".join("FAILED: " + f for f in failed) + "\n\n" + transcript(run["callId"]))

@@ -78,3 +78,21 @@ every `code_exec` step of the workflow answered `Sandbox did not return a parsea
 35 times in a row, including the `pre_process_code` of the end-of-call tool. The same snippets had run without error earlier in the same call,
 and the same conversation replayed over `POST /api/v2/chat/message` ran through. The variables of the call were small (147 variables, about 12 kB of values).
 The customer had confirmed three promises; none was recorded and the call was not closed. We have seen this once in about 800 simulated calls.
+
+## A fourth thing: the agent's model answers after 50 seconds and the simulated customer hangs up
+
+Simulation "scen 15:07:21 6ed331" (11 October 2026, calls between 12:27 and 13:00 UTC, right after the outage), agent version 9, 100 calls.
+We measured, for every customer message, the time until the agent's next tool call or sentence:
+
+| Simulation | Agent reactions | Median | 90th percentile | 99th percentile | Slowest | Calls ended by the customer |
+|---|---|---|---|---|---|---|
+| "scen 03:49:48" (00:49 UTC, same agent version, same 100 customers) | 578 | 0.8 s | 2.2 s | 4.0 s | 5.7 s | 0 |
+| "scen 15:07:21 6ed331" | 598 | 1.8 s | 11.2 s | 33.2 s | 55.8 s | 3 |
+
+In three calls the agent's tool call came 53 to 56 seconds after the customer's message; the tool answered at once, and while the agent's next
+sentence was awaited the call ended with `customer-ended-call`. Two of the three were judged failed, with the reason that the agent "never responded":
+
+- `f97c6f8a-bbf6-477a-ad8c-8f4da8914f5d`: date of birth given at 29.8 s, `verify_identity` called at 85.6 s (correct, accepted), call over at 90 s.
+- `12f619de-e37b-464e-bb90-cd5110114bb2`: payment day named at 73.0 s, the date check ran at 126.0 s, call over at 133 s.
+
+Nothing in a workflow can shorten the model's answer time, so calls like these fail whatever the agent is.

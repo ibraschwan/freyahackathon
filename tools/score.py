@@ -15,10 +15,13 @@ def http(path, body=None):
     req = urllib.request.Request(HOST + path, data=json.dumps(body).encode() if body is not None else None, headers=h, method="POST" if body is not None else "GET")
     for attempt in range(5):                     # the network drops connections now and then: try again (a repeated session request only makes a spare session)
         try: return json.load(urllib.request.urlopen(req, timeout=20))
-        except urllib.error.HTTPError as e: return json.load(e)
-        except (urllib.error.URLError, TimeoutError, ConnectionError):
+        except urllib.error.HTTPError as e:
+            try: return json.loads(e.read())
+            except ValueError:                   # an error page that is not the mock's JSON (502, 504, ...): the mock did not answer, try again
+                if attempt == 4: raise
+        except (urllib.error.URLError, TimeoutError, ConnectionError, ValueError):
             if attempt == 4: raise
-            import time; time.sleep(3 * (attempt + 1))
+        import time; time.sleep(3 * (attempt + 1))
 
 def score_ledger(case, led):
     exp, bad = case["expected"], []
