@@ -69,6 +69,7 @@ SCHEMA = """THE CONFIGURATION. Return one JSON object with exactly these keys.
   "types": {<product type value>: {"words": how the brief says to name this product aloud; a field of the product goes in angle brackets, for example "credit card ending <card_last4>",
                                    "floor": the lowest amount that can be recorded for it: {"field": <product field>} or {"percent_of_full": number} or {"amount": number},
                                    "floor_name": what that amount is called aloud}}. Use the key "*" for a rule that covers every other type.
+  "confirm": optional, leave it out unless the brief demands it. "each" when the brief wants every product read back, confirmed and recorded on its own before the next product is discussed: the engine then reads back one agreed product alone, records it after the customer's yes, and only then goes on to the next product. Without the key every agreed product is read back together for one confirmation.
 }
 "bands": the table that turns days late into a deadline and a number of persuasion attempts, in the brief's order:
   [{"name", "min": lowest days late in the band, "max": highest (null for no upper limit), "deadline": {"unit": "business_days" | "calendar_days", "n": number of days after today, "roll": "next" | "previous" (calendar_days only: where to move a deadline that is not a business day)}, "attempts": number of persuasion attempts}].

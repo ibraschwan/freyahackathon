@@ -318,11 +318,19 @@ def offer_line(st, p, k):
         extra = ''
     return 'Could you pay ' + am + ' for your ' + p['words'] + (' by ' + say(iso(o['date'])) if o['date'] else '') + '?' + extra
 #@live
-def readback(st):
+def each_id(st):
+    """Only with product.confirm "each" and several products: the one agreed product that is read back and recorded
+    next, on its own (the first in product order). '' in every other case."""
+    if st.get('each'):
+        for p in st['products']:
+            if p['id'] in st['plan'] and p['id'] not in st['promises'] and p['id'] not in st['perr']:
+                return p['id']
+    return ''
+def readback(st, only=None):
     parts = []
     for p in st['products']:
         x = st['plan'].get(p['id'])
-        if x and p['id'] not in st['promises']:
+        if x and p['id'] not in st['promises'] and (only is None or p['id'] == only):
             parts.append(money(x['amount']) + ' for your ' + p['words'] + ' on ' + say(iso(x['date'])) + (' (the latest possible date for this product)' if x.get('capped') else ''))
     return 'To confirm: you will pay ' + ', and '.join(parts) + '. ' + (SEN.get('confirm_question') or 'Do you confirm?')
 def live(st):
@@ -349,7 +357,10 @@ def live(st):
             t = 'OPEN' + ('; persuasion offers made so far: ' + str(n) + ' of ' + str(p['attempts']) if n else '')
         L.append('- ' + p['words'] + ' [' + i + ']: ' + t)
     op = open_ids(st)
-    if op:
+    cur = each_id(st)
+    if cur:
+        L.append('The system has read back the agreement for the ' + (prod(st, cur) or dict(words=''))['words'] + ' [' + cur + '] alone. A clear yes -> CALL customer_confirmed: the system records this one product and goes on to the next itself. A changed day or amount -> CALL check_terms again.')
+    elif op:
         L.append('The product in discussion now: ' + (prod(st, op[0]) or dict(words=''))['words'] + ' [' + op[0] + '].')
     elif planned:
         L.append('The system has read the agreement back. A clear yes -> CALL customer_confirmed. A changed day or amount -> CALL check_terms again.')
@@ -483,6 +494,8 @@ def _run(vars):
     st['products'] = ps
     st['stage'] = 'verified'
     st['id'] = 'verified'
+    if (S.get('product') or dict()).get('confirm') == 'each' and len(ps) > 1:
+        st['each'] = 1
     many = len(ps) > 1
     L = ['TODAY: ' + tag(today) + '.', '']
     for n, p in enumerate(ps):
@@ -578,6 +591,9 @@ def _run(vars):
         if p is None or i in seen or i in st['promises'] or i in st['pnotes'] or i in st['perr'] or i in st['given']:
             continue
         st['plan'].pop(i, None)
+        if each_id(st):
+            # confirm "each": another product waits for its read-back; this refusal is not counted, its product gets its turn after the recording
+            continue
         op = open_ids(st)
         if not op or op[0] != i:
             continue
@@ -599,6 +615,9 @@ def _run(vars):
                 st['pnotes'][i] = str(NOTES.get('refused_reason'))
             else:
                 st['given'].append(i)
+    if each_id(st):
+        # confirm "each": as soon as one product is agreed it is read back alone, before anything else is said
+        line = readback(st, each_id(st))
     fin = False
     if not line:
         op = open_ids(st)
@@ -679,6 +698,13 @@ try:
         if i in st['plan'] and i not in st['promises'] and i not in st['perr']:
             nxt = i
             break
+    if st.get('each'):
+        # confirm "each": one confirmation records one product (the first agreed one, the one that was read back). 'one' holds it
+        # across the retry; once it is recorded or has failed twice the loop ends, whatever else is agreed
+        one = st.get('one') or nxt or ''
+        if nxt != one:
+            nxt = None
+        st['one'] = one if nxt else ''
     if nxt:
         x = st['plan'][nxt]
         vars['cur_pid'] = nxt
@@ -686,6 +712,40 @@ try:
         vars['cur_date'] = x['date']
         st['pend'] = nxt
         vars['rec_state'] = 'call'
+    elif st.get('each'):
+        # confirm "each": only the product just handled leaves the plan. Then the result is said, and with it the next step:
+        # the read-back of the next agreed product, or the lead-in and the offer for the next open one
+        done = [i for i in st['plan'] if i in st['promises']]
+        failed = [i for i in st['plan'] if i in st['perr']]
+        for i in done + failed:
+            st['plan'].pop(i, None)
+        if failed and NOTES.get('enabled') and NOTES.get('service_error_reason'):
+            for i in failed:
+                st['pnotes'][i] = str(NOTES.get('service_error_reason'))
+        bad_line = SEN.get('promise_failed') or 'I am sorry, I could not record your promise.'
+        out = ([SEN.get('promise_recorded') or 'Your promise is recorded.'] if done else []) + ([bad_line] if failed else [])
+        cur = each_id(st)
+        op = open_ids(st)
+        p = prod(st, cur or (op[0] if op else ''))
+        if p is not None:
+            out.append(str(SEN.get('next_product') or 'Now your <product>.').replace('<product>', p['words']))
+        if cur:
+            out.append(readback(st, cur))
+        elif p is not None and p['offers']:
+            n = int(st['prop'].get(p['id']) or 0)
+            if n == 0:
+                st['prop'][p['id']] = 1
+            out.append(offer_line(st, p, max(n, 1) - 1))
+        elif p is not None:
+            out.append(str(SEN.get('ask_product') or 'When can you pay it?'))
+        if p is None and failed and not st['promises']:
+            o, r = decide(st, '', '', False)
+            set_final(vars, o, r, bad_line + ' ' + (SEN.get('goodbye') or 'Thank you, goodbye.'))
+            st['fin'] = 'set'
+            vars['rec_state'] = 'close'
+        else:
+            vars['enter_line'] = fill(vars, ' '.join(out) or SEN.get('anything_else') or 'Is there anything else?')
+            vars['rec_state'] = 'talk'
     else:
         done = [i for i in st['plan'] if i in st['promises']]
         failed = [i for i in st['plan'] if i in st['perr']]
@@ -883,6 +943,9 @@ ps = st['products']
 ids = [p['id'] for p in ps]
 pid = str(params.get('product_id') or '').strip()
 op = open_ids(st)
+if st.get('each'):
+    # confirm "each": a refusal that names no usable product is about the product whose read-back is on the table
+    op = [p['id'] for p in ps if p['id'] in st['plan'] and p['id'] not in st['promises'] and p['id'] not in st['perr']][:1] + op
 if len(ps) == 1:
     pid = ids[0]
 elif pid not in ids or (pid not in op and pid not in st['plan']):
